@@ -1,7 +1,7 @@
-const buildContentManifest = require('../lib/buildContentManifest')
-const gulp = require('gulp')
 const gutil = require('gulp-util')
 const stream = require('stream')
+
+const buildContentManifest = require('../lib/buildContentManifest')
 
 function stringSrc (filename, string) {
   const src = stream.Readable({ objectMode: true })
@@ -10,16 +10,16 @@ function stringSrc (filename, string) {
       cwd: '',
       base: '',
       path: filename,
-      contents: new Buffer(string)
+      contents: Buffer.from(string)
     }))
     this.push(null)
   }
   return src
 }
 
-module.exports = function (projectConfig) {
-  return function() {
-    const contentManifest = buildContentManifest(projectConfig)
+module.exports = function (gulp) {
+  return function () {
+    const contentManifest = buildContentManifest()
     return stringSrc('contentManifest.json', JSON.stringify(contentManifest, {}, 2))
       .pipe(gulp.dest('browser/content'))
   }

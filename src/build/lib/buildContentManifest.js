@@ -2,10 +2,10 @@ const _ = require('lodash')
 const path = require('path')
 const recursiveReaddirSync = require('recursive-readdir-sync')
 
-const webPrefix = '/content/'
+const widgetConfig = require('./widgetConfig')
 
-const getContentFiles = function ({ basePath }) {
-  const baseContentPath = path.join(basePath, 'theSrc/internal_www/content')
+const getContentFiles = function () {
+  const baseContentPath = path.join(widgetConfig.basePath, 'theSrc/internal_www/content')
   const htmlExtensionRegex = new RegExp(/\.html$/)
   const contentTemplateRegex = new RegExp(/content_template\.html$/)
   return recursiveReaddirSync(baseContentPath)
@@ -16,7 +16,7 @@ const getContentFiles = function ({ basePath }) {
     .sort()
 }
 
-const groupContentFiles = function (contentFilePaths) {
+const groupContentFiles = function (contentFilePaths, webPrefix = '/content/') {
   const groupedFiles = {}
   _(contentFilePaths).each((contentFilePath) => {
     const parts = contentFilePath.split('/')
@@ -32,6 +32,6 @@ const groupContentFiles = function (contentFilePaths) {
   return groupedFiles
 }
 
-module.exports = function (projectConfig) {
-  return groupContentFiles(getContentFiles(projectConfig))
+module.exports = function () {
+  return groupContentFiles(getContentFiles())
 }

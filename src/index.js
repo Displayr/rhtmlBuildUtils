@@ -1,7 +1,64 @@
-module.exports = function(projectConfig) {
-  return {
-    tasks: {
-      buildContentManifest: require('./build/tasks/buildContentManifest')(projectConfig)
-    }
-  };
+const _ = require('lodash')
+const fs = require('fs-extra')
+const path = require('path')
+const opn = require('opn')
+
+module.exports = {
+  registerGulpTasks: registerGulpTasks
+}
+
+function registerGulpTasks ({ gulp, exclusions = [] }) {
+  const runSequence = require('run-sequence').use(gulp)
+  const shouldRegister = function (taskName) {
+    return !exclusions.includes(taskName)
+  }
+
+  if (shouldRegister('default')) {
+    gulp.task('default', function () {
+      gulp.start('build')
+    })
+  }
+
+  if (shouldRegister('build')) {
+    gulp.task('build', function (done) {
+      runSequence('clean', ['core', 'lint'], ['testSpecs'], done)
+    })
+  }
+
+  if (shouldRegister('core')) {
+    gulp.task('core', ['compileES6', 'less', 'copy', 'buildContentManifest'])
+  }
+
+  if (shouldRegister('serve')) {
+    gulp.task('serve', ['core', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'connect', 'watch'], function () {
+      opn('http://localhost:9000')
+    })
+  }
+
+  if (shouldRegister('testVisual')) {
+    gulp.task('testVisual', function (done) {
+      runSequence(['core', 'webdriverUpdate'], ['connect', 'buildSnapshotsFeatureFile'], 'runProtractor', done)
+    })
+
+    gulp.task('testVisual_s', ['runProtractor'])
+  }
+
+  const pathToTaskFiles = path.join(__dirname, 'build', 'tasks')
+  fs.readdirSync(pathToTaskFiles)
+    .filter(onlyDotJsFiles)
+    .map(stripJsSuffix)
+    .map(function (taskName) {
+      if (shouldRegister(taskName)) {
+        const modulePath = path.join(pathToTaskFiles, taskName)
+        gulp.task(taskName, require(modulePath)(gulp))
+      }
+    })
+}
+
+function onlyDotJsFiles (file) {
+  return (/\.js$/i).test(file)
+}
+
+function stripJsSuffix (file) {
+  return file.replace(/\.js$/, '')
 }
