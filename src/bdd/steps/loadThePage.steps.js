@@ -1,5 +1,3 @@
-const _ = require('lodash')
-
 module.exports = function () {
   this.Before(function () {
     this.context.loadPage = function ({ configName, stateName, width = 1000, height = 1000, rerenderControls = false }) {

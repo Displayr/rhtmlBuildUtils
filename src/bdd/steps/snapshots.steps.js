@@ -1,13 +1,8 @@
-const _ = require('lodash')
 const wrapInPromiseAndLogErrors = require('../lib/wrapInPromiseAndLogErrors')
 
 module.exports = function () {
-  const isApplitoolsEnabled = () => {
-    return !(_.get(browser, 'params.applitools') === 'off')
-  }
-
   this.Then(/^the "(.*)" snapshot matches the baseline$/, function (snapshotName) {
-    if (isApplitoolsEnabled()) {
+    if (this.isApplitoolsEnabled()) {
       const selectorExpression = '.rhtmlwidget-outer-svg'
       return wrapInPromiseAndLogErrors(() => {
         return this.eyes.checkRegionBy(by.css(selectorExpression), snapshotName)
@@ -33,7 +28,7 @@ module.exports = function () {
         return element.getAttribute('snapshot-name').then((snapshotName) => {
           if (snapshotName) {
             console.log(`take snapshot ${contentPath} ${snapshotName} (css '[snapshot-name="${snapshotName}"]')`)
-            if (isApplitoolsEnabled()) {
+            if (this.isApplitoolsEnabled()) {
               return this.eyes.checkRegionBy(by.css(`[snapshot-name="${snapshotName}"]`), snapshotName)
             }
             return Promise.resolve()

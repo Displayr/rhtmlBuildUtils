@@ -1,30 +1,42 @@
 const _ = require('lodash')
 const initializeApplitools = require('../../lib/initializeApplitools')
+const ApplitoolsResultTracker = require('../../lib/applitoolsResultTracker')
 
 const widgetConfig = require('../../../build/lib/widgetConfig')
 const widgetName = widgetConfig.widgetName
 
-// this is duplicated in snapshots.steps.js
-const isApplitoolsEnabled = () => {
-  return !(_.get(browser, 'params.applitools') === 'off')
-}
+const globalApplitoolsResultTracker = new ApplitoolsResultTracker()
 
 module.exports = function () {
   this.Before('@applitools', function (scenario) {
-    if (isApplitoolsEnabled()) {
-      // TODO remove global passing and use browser.params
-      const applitoolsParameters = {
-        width: global.visualDiffConfig.browserWidth,
-        height: global.visualDiffConfig.browserHeight
-      }
-      this.eyes = initializeApplitools.getEyes(global.visualDiffConfig)
-      this.eyes.open(browser, widgetName, `${widgetName}: ${scenario.getName()}`, applitoolsParameters)
+    this.isApplitoolsEnabled = () => {
+      return (_.get(browser, 'params.applitools.enabled'))
+    }
+
+    if (this.isApplitoolsEnabled()) {
+      const applitoolsParameters = _.get(browser, 'params.applitools')
+      globalApplitoolsResultTracker.onDiff(applitoolsParameters.onDiff)
+
+      this.eyes = initializeApplitools.getEyes(applitoolsParameters)
+      this.eyes.open(
+        browser,
+        widgetName,
+        `${widgetName}: ${scenario.getName()}`,
+        _.pick(applitoolsParameters, ['width', 'height'])
+      )
     }
   })
 
   this.After('@applitools', function () {
-    if (isApplitoolsEnabled()) {
-      this.eyes.close(false)
+    if (this.isApplitoolsEnabled()) {
+      return this.eyes.close(false).then((testResults) => {
+        return globalApplitoolsResultTracker.addResult(testResults)
+      })
     }
+  })
+
+  this.registerHandler('AfterFeatures', function (features, callback) {
+    globalApplitoolsResultTracker.processResults()
+    callback()
   })
 }

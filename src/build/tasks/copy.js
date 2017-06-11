@@ -11,7 +11,7 @@ module.exports = function (gulp) {
     ], {}).pipe(gulp.dest('browser'))
 
     gulp.src([
-      'theSrc/images/**/*',
+      'theSrc/images/**/*'
     ], {}).pipe(gulp.dest('browser/images'))
 
     gulp.src('theSrc/R/htmlwidget.yaml')
@@ -25,7 +25,7 @@ module.exports = function (gulp) {
     // only used directly in browser by renderExample.html
     const internalWebServerDependencies = [
       'node_modules/lodash/lodash.min.js',
-      'node_modules/jquery/dist/jquery.min.js',
+      'node_modules/jquery/dist/jquery.min.js'
     ]
 
     gulp.src(internalWebServerDependencies)
