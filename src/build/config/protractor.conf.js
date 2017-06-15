@@ -1,13 +1,8 @@
+const _ = require('lodash')
 const path = require('path')
 const appRootDir = require('app-root-dir').get()
-const testVisualConfig = {
-  'browserWidth': 1280,
-  'browserHeight': 600,
-  'defaultMatchTimeout': 5,
-  'pageLoadWaitSeconds': 5,
-  'forceFullPageScreenshot': true,
-  'logLevel': 'off'
-}
+
+/* global browser */
 
 exports.config = {
   directConnect: true,
@@ -36,8 +31,19 @@ exports.config = {
   allScriptsTimeout: 20000,
   getPageTimeout: 20000,
   disableChecks: true,
+  onPrepare: function () {
+    const convertKeysToBooleans = function (obj) {
+      _(obj).each((value, key) => {
+        if (_.isObject(value)) { convertKeysToBooleans(value) }
+        if (_.isString(value)) {
+          if (value === 'true') { obj[key] = true }
+          if (value === 'false') { obj[key] = false }
+        }
+      })
+    }
 
-  onPrepare () {
-    global.visualDiffConfig = testVisualConfig
+    convertKeysToBooleans(browser.params)
+    console.log(`running with config:`)
+    console.log(browser.params)
   }
 }

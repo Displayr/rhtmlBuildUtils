@@ -1,5 +1,4 @@
 const path = require('path')
-const gulp = require('gulp')
 const browserify = require('browserify')
 const babelify = require('babelify')
 const gutil = require('gulp-util')

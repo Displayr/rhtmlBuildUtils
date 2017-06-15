@@ -6,7 +6,7 @@ module.exports = function (gulp) {
 
     // watch for changes in the browser directory and reload chrome on changes
     gulp.watch([
-      'browser/**/*',
+      'browser/**/*'
     ]).on('change', livereload.changed)
 
     // when these files change then do this,

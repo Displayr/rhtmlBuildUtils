@@ -1,0 +1,125 @@
+{
+  "results": {
+    "name": "rhtmlTemplate: example_of_content_page_features.html",
+    "id": "00000251905085911531",
+    "appName": "rhtmlTemplate",
+    "batchName": "KyleBatch3",
+    "batchId": "00000251905085928923",
+    "branchName": "default",
+    "hostOS": "Mac OS X 10.12",
+    "hostApp": "Chrome",
+    "hostDisplaySize": {
+      "width": 1280,
+      "height": 600
+    },
+    "startedAt": "2017-06-11T21:01:28.374766+00:00",
+    "duration": 45,
+    "isNew": false,
+    "isDifferent": true,
+    "isAborted": false,
+    "defaultMatchSettings": {
+      "matchLevel": "Strict",
+      "ignore": [],
+      "strict": [],
+      "content": [],
+      "layout": [],
+      "floating": [],
+      "splitTopHeight": 0,
+      "splitBottomHeight": 0,
+      "ignoreCaret": true,
+      "scale": 1,
+      "remainder": 0
+    },
+    "appUrls": {
+      "batch": "https://eyes.applitools.com/app/batches/00000251905085928923?accountId=ea8BG5eTekGNe3IwBV585Q~~",
+      "session": "https://eyes.applitools.com/app/batches/00000251905085928923/00000251905085911531?accountId=ea8BG5eTekGNe3IwBV585Q~~"
+    },
+    "apiUrls": {
+      "batch": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923",
+      "session": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923/00000251905085911531"
+    },
+    "stepsInfo": [
+      {
+        "name": "widget_sizing",
+        "isDifferent": false,
+        "hasBaselineImage": true,
+        "hasCurrentImage": true,
+        "appUrls": {
+          "step": "https://eyes.applitools.com/app/batches/00000251905085928923/00000251905085911531/steps/1?accountId=ea8BG5eTekGNe3IwBV585Q~~"
+        },
+        "apiUrls": {
+          "baselineImage": "https://eyesapi.applitools.com/api/images/se~4a6696d4-3fad-45ee-8b35-5264ae855869",
+          "currentImage": "https://eyesapi.applitools.com/api/images/sa~0a61bf68-3a30-40a4-952a-3056dfc248e5",
+          "diffImage": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923/00000251905085911531/steps/1/diff"
+        }
+      },
+      {
+        "name": "config-file-reference",
+        "isDifferent": true,
+        "hasBaselineImage": true,
+        "hasCurrentImage": true,
+        "appUrls": {
+          "step": "https://eyes.applitools.com/app/batches/00000251905085928923/00000251905085911531/steps/2?accountId=ea8BG5eTekGNe3IwBV585Q~~"
+        },
+        "apiUrls": {
+          "baselineImage": "https://eyesapi.applitools.com/api/images/se~e14a5b49-3fb7-45c8-a692-f0f00a7212af",
+          "currentImage": "https://eyesapi.applitools.com/api/images/sa~ea640e57-4fe6-4a08-a05c-094faad1d9b6",
+          "diffImage": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923/00000251905085911531/steps/2/diff"
+        }
+      },
+      {
+        "name": "config-and-state-file-reference",
+        "isDifferent": true,
+        "hasBaselineImage": true,
+        "hasCurrentImage": true,
+        "appUrls": {
+          "step": "https://eyes.applitools.com/app/batches/00000251905085928923/00000251905085911531/steps/3?accountId=ea8BG5eTekGNe3IwBV585Q~~"
+        },
+        "apiUrls": {
+          "baselineImage": "https://eyesapi.applitools.com/api/images/se~f466e094-b492-4441-86d0-c8c3e8f784eb",
+          "currentImage": "https://eyesapi.applitools.com/api/images/sa~814eb094-1422-4dec-a03e-63b448cd437c",
+          "diffImage": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923/00000251905085911531/steps/3/diff"
+        }
+      },
+      {
+        "name": "resize-controls",
+        "isDifferent": true,
+        "hasBaselineImage": true,
+        "hasCurrentImage": true,
+        "appUrls": {
+          "step": "https://eyes.applitools.com/app/batches/00000251905085928923/00000251905085911531/steps/4?accountId=ea8BG5eTekGNe3IwBV585Q~~"
+        },
+        "apiUrls": {
+          "baselineImage": "https://eyesapi.applitools.com/api/images/se~4a444f71-cff2-40c7-8c3a-a4da4f8b8331",
+          "currentImage": "https://eyesapi.applitools.com/api/images/sa~5cf5d696-0212-40e9-b51d-d0262394a34e",
+          "diffImage": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923/00000251905085911531/steps/4/diff"
+        }
+      },
+      {
+        "name": "rerender-controls",
+        "isDifferent": true,
+        "hasBaselineImage": true,
+        "hasCurrentImage": true,
+        "appUrls": {
+          "step": "https://eyes.applitools.com/app/batches/00000251905085928923/00000251905085911531/steps/5?accountId=ea8BG5eTekGNe3IwBV585Q~~"
+        },
+        "apiUrls": {
+          "baselineImage": "https://eyesapi.applitools.com/api/images/se~f282fe2c-7b6f-4e55-b68f-f0b2e65a65d0",
+          "currentImage": "https://eyesapi.applitools.com/api/images/sa~f5a7d500-8740-4796-8968-d0e85c4cd834",
+          "diffImage": "https://eyesapi.applitools.com/api/sessions/batches/00000251905085928923/00000251905085911531/steps/5/diff"
+        }
+      }
+    ],
+    "steps": 5,
+    "matches": 1,
+    "mismatches": 4,
+    "missing": 0,
+    "exactMatches": 0,
+    "strictMatches": 0,
+    "contentMatches": 0,
+    "layoutMatches": 0,
+    "noneMatches": 0,
+    "isPassed": false,
+    "isSaved": false
+  }
+}

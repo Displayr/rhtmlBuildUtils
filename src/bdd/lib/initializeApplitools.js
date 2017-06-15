@@ -3,13 +3,12 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const path = require('path')
 const ConsoleLogHandler = require('eyes.sdk').ConsoleLogHandler
+const widgetConfig = require('../../build/lib/widgetConfig')
 
 const requiredConfigKeys = [
-  'browserWidth',
-  'browserHeight',
+  'width',
+  'height',
   'defaultMatchTimeout',
-  'pageLoadWaitSeconds',
-  'forceFullPageScreenshot',
   'logLevel'
 ]
 
@@ -26,19 +25,24 @@ function getKey () {
   return applitoolsKey
 }
 
+let eyesGlobal = null
+
 module.exports = {
   getEyes (applitoolsConfig) {
+    if (eyesGlobal) { return eyesGlobal }
+
     _(requiredConfigKeys).each((requiredKey) => {
       if (!_.has(applitoolsConfig, requiredKey)) {
         throw new Error(`required applitoolsConfig field ${requiredKey} not specified`)
       }
     })
 
-    const eyes = new Eyes()
-    eyes.setApiKey(getKey())
-    eyes.setForceFullPageScreenshot(applitoolsConfig.forceFullPageScreenshot)
-    eyes.setStitchMode(Eyes.StitchMode.CSS)
-    eyes.setDefaultMatchTimeout(applitoolsConfig.defaultMatchTimeout)
+    eyesGlobal = new Eyes()
+    eyesGlobal.setApiKey(getKey())
+    eyesGlobal.setForceFullPageScreenshot(true)
+    eyesGlobal.setStitchMode(Eyes.StitchMode.CSS)
+    eyesGlobal.setDefaultMatchTimeout(applitoolsConfig.defaultMatchTimeout)
+    eyesGlobal.setBatch(widgetConfig.widgetName, Date.now())
 
     const logLevel = applitoolsConfig.logLevel.toLowerCase()
     const loggingOn = (['info', 'debug'].includes(logLevel))
@@ -46,9 +50,9 @@ module.exports = {
 
     if (loggingOn) {
       const consoleLogHandler = new ConsoleLogHandler(debugLogging)
-      eyes.setLogHandler(consoleLogHandler)
+      eyesGlobal.setLogHandler(consoleLogHandler)
     }
 
-    return eyes
+    return eyesGlobal
   }
 }
