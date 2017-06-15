@@ -28,7 +28,7 @@ module.exports = {
 
       // if the snapshots dont match, applitools will wait X seconds (defaultMatchTimeout)
       // for the page to stabilise before taking a final snapshot
-      defaultMatchTimeout: 2,
+      defaultMatchTimeout: 5,
 
       // set to info or debug to get more logs from applitools
       logLevel: 'off' // off|info|debug

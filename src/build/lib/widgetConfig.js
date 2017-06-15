@@ -3,6 +3,6 @@ const path = require('path')
 const _ = require('lodash')
 
 const widgetConfig = require(path.join(appRootDir, 'build', 'config', 'widget.config'))
-const defaultWidgetConfig = require('../lib/widgetConfig')
+const defaultWidgetConfig = require('../config/default.widget.config')
 
-module.exports = _.defaults({ basePath: appRootDir }, widgetConfig, defaultWidgetConfig)
+module.exports = _.defaultsDeep({ basePath: appRootDir }, widgetConfig, defaultWidgetConfig)
