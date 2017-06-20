@@ -6,6 +6,9 @@ This repo provides an opinionated framework for building and testing [R htmlwidg
  * **[rhtmlPictographs](https://github.com/Displayr/rhtmlPictographs)**: a widget for generating simple infographics
  * **[rhtmlLabeledScatter](https://github.com/Displayr/rhtmlLabeledScatter)**: a widget for generating scatter plots, bubble plots, and trend graphs
  
+HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) based nodejs projects that use gulp as a task manager. The twofold purpose(s) of these nodejs projects is to produce R HTMLWidget packages, and provide a framework for developing and testing the R htmlwidget packages.
+ 
+ 
 # Usage in a widget repo
 
 ## Installation
@@ -31,14 +34,26 @@ then in your project gulpfile.js:
       exclusions: dontRegisterTheseTasks 
     })
 
-By calling registerGulpTasks you will add all the tasks defined in [src/build/tasks](src/build/tasks) the following tasks to your project.
-
-The rhtmlBuildUtils repo assumes the widget repo will contain a config file at <projectRoot>/build/config/widget.config.js (example: [rhtmlTemplate/build/config/widget.config.js](https://github.com/Displayr/rhtmlTemplate/blob/master/build/config/widget.config.js)). The descriptions and defaults for all values in the config are defined in the [rhtmlBuildUtils/build/config/default.widget.config.js](https://github.com/Displayr/rhtmlBuildUtils/blob/master/src/build/config/default.widget.config.js) file.
+By calling registerGulpTasks you will add all the tasks defined in [src/build/tasks](src/build/tasks) to your project. These tasks are enumerated [below](#gulp-task-reference).
 
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
 
 * [internal web server](./docs/internal_web_server.md)
-* [viausl regression testing](./docs/visual_regression_testing.md)
+* [visual regression testing](./docs/visual_regression_testing.md)
+
+The `rhtmlBuildUtils` makes many assumptions about the directory struture and naming conventions in the callee widget repo. These are detailed in [widget_repo_layout](./docs/widget_repo_layout.md)
+
+## Customisation
+
+When using the `rhtmlBuildUtils` package in a widget repo, there are two ways to change the behaviour of the gulp tasks: to exclude a task then define it yourself in the repo, or to modify a local widget.config.js file.
+
+### Override a task in a repo
+
+When calling rhtmlBuildUtils.registerGulpTasks, pass an exclusions array with a list of tasks that you do not want rhtmlBuildUtils to define. Then add them to your gulp config following standard gulp techniques; see [http://gulpjs.com/](http://gulpjs.com/).
+
+### Modifying widget.config.js
+
+The `rhtmlBuildUtils` package assumes the callee widget repo will contain a config file at \<projectRoot\>/build/config/widget.config.js (example: [rhtmlTemplate/build/config/widget.config.js](https://github.com/Displayr/rhtmlTemplate/blob/master/build/config/widget.config.js)). The descriptions and defaults for all values in the config are defined in the [rhtmlBuildUtils/build/config/default.widget.config.js](https://github.com/Displayr/rhtmlBuildUtils/blob/master/src/build/config/default.widget.config.js) file.
 
 # gulp task reference
 
