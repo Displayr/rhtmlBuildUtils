@@ -9,7 +9,7 @@ module.exports = {
   // widgetEntryPoint is used by the compileES6 to generate the JS for the inst/html directory.
   // The widgetEntryPoint must point at the JS file where the widget is registered with HTMLWidgets.
   // Browserify will follow all import statements from this file to create a single bundle of all your Javascript
-  widgetEntryPoint: 'theSrc/scripts/rhtmlTemplate.js',
+  widgetEntryPoint: 'theSrc/scripts/nameYourWidget.js',
 
   visualRegressionSuite: {
     applitools: {
@@ -31,11 +31,11 @@ module.exports = {
       defaultMatchTimeout: 5,
 
       // set to info or debug to get more logs from applitools
-      logLevel: 'off' // off|info|debug
+      logLevel: 'off' // 'off'|'info'|'debug'
     },
 
     // set to true to see the console.log statements from the widget under
     // test and any other logs coming from the chrome browser during the visual regression tests
-    browserLogs: false
+    browserLogs: false // true|false
   }
 }

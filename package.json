@@ -8,6 +8,8 @@
   "description": "build tools for Displayr rhtml widgets",
   "main": "src/index.js",
   "scripts": {
+    "prepush": "node ./bin/prepush",
+    "postinstall": "node ./bin/postinstall",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -56,6 +58,7 @@
     "gulp-tap": "^1.0.1",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
+    "husky": "^0.13.4",
     "jquery": "^3.2.1",
     "karma": "^1.6.0",
     "karma-browserify": "^5.1.1",
