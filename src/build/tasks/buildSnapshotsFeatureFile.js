@@ -13,7 +13,7 @@ const widgetConfig = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function () {
-    const contentPath = path.join(widgetConfig.basePath, 'browser', 'content')
+    const contentPath = path.join(widgetConfig.basePath, 'theSrc', 'internal_www', 'content')
     const tmpDir = path.join(widgetConfig.basePath, '.tmp')
     const contentFilesWithSnapshots = shell.grep('-l', 'snapshot-name=', `${contentPath}/**/*.html`)
       .split('\n')
@@ -25,7 +25,7 @@ module.exports = function (gulp) {
   `
 
     const scenarioStrings = contentFilesWithSnapshots.map((contentFileAbsolutePath) => {
-      const scenarioUrl = contentFileAbsolutePath.substr(contentFileAbsolutePath.indexOf('browser') + 'browser'.length)
+      const scenarioUrl = contentFileAbsolutePath.substr(contentFileAbsolutePath.indexOf('internal_www') + 'internal_www'.length)
       const [, shortenedName] = contentFileAbsolutePath.match('/([^/]+$)')
       return [
         '',

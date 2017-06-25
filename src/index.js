@@ -36,7 +36,12 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 
   if (shouldRegister('testVisual')) {
     gulp.task('testVisual', function (done) {
-      runSequence(['core', 'webdriverUpdate'], ['connect', 'buildSnapshotsFeatureFile'], 'runProtractor', done)
+      runSequence(
+        ['less', 'copy', 'webdriverUpdate', 'compileRenderContentPage', 'buildSnapshotsFeatureFile'],
+        'connect',
+        'runProtractor',
+        done
+      )
     })
 
     gulp.task('testVisual_s', ['runProtractor'])

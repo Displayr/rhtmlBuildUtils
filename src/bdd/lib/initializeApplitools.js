@@ -14,10 +14,17 @@ const requiredConfigKeys = [
 
 function getKey () {
   let applitoolsKey = null
+
+  if (process.env.APPLITOOLS_KEY) {
+    console.log('Got applitools key from env')
+    return process.env.APPLITOOLS_KEY
+  }
+
   const appRootDir = require('app-root-dir').get()
   const keyFile = path.join(appRootDir, '.keys', 'applitools.key')
   try {
     applitoolsKey = fs.readFileSync(keyFile, 'utf-8')
+    console.log('Got applitools key from .keys/applitools.key')
   } catch (err) {
     console.error(`ERROR: Could not read key file: ${keyFile}`)
     process.exit(1)
