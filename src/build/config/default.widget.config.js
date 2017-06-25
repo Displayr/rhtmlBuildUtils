@@ -31,7 +31,10 @@ module.exports = {
       defaultMatchTimeout: 5,
 
       // set to info or debug to get more logs from applitools
-      logLevel: 'off' // 'off'|'info'|'debug'
+      logLevel: 'off', // off|info|debug
+
+      // after loading page delay next step by X seconds
+      pageLoadDelay: 0 // float >= 0
     },
 
     // set to true to see the console.log statements from the widget under

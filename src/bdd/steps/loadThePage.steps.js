@@ -12,6 +12,10 @@ module.exports = function () {
       browser.get(url)
       // NB : assumes you are using Template._addRootSvgToRootElement method
       return browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg')))
+        .then(() => {
+          const pageLoadDelay = browser.params.applitools.pageLoadDelay * 1000
+          return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
+        })
     }
   })
 
