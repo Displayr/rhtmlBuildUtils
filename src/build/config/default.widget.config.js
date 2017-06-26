@@ -33,7 +33,7 @@ module.exports = {
       // set to info or debug to get more logs from applitools
       logLevel: 'off', // off|info|debug
 
-      // after loading page delay next step by X seconds
+      // after loading page delay next step by X seconds. Necessary in CI environment
       pageLoadDelay: 0 // float >= 0
     },
 
