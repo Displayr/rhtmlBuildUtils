@@ -13,13 +13,19 @@ module.exports = function () {
 
   this.When(/^I take all the snapshots on the page "(.*)"$/, function (contentPath) {
     function loadContentPage (_contentPath) {
-      browser.get(`http://localhost:9000${_contentPath}`)
-      const plotContainerPresentPromise = browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg')))
-      const errorContainerPresentPromise = browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
-      return Promise.all([plotContainerPresentPromise, errorContainerPresentPromise]).then((isPresentResults) => {
-        return (isPresentResults[0] || isPresentResults[1])
-          ? Promise.resolve()
-          : Promise.reject(new Error(`Fail to load http://localhost:9000${_contentPath}.`))
+      const start = Date.now()
+      return browser.get(`http://localhost:9000${_contentPath}`).then(() => {
+        const pageLoadDelay = browser.params.applitools.pageLoadDelay * 1000
+        return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
+      }).then(() => {
+        console.log(`browser.get returned after ${Date.now() - start} ms`)
+        const plotContainerPresentPromise = browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg')))
+        const errorContainerPresentPromise = browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
+        return Promise.all([plotContainerPresentPromise, errorContainerPresentPromise]).then((isPresentResults) => {
+          return (isPresentResults[0] || isPresentResults[1])
+            ? Promise.resolve()
+            : Promise.reject(new Error(`Fail to load http://localhost:9000${_contentPath} (after ${Date.now() - start} ms)`))
+        })
       })
     }
 
