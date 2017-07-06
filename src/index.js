@@ -20,7 +20,7 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 
   if (shouldRegister('build')) {
     gulp.task('build', function (done) {
-      runSequence('clean', ['core', 'lint'], ['testSpecs'], done)
+      runSequence('clean', ['core', 'lint'], ['makeDocs', 'testSpecs'], done)
     })
   }
 
