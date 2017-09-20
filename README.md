@@ -5,6 +5,7 @@ This repo provides an opinionated framework for building and testing [R htmlwidg
  * **[rhtmlTemplate](https://github.com/Displayr/rhtmlTemplate)**: a simple widget for demonstration and testing
  * **[rhtmlPictographs](https://github.com/Displayr/rhtmlPictographs)**: a widget for generating simple infographics
  * **[rhtmlLabeledScatter](https://github.com/Displayr/rhtmlLabeledScatter)**: a widget for generating scatter plots, bubble plots, and trend graphs
+ * **[rhtmlHeatmap](https://github.com/Displayr/rhtmlHeatmap)**: a widget for generating heatmaps (wraps d3heatmap)
  
 HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) based nodejs projects that use gulp as a task manager. The twofold purpose(s) of these nodejs projects is to produce R HTMLWidget packages, and provide a framework for developing and testing the R htmlwidget packages.
  

@@ -14,12 +14,19 @@ module.exports = function (gulp) {
       'theSrc/images/**/*'
     ], {}).pipe(gulp.dest('browser/images'))
 
+    gulp.src([
+      'theSrc/styles/**/*.css'
+    ], {}).pipe(gulp.dest('inst/htmlwidgets/lib/style'))
+
     gulp.src('theSrc/R/htmlwidget.yaml')
       .pipe(rename(`${widgetConfig.widgetName}.yaml`))
       .pipe(gulp.dest('inst/htmlwidgets/'))
 
     gulp.src('theSrc/R/htmlwidget.R')
       .pipe(rename(`${widgetConfig.widgetName}.R`))
+      .pipe(gulp.dest('R/'))
+
+    gulp.src(['theSrc/R/*.R', '!theSrc/R/htmlwidget.R'])
       .pipe(gulp.dest('R/'))
 
     // only used directly in browser by renderExample.html

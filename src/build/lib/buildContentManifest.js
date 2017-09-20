@@ -20,14 +20,14 @@ const groupContentFiles = function (contentFilePaths, webPrefix = '/content/') {
   const groupedFiles = {}
   _(contentFilePaths).each((contentFilePath) => {
     const parts = contentFilePath.split('/')
-    if (parts.length >= 2) {
-      const contentType = parts[0]
+    const contentType = (parts.length >= 2)
+      ? parts[0]
+      : 'misc'
 
-      if (!_.has(groupedFiles, contentType)) {
-        groupedFiles[contentType] = []
-      }
-      groupedFiles[contentType].push(`${webPrefix}${contentFilePath}`)
+    if (!_.has(groupedFiles, contentType)) {
+      groupedFiles[contentType] = []
     }
+    groupedFiles[contentType].push(`${webPrefix}${contentFilePath}`)
   })
   return groupedFiles
 }
