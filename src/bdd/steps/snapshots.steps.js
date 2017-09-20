@@ -1,4 +1,7 @@
+const _ = require('lodash')
 const wrapInPromiseAndLogErrors = require('../lib/wrapInPromiseAndLogErrors')
+
+const widgetConfig = require('../../build/lib/widgetConfig')
 
 module.exports = function () {
   this.Then(/^the "(.*)" snapshot matches the baseline$/, function (snapshotName) {
@@ -19,10 +22,17 @@ module.exports = function () {
         return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
       }).then(() => {
         console.log(`browser.get returned after ${Date.now() - start} ms`)
-        const plotContainerPresentPromise = browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg')))
-        const errorContainerPresentPromise = browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
-        return Promise.all([plotContainerPresentPromise, errorContainerPresentPromise]).then((isPresentResults) => {
-          return (isPresentResults[0] || isPresentResults[1])
+        const readyPromises = [
+          browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg'))),
+          browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
+        ]
+
+        if (widgetConfig.isReadySelector) {
+          readyPromises.push(browser.wait(browser.isElementPresent(by.css(widgetConfig.isReadySelector))))
+        }
+
+        return Promise.all(readyPromises).then((isPresentResults) => {
+          return (_.some(isPresentResults))
             ? Promise.resolve()
             : Promise.reject(new Error(`Fail to load http://localhost:9000${_contentPath} (after ${Date.now() - start} ms)`))
         })
