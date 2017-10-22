@@ -5,7 +5,11 @@ module.exports = function () {
   this.Before(function () {
     this.context.getRecentState = function () {
       function getStateUpdates () {
-        return window.stateUpdates
+        if (typeof window.stateUpdates !== 'undefined') {
+          return window.stateUpdates
+        } else {
+          throw new Error('no stateUpdates on window object. Widget lib must implement stateUpdates')
+        }
       }
 
       return browser.executeScript(getStateUpdates).then((stateUpdates) => {
