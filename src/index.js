@@ -1,6 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const opn = require('opn')
+const cliArgs = require('yargs').argv
 
 module.exports = {
   registerGulpTasks: registerGulpTasks
@@ -20,31 +21,39 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 
   if (shouldRegister('build')) {
     gulp.task('build', function (done) {
-      runSequence('clean', ['core', 'lint'], ['makeDocs', 'testSpecs'], done)
+      runSequence('clean', ['compileES6', 'core', 'lint'], ['makeDocs', 'testSpecs'], done)
     })
-  }
-
-  if (shouldRegister('core')) {
-    gulp.task('core', ['compileES6', 'less', 'copy', 'buildContentManifest'])
   }
 
   if (shouldRegister('serve')) {
-    gulp.task('serve', ['core', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'connect', 'watch'], function () {
-      opn('http://localhost:9000')
-    })
+    const port = cliArgs.port || 9000
+    const buildTasks = ['core', 'compileInternal', 'connect', 'watch']
+    const openBrowser = function () {
+      opn(`http://localhost:${port}`)
+    }
+    gulp.task('serve', buildTasks, openBrowser)
   }
 
   if (shouldRegister('testVisual')) {
     gulp.task('testVisual', function (done) {
-      runSequence(
-        ['less', 'copy', 'webdriverUpdate', 'compileRenderContentPage', 'buildSnapshotsFeatureFile'],
-        'connect',
-        'runProtractor',
-        done
-      )
+      runSequence('core', 'compileInternal', 'connect', 'runProtractor', done)
     })
 
     gulp.task('testVisual_s', ['runProtractor'])
+  }
+
+  if (shouldRegister('core')) {
+    gulp.task('core', ['less', 'copy'])
+  }
+
+  if (shouldRegister('compileInternal')) {
+    gulp.task('compileInternal', [
+      'buildContentManifest',
+      'compileRenderExamplePage',
+      'compileRenderContentPage',
+      'compileRenderIndexPage',
+      'buildSnapshotsFeatureFile'
+    ])
   }
 
   const pathToTaskFiles = path.join(__dirname, 'build', 'tasks')

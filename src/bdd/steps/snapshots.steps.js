@@ -6,7 +6,7 @@ const widgetConfig = require('../../build/lib/widgetConfig')
 module.exports = function () {
   this.Then(/^the "(.*)" snapshot matches the baseline$/, function (snapshotName) {
     if (this.isApplitoolsEnabled()) {
-      const selectorExpression = '.rhtmlwidget-outer-svg'
+      const selectorExpression = widgetConfig.visualRegressionSuite.isReadySelector
       return wrapInPromiseAndLogErrors(() => {
         return this.eyes.checkRegionBy(by.css(selectorExpression), snapshotName)
       })
@@ -23,13 +23,9 @@ module.exports = function () {
       }).then(() => {
         console.log(`browser.get returned after ${Date.now() - start} ms`)
         const readyPromises = [
-          browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg'))),
+          browser.wait(browser.isElementPresent(by.css(widgetConfig.visualRegressionSuite.isReadySelector))),
           browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
         ]
-
-        if (widgetConfig.isReadySelector) {
-          readyPromises.push(browser.wait(browser.isElementPresent(by.css(widgetConfig.isReadySelector))))
-        }
 
         return Promise.all(readyPromises).then((isPresentResults) => {
           return (_.some(isPresentResults))
