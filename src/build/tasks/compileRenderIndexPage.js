@@ -10,7 +10,7 @@ const widgetConfig = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function () {
-    const entryPoint = path.join(widgetConfig.basePath, 'theSrc/internal_www/js/renderIndexPage.js')
+    const entryPoint = path.join(__dirname, '../templates/renderIndexPage.js')
     const dest = path.join(widgetConfig.basePath, 'browser/js/')
 
     return gulp.src(entryPoint, { read: false })

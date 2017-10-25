@@ -1,16 +1,30 @@
-const path = require('path')
-const browserify = require('browserify')
 const babelify = require('babelify')
-const gutil = require('gulp-util')
-const tap = require('gulp-tap')
+const browserify = require('browserify')
 const buffer = require('gulp-buffer')
+const fs = require('fs-extra')
+const gutil = require('gulp-util')
+const mustache = require('mustache')
+const path = require('path')
 const sourcemaps = require('gulp-sourcemaps')
+const tap = require('gulp-tap')
 
 const widgetConfig = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function () {
-    const entryPoint = path.join(widgetConfig.basePath, 'theSrc/internal_www/js/renderContentPage.js')
+    // step 1: apply vars to template, and save renderContentPage in .tmp
+    const templateFile = path.join(__dirname, '../templates/renderContentPage.js')
+    const templateContent = fs.readFileSync(templateFile, 'utf8')
+    const templateVariables = {
+      widget_definition_path: path.join('..', widgetConfig.widgetDefinition)
+    }
+
+    const output = mustache.render(templateContent, templateVariables)
+    fs.mkdirsSync('.tmp')
+    fs.writeFileSync('.tmp/renderContentPage.js', output, 'utf8')
+
+    // step 2: browserify renderContentPage.js, which bundles all the widget code into single file for browser testing
+    const entryPoint = path.join(widgetConfig.basePath, '.tmp/renderContentPage.js')
     const dest = path.join(widgetConfig.basePath, 'browser/js/')
 
     return gulp.src(entryPoint, {read: false})
