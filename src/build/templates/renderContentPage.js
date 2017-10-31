@@ -1,19 +1,21 @@
+// This is a template, that is processed by build/tasks/compileRenderContentPage.js. All the {{X}} are replaced.
 
 import $ from 'jquery'
 import _ from 'lodash'
 /* global window */
 
-const WidgetDefinition = require('{{{widget_definition_path}}}')
+const WidgetFactory = require('{{{widget_definition_path}}}')
 
 const defaultConfig = {
-  width: 200,
-  height: 200,
-  border: false
+  width: {{defaults.width}},
+  height: {{defaults.height}},
+  border: {{defaults.border}}
 }
 
 let exampleCounter = 0
 
 // NB The window.stateUpdates is used by the visualTesting suite to check what stateCallbacks are made
+// It assumes there is only one widget on the page
 window.stateUpdates = []
 const stateChangedCallback = (newState) => {
   window.stateUpdates.push(_.clone(newState))
@@ -22,16 +24,15 @@ const stateChangedCallback = (newState) => {
 
 const retrieveState = function (configName, stateName) {
   return new Promise((resolve, reject) => {
-    $.ajax(`/data/${configName}/${stateName}.json`).done(resolve).error(reject)
+    // TODO readd error handling
+    $.ajax(`/data/${configName}/${stateName}.json`).done(resolve) //.error(reject)
   })
 }
 
 const retrieveConfig = function (configName) {
   return new Promise((resolve, reject) => {
-    const query = $.ajax(`/data/${configName}/config.json`)
-    query.done(resolve)
-    // TODO why isnt error working ?
-    // query.error(reject)
+    // TODO readd error handling
+    $.ajax(`/data/${configName}/config.json`).done(resolve) //.error(reject)
   })
 }
 
@@ -67,11 +68,16 @@ const addExampleTo = function () {
     configPromise = retrieveConfig(dataAttributes.config)
   } else {
     const configString = element.text() || '{}'
-    try {
-      configPromise = JSON.parse(configString)
-    } catch (err) {
-      console.error(`Failed to JSON parse config string: ${configString}`)
-      configPromise = Promise.reject(err)
+
+    if (configString.indexOf('{') === 0) {
+      try {
+        configPromise = JSON.parse(configString)
+      } catch (err) {
+        console.error(`Failed to JSON parse config string: ${configString}`)
+        configPromise = Promise.reject(err)
+      }
+    } else {
+      configPromise = configString
     }
   }
 
@@ -82,12 +88,12 @@ const addExampleTo = function () {
     statePromise = Promise.resolve({})
   }
 
-  Promise.all([configPromise, statePromise]).then(([config, state = {}]) => {
+  Promise.all([configPromise, statePromise]).then(([config, userState = {}]) => {
     console.log('loading widget with config')
     console.log(config)
 
-    console.log('loading widget with state')
-    console.log(state)
+    console.log('loading widget with userState')
+    console.log(userState)
 
     element.empty()
     let widgetInstance = null
@@ -99,6 +105,18 @@ const addExampleTo = function () {
         .html(JSON.stringify(config, {}, 2))
 
       element.append(configPre)
+    }
+
+    // NB this will not work with multiple widgets on the page, however the
+    // only use case at present is via renderExample.html which always has a single widget on page
+    window.resizeHook = function (newWidth, newHeight) {
+      console.log(`resize to ${newWidth}x${newHeight}`)
+
+      $(`.${exampleNumber} .inner-example`)
+        .css('width', newWidth)
+        .css('height', newHeight)
+
+      return widgetInstance.resize(newWidth, newHeight)
     }
 
     if (_.has(dataAttributes, 'resizeControls')) {
@@ -137,9 +155,7 @@ const addExampleTo = function () {
         console.log(`newConfig: ${newConfigName}`)
 
         retrieveConfig(newConfigName).then((newConfig) => {
-          widgetInstance.setConfig(newConfig)
-          widgetInstance.setUserState(window.stateUpdates[window.stateUpdates.length - 1])
-          widgetInstance.draw()
+          widgetInstance.renderValue(newConfig, window.stateUpdates[window.stateUpdates.length - 1] || {})
         }).catch((error) => {
           console.error('Error in rerender:')
           console.error(error)
@@ -149,17 +165,33 @@ const addExampleTo = function () {
       $(`.${exampleNumber} .rerender-button`).bind('click', rerenderHandler)
     }
 
-    // NB TODO I have changed this from the original
-    const innerExampleStyle = `width:${dataAttributes.width}px;height:${dataAttributes.height}px;`
-    const widgetDiv = $(`<div id="inner-example" class="inner-example" style="${innerExampleStyle}">`)
-    if (dataAttributes.border) {
-      widgetDiv.addClass('border')
-    }
-    element.append(widgetDiv)
+    const surroundingDiv = $('<div>')
+      .attr('id', 'inner-example')
+      .attr('class', 'inner-example')
+      .css('width', `${dataAttributes.width}`)
+      .css('height', `${dataAttributes.height}`)
 
-    // NB TODO I have changed this from the original
-    widgetInstance = WidgetDefinition.initialize(document.getElementById('inner-example'), dataAttributes.width, dataAttributes.height, stateChangedCallback())
-    WidgetDefinition.renderValue(document.getElementById('inner-example'), config, widgetInstance)
+    if (_.has(dataAttributes, 'border')) {
+      surroundingDiv.addClass((dataAttributes.border) ? 'border' : 'no-border')
+    } else {
+      surroundingDiv.addClass('border-unset')
+    }
+
+    const widgetDiv = $('<div>')
+      .attr('id', `inner-inner-example-${exampleNumber}`)
+      .attr('class', 'inner-inner-example')
+
+    if ({{includeWidthOnInner}}) {
+      widgetDiv.css('width', `${dataAttributes.width}`)
+      widgetDiv.css('height', `${dataAttributes.height}`)
+    }
+
+    surroundingDiv.append(widgetDiv)
+    element.append(surroundingDiv)
+
+    const widgetAsHtmlElement = document.getElementById(`inner-inner-example-${exampleNumber}`)
+    widgetInstance = WidgetFactory(widgetAsHtmlElement, dataAttributes.width, dataAttributes.height, stateChangedCallback)
+    widgetInstance.renderValue(config, userState)
   }).catch((error) => {
     console.log(error)
   })

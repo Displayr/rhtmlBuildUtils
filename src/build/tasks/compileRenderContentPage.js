@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const babelify = require('babelify')
 const browserify = require('browserify')
 const buffer = require('gulp-buffer')
@@ -10,14 +11,26 @@ const tap = require('gulp-tap')
 
 const widgetConfig = require('../lib/widgetConfig')
 
+const DEFAULT_RENDERCONTENTPAGE_SETTINGS = {
+  includeWidthOnInner: false,
+  defaults: {
+    width: 200,
+    height: 200,
+    border: false
+  }
+}
+
+const contentPageSettings = _.merge({}, DEFAULT_RENDERCONTENTPAGE_SETTINGS, widgetConfig.contentPage)
+
 module.exports = function (gulp) {
   return function () {
     // step 1: apply vars to template, and save renderContentPage in .tmp
     const templateFile = path.join(__dirname, '../templates/renderContentPage.js')
     const templateContent = fs.readFileSync(templateFile, 'utf8')
-    const templateVariables = {
-      widget_definition_path: path.join('..', widgetConfig.widgetDefinition)
-    }
+
+    const templateVariables = _.merge({}, contentPageSettings, {
+      widget_definition_path: path.join('..', widgetConfig.widgetFactory)
+    })
 
     const output = mustache.render(templateContent, templateVariables)
     fs.mkdirsSync('.tmp')

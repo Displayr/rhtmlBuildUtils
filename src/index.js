@@ -1,6 +1,8 @@
+const _ = require('lodash')
 const fs = require('fs-extra')
 const path = require('path')
 const opn = require('opn')
+const cliArgs = require('yargs').argv
 
 module.exports = {
   registerGulpTasks: registerGulpTasks
@@ -29,8 +31,9 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   }
 
   if (shouldRegister('serve')) {
+    const port = cliArgs.port || 9000
     gulp.task('serve', ['core', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'connect', 'watch'], function () {
-      opn('http://localhost:9000')
+      opn(`http://localhost:${port}`)
     })
   }
 
