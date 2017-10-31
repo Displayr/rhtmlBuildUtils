@@ -89,11 +89,11 @@ const addExampleTo = function () {
   }
 
   Promise.all([configPromise, statePromise]).then(([config, userState = {}]) => {
-    console.log('loading widget with config')
-    console.log(config)
+    console.log('loading widget with config:')
+    console.log(JSON.stringify(config, {}, 2))
 
-    console.log('loading widget with userState')
-    console.log(userState)
+    console.log('loading widget with userState:')
+    console.log(JSON.stringify(userState, {}, 2))
 
     element.empty()
     let widgetInstance = null
