@@ -16,7 +16,9 @@ module.exports = function (gulp) {
 
     gulp.src([
       'theSrc/styles/**/*.css'
-    ], {}).pipe(gulp.dest('inst/htmlwidgets/lib/style'))
+    ], {})
+      .pipe(gulp.dest('inst/htmlwidgets/lib/style'))
+      .pipe(gulp.dest('browser/style'))
 
     gulp.src('theSrc/R/htmlwidget.yaml')
       .pipe(rename(`${widgetConfig.widgetName}.yaml`))

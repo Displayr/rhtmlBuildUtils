@@ -1,6 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const opn = require('opn')
+const cliArgs = require('yargs').argv
 
 module.exports = {
   registerGulpTasks: registerGulpTasks
@@ -29,9 +30,23 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   }
 
   if (shouldRegister('serve')) {
-    gulp.task('serve', ['core', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'connect', 'watch'], function () {
-      opn('http://localhost:9000')
-    })
+    const port = cliArgs.port || 9000
+
+    const buildTasks = [
+      'core',
+      'compileRenderExamplePage',
+      'compileRenderContentPage',
+      'compileRenderIndexPage',
+      'buildSnapshotsFeatureFile',
+      'connect',
+      'watch'
+    ]
+
+    const openBrowser = function () {
+      opn(`http://localhost:${port}`)
+    }
+
+    gulp.task('serve', buildTasks, openBrowser)
   }
 
   if (shouldRegister('testVisual')) {
