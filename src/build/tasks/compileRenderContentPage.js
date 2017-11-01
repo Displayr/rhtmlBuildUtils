@@ -11,7 +11,7 @@ const tap = require('gulp-tap')
 
 const widgetConfig = require('../lib/widgetConfig')
 
-const DEFAULT_RENDERCONTENTPAGE_SETTINGS = {
+const DEFAULT_SETTINGS = {
   includeWidthOnInner: false,
   defaults: {
     width: 200,
@@ -20,17 +20,18 @@ const DEFAULT_RENDERCONTENTPAGE_SETTINGS = {
   }
 }
 
-const contentPageSettings = _.merge({}, DEFAULT_RENDERCONTENTPAGE_SETTINGS, widgetConfig.contentPage)
+const templateVariables = _.merge(
+  {},
+  DEFAULT_SETTINGS,
+  widgetConfig.internalWebSettings,
+  {widget_definition_path: path.join('..', widgetConfig.widgetFactory)}
+)
 
 module.exports = function (gulp) {
   return function () {
     // step 1: apply vars to template, and save renderContentPage in .tmp
-    const templateFile = path.join(__dirname, '../templates/renderContentPage.js')
+    const templateFile = path.join(__dirname, '../templates/renderContentPage.template.js')
     const templateContent = fs.readFileSync(templateFile, 'utf8')
-
-    const templateVariables = _.merge({}, contentPageSettings, {
-      widget_definition_path: path.join('..', widgetConfig.widgetFactory)
-    })
 
     const output = mustache.render(templateContent, templateVariables)
     fs.mkdirsSync('.tmp')

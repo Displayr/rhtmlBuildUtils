@@ -24,15 +24,13 @@ const stateChangedCallback = (newState) => {
 
 const retrieveState = function (configName, stateName) {
   return new Promise((resolve, reject) => {
-    // TODO readd error handling
-    $.ajax(`/data/${configName}/${stateName}.json`).done(resolve) //.error(reject)
+    $.ajax(`/data/${configName}/${stateName}.json`).done(resolve).fail(reject)
   })
 }
 
 const retrieveConfig = function (configName) {
   return new Promise((resolve, reject) => {
-    // TODO readd error handling
-    $.ajax(`/data/${configName}/config.json`).done(resolve) //.error(reject)
+    $.ajax(`/data/${configName}/config.json`).done(resolve).fail(reject)
   })
 }
 
@@ -193,6 +191,7 @@ const addExampleTo = function () {
     widgetInstance = WidgetFactory(widgetAsHtmlElement, dataAttributes.width, dataAttributes.height, stateChangedCallback)
     widgetInstance.renderValue(config, userState)
   }).catch((error) => {
+    console.error(`Error in widget instantiation with data attributes: ${JSON.stringify(dataAttributes, {}, 2)}`)
     console.log(error)
   })
 }

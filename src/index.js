@@ -32,9 +32,22 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 
   if (shouldRegister('serve')) {
     const port = cliArgs.port || 9000
-    gulp.task('serve', ['core', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'connect', 'watch'], function () {
+
+    const buildTasks = [
+      'core',
+      'compileRenderExamplePage',
+      'compileRenderContentPage',
+      'compileRenderIndexPage',
+      'buildSnapshotsFeatureFile',
+      'connect',
+      'watch'
+    ]
+
+    const openBrowser = function () {
       opn(`http://localhost:${port}`)
-    })
+    }
+
+    gulp.task('serve', buildTasks, openBrowser)
   }
 
   if (shouldRegister('testVisual')) {

@@ -1,8 +1,12 @@
 const livereload = require('gulp-livereload')
+const cliArgs = require('yargs').argv
+
+const port = cliArgs.port || 9000
+const liveReloadPort = 35729 + (parseInt(port) - 9000)
 
 module.exports = function (gulp) {
   return function () {
-    livereload.listen()
+    livereload.listen({ port: liveReloadPort })
 
     // watch for changes in the browser directory and reload chrome on changes
     gulp.watch([
