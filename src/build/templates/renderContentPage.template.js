@@ -1,4 +1,4 @@
-// This is a template, that is processed by build/tasks/compileRenderContentPage.js. All the {{X}} are replaced.
+// This is a template, that is processed by build/tasks/compileRenderContentPage.js. All the {{X}} and {{{X}}} are replaced.
 
 import $ from 'jquery'
 import _ from 'lodash'
