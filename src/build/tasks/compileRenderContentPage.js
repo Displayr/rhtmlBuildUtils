@@ -9,38 +9,30 @@ const path = require('path')
 const sourcemaps = require('gulp-sourcemaps')
 const tap = require('gulp-tap')
 
-const widgetConfig = require('../lib/widgetConfig')
-
-const DEFAULT_SETTINGS = {
-  includeWidthOnInner: false,
-  defaults: {
-    width: 200,
-    height: 200,
-    border: false
-  }
-}
+const {basePath, widgetFactory, internalWebSettings} = require('../lib/widgetConfig')
 
 const templateVariables = _.merge(
   {},
-  DEFAULT_SETTINGS,
-  widgetConfig.internalWebSettings,
-  {widget_definition_path: path.join('..', widgetConfig.widgetFactory)}
+  internalWebSettings,
+  {widget_definition_path: path.join('..', widgetFactory)}
 )
 
 module.exports = function (gulp) {
   return function () {
     // step 1: apply vars to template, and save renderContentPage in .tmp
     const templateFile = path.join(__dirname, '../templates/renderContentPage.template.js')
-    const templateContent = fs.readFileSync(templateFile, 'utf8')
+    const entryPointDirectory = path.join(basePath, '.tmp')
+    const entryPoint = path.join(basePath, '.tmp/renderContentPage.js')
+    const compiledContentDestination = path.join(basePath, 'browser/js/')
 
+    fs.mkdirsSync(entryPointDirectory)
+    fs.mkdirsSync(compiledContentDestination)
+
+    const templateContent = fs.readFileSync(templateFile, 'utf8')
     const output = mustache.render(templateContent, templateVariables)
-    fs.mkdirsSync('.tmp')
-    fs.writeFileSync('.tmp/renderContentPage.js', output, 'utf8')
+    fs.writeFileSync(entryPoint, output, 'utf8')
 
     // step 2: browserify renderContentPage.js, which bundles all the widget code into single file for browser testing
-    const entryPoint = path.join(widgetConfig.basePath, '.tmp/renderContentPage.js')
-    const dest = path.join(widgetConfig.basePath, 'browser/js/')
-
     return gulp.src(entryPoint, {read: false})
       .pipe(tap(function (file) {
         gutil.log(`bundling ${file.path}`)
@@ -59,6 +51,6 @@ module.exports = function (gulp) {
       .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('.'))
-      .pipe(gulp.dest(dest))
+      .pipe(gulp.dest(compiledContentDestination))
   }
 }

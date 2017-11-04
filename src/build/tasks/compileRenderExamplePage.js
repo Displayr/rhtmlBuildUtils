@@ -1,23 +1,19 @@
-const _ = require('lodash')
 const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
 
-const widgetConfig = require('../lib/widgetConfig')
-
-const DEFAULT_SETTINGS = {
-  css: []
-}
-
-const templateVariables = _.merge({}, DEFAULT_SETTINGS, widgetConfig.internalWebSettings)
+const {basePath, internalWebSettings} = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function () {
     const templateFile = path.join(__dirname, '../templates/renderExample.template.html')
-    const templateContent = fs.readFileSync(templateFile, 'utf8')
+    const destinationDirectory = path.join(basePath, 'browser')
+    const destinationFile = path.join(basePath, 'browser/renderExample.html')
 
-    const output = mustache.render(templateContent, templateVariables)
-    const dest = path.join(widgetConfig.basePath, 'browser/renderExample.html')
-    fs.writeFileSync(dest, output, 'utf8')
+    const templateContent = fs.readFileSync(templateFile, 'utf8')
+    const output = mustache.render(templateContent, internalWebSettings)
+
+    fs.mkdirsSync(destinationDirectory)
+    fs.writeFileSync(destinationFile, output, 'utf8')
   }
 }

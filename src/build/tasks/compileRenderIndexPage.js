@@ -9,27 +9,24 @@ const path = require('path')
 const sourcemaps = require('gulp-sourcemaps')
 const tap = require('gulp-tap')
 
-const widgetConfig = require('../lib/widgetConfig')
-
-const DEFAULT_SETTINGS = {
-}
-
-const templateVariables = _.merge({}, DEFAULT_SETTINGS, widgetConfig.internalWebSettings)
+const {basePath, internalWebSettings} = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function () {
     // step 1: apply vars to template, and save renderContentPage in .tmp
     const templateFile = path.join(__dirname, '../templates/renderIndexPage.template.js')
-    const templateContent = fs.readFileSync(templateFile, 'utf8')
+    const entryPointDirectory = path.join(basePath, '.tmp')
+    const entryPoint = path.join(basePath, '.tmp/renderIndexPage.js')
+    const compiledContentDestination = path.join(basePath, 'browser/js/')
 
-    const output = mustache.render(templateContent, templateVariables)
-    fs.mkdirsSync('.tmp')
-    fs.writeFileSync('.tmp/renderIndexPage.js', output, 'utf8')
+    fs.mkdirsSync(entryPointDirectory)
+    fs.mkdirsSync(compiledContentDestination)
+
+    const templateContent = fs.readFileSync(templateFile, 'utf8')
+    const output = mustache.render(templateContent, internalWebSettings)
+    fs.writeFileSync(entryPoint, output, 'utf8')
 
     // step 2: browserify renderIndexPage.js
-    const entryPoint = path.join(__dirname, '.tmp/renderIndexPage.js')
-    const dest = path.join(widgetConfig.basePath, 'browser/js/')
-
     return gulp.src(entryPoint, { read: false })
       .pipe(tap(function (file) {
         gutil.log(`bundling ${file.path}`)
@@ -48,6 +45,6 @@ module.exports = function (gulp) {
       .pipe(buffer())
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(dest))
+      .pipe(gulp.dest(compiledContentDestination))
   }
 }

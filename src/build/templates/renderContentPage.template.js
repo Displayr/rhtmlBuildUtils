@@ -7,9 +7,9 @@ import _ from 'lodash'
 const WidgetFactory = require('{{{widget_definition_path}}}')
 
 const defaultConfig = {
-  width: {{defaults.width}},
-  height: {{defaults.height}},
-  border: {{defaults.border}}
+  width: {{default_width}},
+  height: {{default_height}},
+  border: {{default_border}}
 }
 
 let exampleCounter = 0
@@ -110,7 +110,7 @@ const addExampleTo = function () {
     window.resizeHook = function (newWidth, newHeight) {
       console.log(`resize to ${newWidth}x${newHeight}`)
 
-      $(`.${exampleNumber} .inner-example`)
+      $(`.${exampleNumber} .widget-container`)
         .css('width', newWidth)
         .css('height', newHeight)
 
@@ -124,10 +124,10 @@ const addExampleTo = function () {
       const newResizeHandler = function (additionalWidth, additionalHeight) {
         return function (event) {
           event.preventDefault()
-          const newWidth = $(`.${exampleNumber} .inner-example`).width() + additionalWidth
-          const newHeight = $(`.${exampleNumber} .inner-example`).height() + additionalHeight
+          const newWidth = $(`.${exampleNumber} .widget-container`).width() + additionalWidth
+          const newHeight = $(`.${exampleNumber} .widget-container`).height() + additionalHeight
 
-          $(`.${exampleNumber} .inner-example`)
+          $(`.${exampleNumber} .widget-container`)
             .css('width', newWidth)
             .css('height', newHeight)
 
@@ -164,8 +164,8 @@ const addExampleTo = function () {
     }
 
     const surroundingDiv = $('<div>')
-      .attr('id', 'inner-example')
-      .attr('class', 'inner-example')
+      .attr('id', 'widget-container')
+      .attr('class', 'widget-container')
       .css('width', `${dataAttributes.width}`)
       .css('height', `${dataAttributes.height}`)
 
@@ -176,10 +176,10 @@ const addExampleTo = function () {
     }
 
     const widgetDiv = $('<div>')
-      .attr('id', `inner-inner-example-${exampleNumber}`)
-      .attr('class', 'inner-inner-example')
+      .attr('id', `widget-div-${exampleNumber}`)
+      .attr('class', 'widget-div')
 
-    if ({{includeWidthOnInner}}) {
+    if ({{includeDimensionsOnWidgetDiv}}) {
       widgetDiv.css('width', `${dataAttributes.width}`)
       widgetDiv.css('height', `${dataAttributes.height}`)
     }
@@ -187,7 +187,7 @@ const addExampleTo = function () {
     surroundingDiv.append(widgetDiv)
     element.append(surroundingDiv)
 
-    const widgetAsHtmlElement = document.getElementById(`inner-inner-example-${exampleNumber}`)
+    const widgetAsHtmlElement = document.getElementById(`widget-div-${exampleNumber}`)
     widgetInstance = WidgetFactory(widgetAsHtmlElement, dataAttributes.width, dataAttributes.height, stateChangedCallback)
     widgetInstance.renderValue(config, userState)
   }).catch((error) => {
