@@ -23,7 +23,7 @@ module.exports = function () {
       }).then(() => {
         console.log(`browser.get returned after ${Date.now() - start} ms`)
         const readyPromises = [
-          browser.wait(browser.isElementPresent(by.css((widgetConfig.visualRegressionSuite.isReadySelector))),
+          browser.wait(browser.isElementPresent(by.css(widgetConfig.visualRegressionSuite.isReadySelector))),
           browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
         ]
 

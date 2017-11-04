@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const babelify = require('babelify')
 const browserify = require('browserify')
 const buffer = require('gulp-buffer')
