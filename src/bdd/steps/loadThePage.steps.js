@@ -18,6 +18,7 @@ module.exports = function () {
       return browser.wait(browser.isElementPresent(by.css(widgetConfig.visualRegressionSuite.isReadySelector)))
         .then(() => {
           const pageLoadDelay = browser.params.applitools.pageLoadDelay * 1000
+          console.log(`is ready done: waited for ${widgetConfig.visualRegressionSuite.isReadySelector}`)
           return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
         })
     }
