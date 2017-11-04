@@ -55,8 +55,6 @@ module.exports = {
   // invoked via R
   internalWebSettings: {
 
-    // TODO rename the inner vs inner inner
-    // TODO rename includeDimensionsOnWidgetDiv to includeDimensionsOnX
     // in renderContentPage there is an widget-container div and an widget-div. If 'includeDimensionsOnWidgetDiv' is true then the width and height of the widget-div div is set to the width x height. If false it is left to inherit from the parent.
     // Some widgets require inherit, some require explicit width x height
     includeDimensionsOnWidgetDiv: false,
