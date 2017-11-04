@@ -6,7 +6,7 @@ const widgetConfig = require('../../build/lib/widgetConfig')
 module.exports = function () {
   this.Then(/^the "(.*)" snapshot matches the baseline$/, function (snapshotName) {
     if (this.isApplitoolsEnabled()) {
-      const selectorExpression = '.rhtmlwidget-outer-svg'
+      const selectorExpression = widgetConfig.visualRegressionSuite.isReadySelector
       return wrapInPromiseAndLogErrors(() => {
         return this.eyes.checkRegionBy(by.css(selectorExpression), snapshotName)
       })

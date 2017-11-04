@@ -1,3 +1,5 @@
+const widgetConfig = require('../../build/lib/widgetConfig')
+
 module.exports = function () {
   this.Before(function () {
     this.context.loadPage = function ({ configName, stateName, width = 1000, height = 1000, rerenderControls = false, border = false }) {
@@ -13,8 +15,7 @@ module.exports = function () {
       }
 
       browser.get(url)
-      // NB : assumes you are using Template._addRootSvgToRootElement method
-      return browser.wait(browser.isElementPresent(by.css('.rhtmlwidget-outer-svg')))
+      return browser.wait(browser.isElementPresent(by.css(widgetConfig.visualRegressionSuite.isReadySelector)))
         .then(() => {
           const pageLoadDelay = browser.params.applitools.pageLoadDelay * 1000
           return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
