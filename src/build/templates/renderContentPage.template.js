@@ -169,10 +169,8 @@ const addExampleTo = function () {
       .css('width', `${dataAttributes.width}`)
       .css('height', `${dataAttributes.height}`)
 
-    if (_.has(dataAttributes, 'border')) {
-      surroundingDiv.addClass((dataAttributes.border) ? 'border' : 'no-border')
-    } else {
-      surroundingDiv.addClass('border-unset')
+    if (dataAttributes.border) {
+      surroundingDiv.addClass('border')
     }
 
     const widgetDiv = $('<div>')

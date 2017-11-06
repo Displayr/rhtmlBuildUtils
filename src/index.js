@@ -49,7 +49,8 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   if (shouldRegister('compileInternal')) {
     gulp.task('compileInternal', [
       'buildContentManifest',
-      'compileRenderExamplePage',
+      'prepareInternalWwwCss',
+      'prepareRenderExamplePage',
       'compileRenderContentPage',
       'compileRenderIndexPage',
       'buildSnapshotsFeatureFile'
