@@ -28,9 +28,25 @@ const retrieveState = function (configName, stateName) {
   })
 }
 
-const retrieveConfig = function (configName) {
-  return new Promise((resolve, reject) => {
-    $.ajax(`/data/${configName}/config.json`).done(resolve).fail(reject)
+const retrieveConfig = function (configString) {
+  const configPartPaths = configString.split(',').map(_.trim)
+
+  const getPathFromConfigPart = (configPartPath) => {
+    if (configPartPath.indexOf('.') !== -1) {
+      return `/${configPartPath.replace(new RegExp(/\./, 'g'), '/')}.json`
+    } else {
+      return `/data/${configPartPath}/config.json`
+    }
+  }
+
+  const retrievalPromises = configPartPaths.map((configPartPath) => {
+    return new Promise((resolve, reject) => {
+      $.ajax(getPathFromConfigPart(configPartPath)).done(resolve).fail(reject)
+    })
+  })
+
+  return Promise.all(retrievalPromises).then((configParts) => {
+    return _.merge(...configParts)
   })
 }
 
