@@ -29,21 +29,33 @@ const retrieveState = function (configName, stateName) {
 }
 
 const retrieveConfig = function (configString) {
-  const configPartPaths = configString.split(',').map(_.trim)
 
-  const getPathFromConfigPart = (configPartPath) => {
-    if (configPartPath.indexOf('.') !== -1) {
-      return `/${configPartPath.replace(new RegExp(/\./, 'g'), '/')}.json`
-    } else {
-      return `/data/${configPartPath}/config.json`
+  const retrieveConfigPart = (configPartPath) => {
+    return new Promise((resolve, reject) => {
+      $.ajax(configPartPath).done(resolve).fail(reject)
+    })
+  }
+
+  const parseInlineConfigPart = (configPartString) => {
+    try {
+      return JSON.parse(configPartString)
+    } catch (error) {
+      return Promise.reject(new Error(`Error JSON.parsing configPart string '${configPartString}'`))
     }
   }
 
-  const retrievalPromises = configPartPaths.map((configPartPath) => {
-    return new Promise((resolve, reject) => {
-      $.ajax(getPathFromConfigPart(configPartPath)).done(resolve).fail(reject)
-    })
-  })
+  const getConfigPart = (configPartPath) => {
+    if (configPartPath.indexOf('{') === 0) {
+      return parseInlineConfigPart(configPartPath)
+    } else if (configPartPath.indexOf('.') !== -1) {
+      return retrieveConfigPart(`/${configPartPath.replace(new RegExp(/\./, 'g'), '/')}.json`)
+    } else {
+      return retrieveConfigPart(`/data/${configPartPath}/config.json`)
+    }
+  }
+
+  const configPartPaths = configString.split('|').map(_.trim)
+  const retrievalPromises = configPartPaths.map(getConfigPart)
 
   return Promise.all(retrievalPromises).then((configParts) => {
     return _.merge(...configParts)
