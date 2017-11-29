@@ -34,5 +34,6 @@ module.exports = function (gulp) {
       .pipe(uglify())
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(dest))
+      .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()) })
   }
 }

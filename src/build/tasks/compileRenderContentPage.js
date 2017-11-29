@@ -52,5 +52,6 @@ module.exports = function (gulp) {
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(compiledContentDestination))
+      .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()) })
   }
 }
