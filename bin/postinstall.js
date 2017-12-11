@@ -24,6 +24,8 @@ function findProtractor () {
 }
 
 function updateWebdriver (protractorPath) {
+  const chromeDriverVersion = (process.env.CI === true || process.env.CI === 'true') ? '2.30' : '2.33'
   const webdriverScriptPath = path.join(protractorPath, 'bin', 'webdriver-manager')
-  process.exit(shell.exec(`node ${webdriverScriptPath} update --no-gecko`).code)
+
+  process.exit(shell.exec(`node ${webdriverScriptPath} update --no-gecko --versions.chrome ${chromeDriverVersion}`).code)
 }
