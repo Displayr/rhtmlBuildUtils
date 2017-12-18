@@ -24,7 +24,11 @@ function findProtractor () {
 }
 
 function updateWebdriver (protractorPath) {
-  const chromeDriverVersion = (process.env.CI === true || process.env.CI === 'true') ? '2.30' : '2.33'
+  // Travis CI was running an older linux build which required chromedriver 2.30 because it was running chrome version < 60.
+  // They have recently updgraded so we can just use 2.33 (or even latest chromedriver) but I am leaving this code here just in case
+  // TODO March 2018 - delete this commented ternary
+  // const chromeDriverVersion = (process.env.CI === true || process.env.CI === 'true') ? '2.33' : '2.33'
+  const chromeDriverVersion = '2.33'
   const webdriverScriptPath = path.join(protractorPath, 'bin', 'webdriver-manager')
 
   process.exit(shell.exec(`node ${webdriverScriptPath} update --no-gecko --versions.chrome ${chromeDriverVersion}`).code)
