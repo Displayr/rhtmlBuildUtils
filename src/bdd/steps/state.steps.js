@@ -24,7 +24,16 @@ module.exports = function () {
     }
 
     return wrapInPromiseAndLogErrors(() => {
-      const expectedStateUrl = `http://localhost:9000/data/${this.context.configName}/${expectedStateFile}.json`
+      // TODO code is duplicated between renderContentTemplate and state.steps.js
+      const expectedStateFileIsDotNotation = expectedStateFile.match(/[.]/)
+      const replaceDotsWithSlashes = (inputString) => {
+        return inputString.replace(/[.]/, '/')
+      }
+
+      const expectedStateUrl = (expectedStateFileIsDotNotation)
+        ? `http://localhost:9000/${replaceDotsWithSlashes(expectedStateFile)}.json`
+        : `http://localhost:9000/data/${this.context.configName}/${expectedStateFile}.json`
+
       const expectedStatePromise = request(expectedStateUrl).then(JSON.parse)
       const actualStatePromise = this.context.getRecentState()
 

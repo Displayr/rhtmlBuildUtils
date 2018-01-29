@@ -23,8 +23,19 @@ const stateChangedCallback = (newState) => {
 }
 
 const retrieveState = function (configName, stateName) {
+
+  // TODO code is duplicated between renderContentTemplate and state.steps.js
+  const expectedStateFileIsDotNotation = stateName.match(/[.]/)
+  const replaceDotsWithSlashes = (inputString) => {
+    return inputString.replace(/[.]/, '/')
+  }
+
+  const stateUrl = (expectedStateFileIsDotNotation)
+    ? `/${replaceDotsWithSlashes(stateName)}.json`
+    : `/data/${configName}/${stateName}.json`
+
   return new Promise((resolve, reject) => {
-    $.ajax(`/data/${configName}/${stateName}.json`).done(resolve).fail(reject)
+    $.ajax(stateUrl).done(resolve).fail(reject)
   })
 }
 
@@ -115,12 +126,6 @@ const addExampleTo = function () {
   }
 
   Promise.all([configPromise, statePromise]).then(([config, userState = {}]) => {
-    console.log('loading widget with config:')
-    console.log(JSON.stringify(config, {}, 2))
-
-    console.log('loading widget with userState:')
-    console.log(JSON.stringify(userState, {}, 2))
-
     element.empty()
     let widgetInstance = null
 
@@ -245,7 +250,6 @@ $(document).ready(function () {
   $('.example').each(addExampleTo)
   $('body').attr('loaded', '')
 
-  console.log('adding to window')
   // NB "export" addExampleTo function so it can be used in renderExample.html
   window.addExampleTo = addExampleTo
 })
