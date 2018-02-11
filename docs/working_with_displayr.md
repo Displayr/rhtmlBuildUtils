@@ -3,9 +3,14 @@ There are several noteworthy displayr behaviours to keep in mind when maintainin
 In no particular order:
 
 ## Displayr widget caching
-When a widget is calculated in R then we take note of the R output (the widget’s data) and any JS libraries it uses (which we upload to a CDN). This information is stored in the Displayr/Q project, ensuring that the widget’s data is always used with the same JavaScript assets that were current when it was calculated, even if the project is loaded 6 months later.
+When a widget is calculated in displayr then the R output (the widget’s data) and all JS libraries (including the widget wrapper library and the widget code used) are uploaded to a CDN and cached. The next time the widget is displayed, nothing is recomputed, Displayr just serves the JS+HTML assets with the previously computed widget data to the browser for rendering. This is done to ensure that the widgets will be consistently drawn the way it was when the user last viewed the page, even if the project is loaded 6 months later.
 
 If the user recalculates a widget in Displayr/Q then new output/data is captured and new assets are remembered and used. Displayr/Q will sees that the JS assets have changed after recalculation and then the widget will be reloaded from scratch into the DOM.
+
+This has several consequences:
+
+* Even if you update a widget implementation and upload that to the R server, these updates will not be reflected until you click "calculate"
+* If the user resizes the widget then closes the browser or navigates, when they eventually return to the page and the widget is drawn, the factory will be called with the original widget dimensions, not the new ones. See "Sizing is Displayr" below for more details.
 
 ## The statechanged callback
 
@@ -19,11 +24,11 @@ The new factory signature is as follows:
 
     factory(el, width, height, stateChangedFn) <-- stateChangedFn is a function reference that the widget should call with the new "state" object every time the user state is updated
     
-(the following might change) Every time the statchanged callback is called, Displayr will call renderValue(). make a note of this as it means your widget will redraw every time you call the stateChanged function.
+(the following might change) **Every time the statchanged callback is called, Displayr will call renderValue().** Make a note of this as it means your widget will redraw every time you call the stateChanged function.
 
 ## Extremely verbose Displayr logging
 
-Display logs so many things to console.log the signal to noise ratio is effectively zero. If you need to silence displayr so you can see what your widget is saying, simply run this in the dev tools console:
+Display logs so many things to console.log the signal to noise ratio with respect to widget logging is effectively zero. If you need to silence displayr so you can see what your widget is saying, simply run this in the dev tools console:
 
     suppressDisplayrLogging()
  
