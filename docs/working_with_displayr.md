@@ -3,7 +3,7 @@ There are several noteworthy displayr behaviours to keep in mind when maintainin
 In no particular order:
 
 ## Displayr widget caching
-When a widget is calculated in displayr then the R output (the widget’s data) and all JS libraries (including the widget wrapper library and the widget code used) are uploaded to a CDN and cached. The next time the widget is displayed, nothing is recomputed, Displayr just serves the JS+HTML assets with the previously computed widget data to the browser for rendering. This is done to ensure that the widgets will be consistently drawn the way it was when the user last viewed the page, even if the project is loaded 6 months later.
+When a widget is calculated in displayr then the R output (the widget’s data) and references to JS libraries (including the widget wrapper library and the widget code used) are stored in the Displayr project.  The JS libraries themselves are uploaded to a CDN and stored permanently. The next time the widget is displayed, nothing is recomputed, Displayr just serves the JS+HTML assets with the previously computed widget data to the browser for rendering. This is done to ensure that the widgets will be consistently drawn the way it was when the user last viewed the page, even if the project is loaded 6 months later.
 
 If the user recalculates a widget in Displayr/Q then new output/data is captured and new assets are remembered and used. Displayr/Q will sees that the JS assets have changed after recalculation and then the widget will be reloaded from scratch into the DOM.
 
