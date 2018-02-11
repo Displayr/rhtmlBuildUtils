@@ -43,3 +43,36 @@ As a general rule, widgets should ignore the initial size that is passed to the 
 * user views some other pages, or closes the app
 * when the user returns to the page with the widget, the cached assets are used, so the widget is passed 200x100 even though the actual container is now no longer 200x100
 * this would be corrected if the user hits "calculate" or if the user resizes the box (causing resize to get called).
+
+## Testing widgets in Displayr
+
+Displayr can be configured to use a dev R server. So to test a widget in Displayr you must install the widget on the dev server and then change your displayr session to use the dev R server. 
+
+Specific steps are listed below (assuming a widget called Displayr/rhtmlFoo and a working branch of JIRA-1234):
+
+* build the inst directory of the widget and commit and push your code (`gulp; git commit -m 'message'; git push origin head`)   
+* login to the dev server (get server username and location from Displayr team)
+* Run `R_opencpu` and enter the following command sequence, then exit R_opencpu
+```
+    library(devtools)
+    install_github("Displayr/rhtmlFoo@JIRA-1234")
+    quit() 
+
+```
+* Run `update_opencpu.sh`
+
+It is important to note the widget CDN caching behaviour, see the `Displayr widget caching` section above. TLDR; after the 4 steps above, you must still click 'calculate' to use your new code.
+
+**Productivity Enhancement**
+
+On osx/unix/linux you can add this to your bash_profile (assuming you have your public key installed in the authorized_keys list for the dev server):
+ 
+    function numpush () {
+        ssh -o "StrictHostKeyChecking=no" <DEV_SERVER_USERNAME>@<DEV_SERVER_HOSTNAME> 'echo library\(devtools\)\; install_github\(\"'$1'\"\)\; quit\(\) > /tmp/foo; /home/numbers/bin/R_opencpu --file=/tmp/foo; /home/numbers/bin/update_opencpu.sh'
+    } 
+
+Then the whole process becomes (assuming a widget called Displayr/rhtmlFoo and a working branch of JIRA-1234):
+
+    $ gulp #<-- build the widget
+    $ git commit -m 'message' && git push origin head <-- push code to git
+    $ numpush "Displayr/rhtmlFoo@JIRA-1234" <-- push code to R Server
