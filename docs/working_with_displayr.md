@@ -16,7 +16,7 @@ This has several consequences:
 
 ## The statechanged callback
 
-Displayr uses a modified version of the htmlwidgets package that will hand an initial state and a state changed callback to a widget. This allows user interactions with a widget to be persisted.
+Displayr uses a modified version of the htmlwidgets package that will hand an initial state and a state changed callback to a widget. This allows user interactions with a widget to be persisted. There are more detailed documentation [here](https://github.com/Displayr/htmlwidgets/blob/master/vignettes/develop_advanced.Rmd#preserving-widget-state). In summary:
 
 The new render value signature is as follows:
 
