@@ -170,6 +170,12 @@ const addExampleTo = function () {
             .css('width', newWidth)
             .css('height', newHeight)
 
+          if ({{includeDimensionsOnWidgetDiv}}) {
+            $(`#widget-div-${exampleNumber}`)
+              .css('width', newWidth)
+              .css('height', newHeight)
+          }
+
           return widgetInstance.resize(newWidth, newHeight)
         }
       }
