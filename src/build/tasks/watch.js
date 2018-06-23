@@ -15,8 +15,9 @@ module.exports = function (gulp) {
 
     // when these files change then do this,
     // for example when the json file changes rerun the copy command
-    gulp.watch(['theSrc/internal_www/**/*', '!theSrc/internal_www/**/*.js'], ['copy'])
+    gulp.watch(['theSrc/internal_www/**/*'], ['copy'])
     gulp.watch(['theSrc/internal_www/js/*.js', 'theSrc/scripts/*.js', 'theSrc/scripts/**/*.js'], ['compileRenderContentPage'])
+    gulp.watch(['theSrc/internal_www/styles/**/.css'], ['copy'])
     gulp.watch('theSrc/styles/**/*.less', ['less'])
   }
 }

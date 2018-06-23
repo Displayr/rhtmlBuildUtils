@@ -1,12 +1,14 @@
-const _ = require('lodash')
 const wrapInPromiseAndLogErrors = require('../lib/wrapInPromiseAndLogErrors')
 
 const widgetConfig = require('../../build/lib/widgetConfig')
 
+/* global $ */
+/* global protractor */
+
 module.exports = function () {
   this.Then(/^the "(.*)" snapshot matches the baseline$/, function (snapshotName) {
     if (this.isApplitoolsEnabled()) {
-      const selectorExpression = widgetConfig.visualRegressionSuite.isReadySelector
+      const selectorExpression = widgetConfig.internalWebSettings.isReadySelector // this wont always be the same as what we want to select !!
       return wrapInPromiseAndLogErrors(() => {
         return this.eyes.checkRegionBy(by.css(selectorExpression), snapshotName)
       })
@@ -21,17 +23,17 @@ module.exports = function () {
         const pageLoadDelay = browser.params.applitools.pageLoadDelay * 1000
         return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
       }).then(() => {
-        console.log(`browser.get returned after ${Date.now() - start} ms`)
-        const readyPromises = [
-          browser.wait(browser.isElementPresent(by.css(widgetConfig.visualRegressionSuite.isReadySelector))),
-          browser.wait(browser.isElementPresent(by.css('.rhtml-error-container')))
-        ]
+        const EC = protractor.ExpectedConditions
+        const ready = $('body[widgets-ready]')
+        const failed = $('.rhtml-error-container')
 
-        return Promise.all(readyPromises).then((isPresentResults) => {
-          return (_.some(isPresentResults))
-            ? Promise.resolve()
-            : Promise.reject(new Error(`Fail to load http://localhost:9000${_contentPath} (after ${Date.now() - start} ms)`))
-        })
+        const isLoaded = EC.or(EC.presenceOf(ready), EC.presenceOf(failed))
+        return browser.wait(isLoaded, 30000)
+          .catch(error => {
+            console.log('error')
+            console.log(JSON.stringify(error, {}, 2))
+            throw new Error(`Fail to load http://localhost:9000${_contentPath} (after ${Date.now() - start} ms)`)
+          })
       })
     }
 

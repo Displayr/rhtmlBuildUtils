@@ -28,7 +28,7 @@ module.exports = function (gulp) {
       _(tags).each(tag => protractorParamsArray.push(`--cucumberOpts.tags=${tag}`))
     }
 
-    gulp.src(['.tmp/snapshots.feature', 'bdd/features/**/*.feature'])
+    gulp.src(['.tmp/**/*.feature', 'bdd/features/**/*.feature'])
       .pipe(gulpProtractor.protractor({
         configFile: path.join(__dirname, '../config/protractor.conf.js'),
         args: protractorParamsArray

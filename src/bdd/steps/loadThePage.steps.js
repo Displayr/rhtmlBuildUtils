@@ -1,5 +1,3 @@
-const widgetConfig = require('../../build/lib/widgetConfig')
-
 module.exports = function () {
   this.Before(function () {
     this.context.loadPage = function ({ configName, stateName, width = 1000, height = 1000, rerenderControls = false, border = false }) {
@@ -15,10 +13,10 @@ module.exports = function () {
       }
 
       browser.get(url)
-      return browser.wait(browser.isElementPresent(by.css(widgetConfig.visualRegressionSuite.isReadySelector)))
+      return browser.wait(browser.isElementPresent(by.css('body[widgets-ready]')))
         .then(() => {
           const pageLoadDelay = browser.params.applitools.pageLoadDelay * 1000
-          console.log(`is ready done: waited for ${widgetConfig.visualRegressionSuite.isReadySelector}`)
+          console.log(`is ready done: waited for body[widgets-ready]`)
           return new Promise(resolve => setTimeout(resolve, pageLoadDelay))
         })
     }
