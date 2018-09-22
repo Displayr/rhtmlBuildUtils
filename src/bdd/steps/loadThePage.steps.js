@@ -1,16 +1,14 @@
 module.exports = function () {
   this.Before(function () {
     this.context.loadPage = function ({ configName, stateName, width = 1000, height = 1000, rerenderControls = false, border = false }) {
-      let url = `http://localhost:9000/renderExample.html?width=${width}&height=${height}&config=${configName}`
-      if (stateName) {
-        url += `&state=${stateName}`
+      const config = {
+        height,
+        width,
+        type: 'single_widget_single_page',
+        widgets: [{ config: [configName], rerenderControls, border, state: stateName }]
       }
-      if (rerenderControls) {
-        url += '&rerenderControls=true'
-      }
-      if (border) {
-        url += '&border=true'
-      }
+      const configString = new Buffer(JSON.stringify(config)).toString('base64') // eslint-disable-line node/no-deprecated-api
+      let url = `http://localhost:9000/renderExample.html?config=${configString}`
 
       browser.get(url)
       return browser.wait(browser.isElementPresent(by.css('body[widgets-ready]')))
