@@ -3,8 +3,13 @@ const path = require('path')
 const opn = require('opn')
 const cliArgs = require('yargs').argv
 
-module.exports = {
-  registerGulpTasks: registerGulpTasks
+const taskSequences = {
+  build: [ 'clean', ['compileES6', 'core', 'lint'], ['makeDocs', 'testSpecs'] ],
+  core: [ 'less', 'copy' ],
+  serve: [ ['core', 'compileInternal', 'connect', 'watch'], 'openBrowser' ],
+  testVisual: [ 'core', 'compileInternal', 'connect', 'runProtractor' ],
+  testVisual_s: [ 'runProtractor' ],
+  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile' ]
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {
@@ -21,40 +26,46 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 
   if (shouldRegister('build')) {
     gulp.task('build', function (done) {
-      runSequence('clean', ['compileES6', 'core', 'lint'], ['makeDocs', 'testSpecs'], done)
+      runSequence(...taskSequences.build, done)
     })
   }
 
-  if (shouldRegister('serve')) {
+  if (shouldRegister('openBrowser')) {
     const port = cliArgs.port || 9000
-    const buildTasks = ['core', 'compileInternal', 'connect', 'watch']
     const openBrowser = function () {
       opn(`http://localhost:${port}`)
     }
-    gulp.task('serve', buildTasks, openBrowser)
+    gulp.task('openBrowser', openBrowser)
+  }
+
+  if (shouldRegister('serve')) {
+    gulp.task('serve', function (done) {
+      runSequence(...taskSequences.serve, done)
+    })
   }
 
   if (shouldRegister('testVisual')) {
     gulp.task('testVisual', function (done) {
-      runSequence('core', 'compileInternal', 'connect', 'runProtractor', done)
+      runSequence(...taskSequences.testVisual, done)
     })
+  }
 
-    gulp.task('testVisual_s', ['runProtractor'])
+  if (shouldRegister('testVisual_s')) {
+    gulp.task('testVisual_s', function (done) {
+      runSequence(...taskSequences.testVisual_s, done)
+    })
   }
 
   if (shouldRegister('core')) {
-    gulp.task('core', ['less', 'copy'])
+    gulp.task('core', function (done) {
+      runSequence(...taskSequences.core, done)
+    })
   }
 
   if (shouldRegister('compileInternal')) {
-    gulp.task('compileInternal', [
-      'buildContentManifest',
-      'prepareInternalWwwCss',
-      'prepareRenderExamplePage',
-      'compileRenderContentPage',
-      'compileRenderIndexPage',
-      'buildSnapshotsFeatureFile'
-    ])
+    gulp.task('compileInternal', function (done) {
+      runSequence(...taskSequences.compileInternal, done)
+    })
   }
 
   const pathToTaskFiles = path.join(__dirname, 'build', 'tasks')
@@ -67,6 +78,8 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
         gulp.task(taskName, require(modulePath)(gulp))
       }
     })
+
+  return runSequence
 }
 
 function onlyDotJsFiles (file) {
@@ -75,4 +88,9 @@ function onlyDotJsFiles (file) {
 
 function stripJsSuffix (file) {
   return file.replace(/\.js$/, '')
+}
+
+module.exports = {
+  registerGulpTasks,
+  taskSequences
 }

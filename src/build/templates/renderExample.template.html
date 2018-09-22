@@ -12,18 +12,50 @@
 <body>
 <script src="/js/renderContentPage.js"></script>
 
-<div id="render-example-container" style="display:inline-block"></div>
+<div id="examples-container" style="display:inline-block"></div>
 
 <script>
+
+  /*
+   * config is passed as a base64 encoded json object at url parameter 'config'
+   * or as a file that can be fetched at the relative URL specified in url parameter 'configPath'
+   * Config structure:
+   * {
+   *   width: int,
+   *   height: int,
+   *   title: string,
+   *   rowSize: int
+   *   snapshotName: string
+   *   widgets: Array of object:
+   *     width
+   *     height
+   *     config: array of strings
+   *     state: string
+   *     rerenderControls: boolean
+   *     border: boolean,
+   *     comment:
+   *     status: [green|yellow|red]
+   * }
+   */
+
+  const defaultConfig = {
+    width: 600,
+    height: 600,
+    title: null,
+    rowSize: 1,
+    widgets: []
+  }
+
   function getUrlVars() {
-    var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for (var i = 0; i < hashes.length; i++) {
-      hash = hashes[i].split('=');
-      vars.push(hash[0]);
-      vars[hash[0]] = hash[1];
-    }
-    return vars;
+    var vars = {}
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&')
+    _(hashes).each(hashString => {
+      var hash = hashString.split('=')
+      if (!_.has(vars, hash[0])) { vars[hash[0]] = hash[1] }
+      else if (_.has(vars, hash[0]) && _.isString(vars[hash[0]])) { vars[hash[0]] = [ vars[hash[0]], hash[1] ]}
+      else if (_.has(vars, hash[0]) && _.isArray(vars[hash[0]])) { vars[hash[0]].push(hash[1]) }
+    })
+    return vars
   }
 
   $(document).ready(function () {
@@ -34,20 +66,69 @@
     setTimeout(() => {
       const urlVars = getUrlVars();
 
-      const scatterPlotDomElement = $('#render-example-container')
-        .addClass('example');
+      const configPromise = (_.has(urlVars, 'config'))
+        ? parseConfig(urlVars.config)
+        : fetchAndParseConfig(urlVars.configPath)
 
-      if (urlVars.width) { scatterPlotDomElement.attr('data-width', urlVars.width); }
-      if (urlVars.height) { scatterPlotDomElement.attr('data-height', urlVars.height); }
-      if (urlVars.config) { scatterPlotDomElement.attr('data-config', urlVars.config); }
-      if (urlVars.state) { scatterPlotDomElement.attr('data-state', urlVars.state); }
-      if (urlVars.rerenderControls) { scatterPlotDomElement.attr('data-rerender', true); }
-      if (urlVars.border) { scatterPlotDomElement.attr('data-border', true); }
+      configPromise.then(renderExampleConfig => {
+        console.log('renderExampleConfig')
+        console.log(JSON.stringify(renderExampleConfig, {}, 2))
 
-      // NB addExampleTo is a function added to window by renderContentPage.js
-      $('.example').each(addExampleTo);
-    }, 0);
-  });
+        const examplesContainer = $('#examples-container')
+        if (renderExampleConfig.testname) { examplesContainer.attr('snapshot-name', renderExampleConfig.testname) }
+
+        const widgetConfigs = (_.isArray(renderExampleConfig.widgets)) ? renderExampleConfig.widgets : [renderExampleConfig.widgets]
+        const rowSize = parseInt(renderExampleConfig.rowSize)
+        const rowsOfWidgetConfigs = _.chunk(widgetConfigs, rowSize)
+
+        if (renderExampleConfig.title) {
+          const descriptionDiv = $('<h3 class="description">').html(renderExampleConfig.title)
+          examplesContainer.append(descriptionDiv)
+        }
+
+        if (renderExampleConfig.general_comments) {
+          _(renderExampleConfig.general_comments).each(general_comment => {
+            const descriptionDiv = $('<div class="description">').html(general_comment)
+            examplesContainer.append(descriptionDiv)
+          })
+        }
+
+        _(rowsOfWidgetConfigs).each((rowOfWidgetConfigs) => {
+          const newRow = $('<div class="row">')
+          examplesContainer.append(newRow)
+
+          _(rowOfWidgetConfigs).each((widgetConfig) => {
+
+            const exampleDiv = $('<div class="example">')
+
+            exampleDiv.attr('data-config', (widgetConfig.config || []).join('|'))
+            exampleDiv.attr('data-width', widgetConfig.width || renderExampleConfig.width)
+            exampleDiv.attr('data-height', widgetConfig.height || renderExampleConfig.height)
+            if (widgetConfig.state) { exampleDiv.attr('data-state', renderExampleConfig.state) }
+            if (widgetConfig.rerenderControls) { exampleDiv.attr('data-rerender', true) }
+            if (widgetConfig.border) { exampleDiv.attr('data-border', true) }
+            if (widgetConfig.comment) { exampleDiv.attr('title', widgetConfig.comment) }
+
+            if (widgetConfig.status) { exampleDiv.addClass(`status-${widgetConfig.status}`) }
+
+            newRow.append(exampleDiv)
+          })
+        })
+
+        // NB addExampleTo is a function added to window by renderContentPage.js
+        $('.example').each(addExampleTo)
+      })
+    }, 0)
+  })
+
+  function parseConfig (base64EncodedConfigString) {
+    const parsedConfig = JSON.parse(atob(base64EncodedConfigString))
+    return Promise.resolve(_.defaultsDeep(parsedConfig, defaultConfig))
+  }
+
+  function fetchAndParseConfig () {
+    throw new Error('not implemented yet')
+  }
 </script>
 </body>
 </html>

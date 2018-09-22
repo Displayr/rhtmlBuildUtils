@@ -6,8 +6,7 @@ module.exports = function (gulp) {
   return function () {
     //  TODO this needs a return signalling all the copying is done
     gulp.src([
-      'theSrc/internal_www/**/*',
-      '!theSrc/internal_www/**/*.js'
+      'theSrc/internal_www/**/*'
     ], {}).pipe(gulp.dest('browser'))
 
     gulp.src([
@@ -18,6 +17,11 @@ module.exports = function (gulp) {
       'theSrc/styles/**/*.css'
     ], {})
       .pipe(gulp.dest('inst/htmlwidgets/lib/style'))
+      .pipe(gulp.dest('browser/style'))
+
+    gulp.src([
+      'theSrc/internal_www/styles/**/*.css'
+    ], {})
       .pipe(gulp.dest('browser/style'))
 
     gulp.src('theSrc/R/htmlwidget.yaml')

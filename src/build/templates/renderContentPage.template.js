@@ -254,8 +254,25 @@ const addLinkToIndex = function () {
 $(document).ready(function () {
   addLinkToIndex()
   $('.example').each(addExampleTo)
-  $('body').attr('loaded', '')
+  $('body').attr('loaded', '') // TODO rename - it only means the widgets are now running
 
   // NB "export" addExampleTo function so it can be used in renderExample.html
   window.addExampleTo = addExampleTo
+
+  {{#isReadySelector}}
+  setTimeout(() => {
+    const readyExpression = '{{{.}}}'
+    const widgetCount = $('.example').length
+    console.log(`waiting for ${widgetCount} instances of ${readyExpression} then I will set widgets-ready on body`)
+    const waitingForReadyInterval = setInterval(() => {
+      const readyCount = $(readyExpression).length
+
+      if ((widgetCount) === readyCount) {
+        console.log(`setting widgets-ready on body after ${performance.now().toFixed(0)}ms`)
+        $('body').attr('widgets-ready', '')
+        clearInterval(waitingForReadyInterval)
+      }
+    }, 250)
+  }, 10)
+  {{/isReadySelector}}
 })

@@ -52,9 +52,14 @@ pre.config {
     margin-bottom: 10px;
 }
 
-.for-consideration .widget-container {
+.for-consideration, .status-red {
     border: 4px dashed red;
 }
+
+.status-yellow {
+    border: 4px dashed orange;
+}
+
 
 .example {
     align-self: flex-end;
