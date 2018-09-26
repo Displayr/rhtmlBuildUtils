@@ -8,7 +8,9 @@ const widgetConfig = require('../../build/lib/widgetConfig')
 module.exports = function () {
   this.Then(/^the "(.*)" snapshot matches the baseline$/, function (snapshotName) {
     if (this.isApplitoolsEnabled()) {
-      const selectorExpression = widgetConfig.internalWebSettings.isReadySelector // this wont always be the same as what we want to select !!
+      const selectorExpression =
+        widgetConfig.internalWebSettings.singleWidgetSnapshotSelector ||
+        widgetConfig.internalWebSettings.isReadySelector
       return wrapInPromiseAndLogErrors(() => {
         return this.eyes.checkRegionBy(by.css(selectorExpression), snapshotName)
       })

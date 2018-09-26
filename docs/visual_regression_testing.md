@@ -52,6 +52,10 @@ This will cause the widgetRenderValue to be called again with a config. The same
 
 This step causes the suite to use applitools to take a snapshot of the current state and call it "<snapshot_name>". If the named snapshot does not match the saved snapshot in the applitools DB then the test will fail (unless --applitools.onDiff is set to 'pass'). If this is a new snapshot then the test will pass.
 
+For the `Then the "<snapshot_name>" snapshot matches the baseline`, the content that is snapshotted is determined by a css selector specified in the project `widget.config.json` file. The value used specified by the `internalWebSettings.singleWidgetSnapshotSelector`, and if this is not provided then we use  the `internalWebSettings.isReadySelector` value.
+   
+For the `When I take all the snapshots on the page "<path_to_page>` the content that is snapshotted is dynamically chosen by looking for DOM elements with the `snapshot-name` attribute. As of rhtmBuildUtils version 3.0 and higher, the user will not need to write HTML to build snapshot files, instead they can now create yml test files (TODO doc this in more detail).   
+
 **User State Steps:**
 
     'Then the final state callback should match "<state>"'
