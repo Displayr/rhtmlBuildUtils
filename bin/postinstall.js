@@ -28,7 +28,7 @@ function updateWebdriver (protractorPath) {
   // They have recently updgraded so we can just use 2.33 (or even latest chromedriver) but I am leaving this code here just in case
   // TODO March 2018 - delete this commented ternary
   // const chromeDriverVersion = (process.env.CI === true || process.env.CI === 'true') ? '2.33' : '2.33'
-  const chromeDriverVersion = '2.33'
+  const chromeDriverVersion = '2.43'
   const webdriverScriptPath = path.join(protractorPath, 'bin', 'webdriver-manager')
 
   process.exit(shell.exec(`node ${webdriverScriptPath} update --no-gecko --versions.chrome ${chromeDriverVersion}`).code)
