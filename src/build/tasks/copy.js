@@ -38,7 +38,8 @@ module.exports = function (gulp) {
     // only used directly in browser by renderExample.html
     const internalWebServerDependencies = [
       'node_modules/lodash/lodash.min.js',
-      'node_modules/jquery/dist/jquery.min.js'
+      'node_modules/jquery/dist/jquery.min.js',
+      'node_modules/bootstrap/dist/js/bootstrap.min.js'
     ]
 
     gulp.src(internalWebServerDependencies)
