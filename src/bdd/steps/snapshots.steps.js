@@ -1,5 +1,5 @@
+const _ = require('lodash')
 const wrapInPromiseAndLogErrors = require('../lib/wrapInPromiseAndLogErrors')
-
 const widgetConfig = require('../../build/lib/widgetConfig')
 
 /* global $ */
@@ -14,8 +14,10 @@ module.exports = function () {
       return wrapInPromiseAndLogErrors(() => {
         return this.eyes.checkRegionBy(by.css(selectorExpression), snapshotName)
       })
+    } else {
+      const delay = _.get(browser, 'params.delay', 1000)
+      return new Promise(resolve => setTimeout(resolve, delay))
     }
-    return Promise.resolve()
   })
 
   this.When(/^I take all the snapshots on the page "(.*)"$/, function (contentPath) {
