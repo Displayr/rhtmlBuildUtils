@@ -4,7 +4,7 @@
     "node": ">=6.9.5"
   },
   "name": "rhtmlBuildUtils",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "build tools for Displayr rhtml widgets",
   "main": "src/index.js",
   "scripts": {
@@ -50,9 +50,9 @@
     "gulp-exit": "0.0.2",
     "gulp-if": "^2.0.2",
     "gulp-less": "^3.3.0",
-    "gulp-livereload": "^3.8.1",
+    "gulp-livereload": "^4.0.1",
     "gulp-load-plugins": "^1.5.0",
-    "gulp-protractor": "^4.0.0",
+    "gulp-protractor": "^4.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-tap": "^1.0.1",
