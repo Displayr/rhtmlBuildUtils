@@ -104,7 +104,7 @@
             exampleDiv.attr('data-config', (widgetConfig.config || []).join('|'))
             exampleDiv.attr('data-width', widgetConfig.width || renderExampleConfig.width)
             exampleDiv.attr('data-height', widgetConfig.height || renderExampleConfig.height)
-            if (widgetConfig.state) { exampleDiv.attr('data-state', renderExampleConfig.state) }
+            if (widgetConfig.state) { exampleDiv.attr('data-state', widgetConfig.state|| renderExampleConfig.state) }
             if (widgetConfig.rerenderControls) { exampleDiv.attr('data-rerender', true) }
             if (widgetConfig.border) { exampleDiv.attr('data-border', true) }
             if (widgetConfig.comment) { exampleDiv.attr('title', widgetConfig.comment) }
