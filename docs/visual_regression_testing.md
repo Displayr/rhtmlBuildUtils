@@ -2,6 +2,8 @@
 
 ## Quick Reference: how to use and extend it
 
+> At present, applitools does not work locally on osx, but it does in CI, so if running the visual suite locally, always add `--applitools.enabled=false`
+
 * to run the visual regression suite : `gulp testVisual`
 * to run the visual regression suite if the web driver binaries are already installed and `gulp serve` is already running: `gulp testVisual_s`
 * to run the visual regression suite on a subset of the scenarios : `gulp testVisual_s --tags=<TAG>`. Only scenarios matching the tag will be run.
@@ -30,6 +32,8 @@ The following steps are defined by the rhtmlBuildUtils repo:
     'Given I am viewing "<config>" with dimensions WWWxHHH and rerender controls' 
     'Given I am viewing "<config>" with state "<state>" and dimensions WWWxHHH and rerender controls' 
 
+> This description is slightly out of date. The <config> now supports syntax as follows: `data.data1|config.config1`. This load the json files at `internal_www/config/config1.json` and `internal_www/data/data1.json`, merges them, then uses that for the config! I have not checked if the old uses (described below) still work.
+   
 Loading steps will load a widget config, with optional state, and a given width and height. The <config> supplied must match the file system such that there is a file in the widget repo at `./theSrc/internal_www/data/<config>/config.json` and the optional <state> must match the file system such that this file exists : `./theSrc/internal_www/data/<config>/<state>.json`. These steps actually load the URL `http://localhost:9000/renderExample.html` , which is documented in more details [here](./internal_web_server.md).
  
 If `with/and rerender controls` is included then the rerender controls will be added, allowing the tests to test widget rerendering.
@@ -54,7 +58,7 @@ This step causes the suite to use applitools to take a snapshot of the current s
 
 For the `Then the "<snapshot_name>" snapshot matches the baseline`, the content that is snapshotted is determined by a css selector specified in the project `widget.config.json` file. The value used specified by the `internalWebSettings.singleWidgetSnapshotSelector`, and if this is not provided then we use  the `internalWebSettings.isReadySelector` value.
    
-For the `When I take all the snapshots on the page "<path_to_page>` the content that is snapshotted is dynamically chosen by looking for DOM elements with the `snapshot-name` attribute. As of rhtmBuildUtils version 3.0 and higher, the user will not need to write HTML to build snapshot files, instead they can now create yml test files (TODO doc this in more detail).   
+For the `When I take all the snapshots on the page "<path_to_page>` the content that is snapshotted is dynamically chosen by looking for DOM elements with the `snapshot-name` attribute. As of rhtmBuildUtils version 3.0 and higher, the user will not need to write HTML to build snapshot files, instead they can now create yml test files (TODO doc this in more detail) as can be seen in the [rhtmlDonut test_plan section[(https://github.com/Displayr/rhtmlDonut/tree/master/theSrc/test_plans).
 
 **User State Steps:**
 
@@ -72,7 +76,7 @@ Our Protractor + Cucumber + Applitools visual regression suite is composed of a 
 * To provide a user friendly test language, we are using the [cucumber](https://cucumber.io/) test framework so that we can write true [Given Then When / Specification By Example testing](https://martinfowler.com/bliki/GivenWhenThen.html).
 * To perform snapshot baselining, we are using [applitools](http://applitools.com).
 
-From a tester perspective, you will need to write new Cucumber scenarios in a feature file. Cucumber is made up of:
+From a tester perspective, IF you need to test user interactions with your widget, you will need to write new Cucumber scenarios in a feature file. Cucumber is made up of:
  
 * `Feature files` containing `Scenarios`, each of which is one or more `steps`
 * `Step Definition` files containing ... step definitions, and
@@ -101,7 +105,7 @@ Some notes on the above:
 
 * There is one `Feature` per .feature file and the feature text can be free text to descibe what is under test in the file
 * There is one or more `Scenario` per file and the text to the right of the `Scenario:` is a description of the scenario.
-* The rest of the lines are `Steps`. The step must start with `Given` / YOU ARE HERE ! 
+* The rest of the lines are `Steps`. The step must start with `Given`
 * When cucumber examines the line `When I click the "blue" square`, it will look through all its step definitions for a matching step definition. If it finds one then it will execute the code. In our case there is a matching step definition in the file [widgetInteractions.steps.js](https://github.com/Displayr/rhtmlTemplate/blob/master/bdd/steps/widgetInteraction.steps.js):
 
 ```
@@ -110,7 +114,7 @@ Some notes on the above:
   });
 ```
 
-This step definition extracts the string 'blue' from the `Step` in the feature file and then calls widget.selectSquare('blue'). widget in this case is a Page Object that abstracts interaction with the browser. It is defined here : '[template.page.js](https://github.com/Displayr/rhtmlTemplate/blob/master/bdd/pageObjects/template.page.js)'. In that file the definition of selectSquare is :
+This step definition extracts the string 'blue' from the `Step` in the feature file and then calls widget.selectSquare('blue'). widget in this case is a Page Object that abstracts interaction with the browser. It is defined here : [template.page.js](https://github.com/Displayr/rhtmlTemplate/blob/master/bdd/pageObjects/template.page.js). In that file the definition of selectSquare is :
 
 ```
   selectSquare(squareName) {
@@ -135,7 +139,7 @@ The first `Step` tell protractor to load renderExample.html with a specific conf
 Some notes on Applitools:
  
 * To see the snapshot comparison we must go to the applitools website : [http://applitools.com](http://applitools.com)
-* Presently, if the snapshot does not match the protractor tests will still pass. This is a work in progress. So you need to check the website even if the tests pass !
+* If the snapshot does not match, the scenario will still pass, but the BDD suite execution (i.e., the testVisual command) will fail with a report of failing snapshots.
  
 ## Taking all the snapshots in the content area
 
