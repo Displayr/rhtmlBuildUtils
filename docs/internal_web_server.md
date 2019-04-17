@@ -22,7 +22,7 @@ At first glance in the widget repos you see quite a bit of non production code s
 
 The internal web server is just hosting all the files in the `browser` area, which is an auto generated section of the repo. Several gulp steps work in conjunction to build the content in the `browser` directory and serve it at http://127.0.0.1:9000. The 'important' ones are described below:
  
-* the `compileRenderContentPage` and `compileRenderIndexPage` steps compiles ES6 into ES5 for the browser
+* the `compileRenderContentPage` and `compileRenderIndexPage` steps compiles ES6 into ES5 for the browser. These steps also convert the compileRenderContentPage.template.js into the compileRenderContentPage.js, adding widget specific config to the generic compileRenderContentPage.template.js to create a compileRenderContentPage.js specific for the widget under test. Same process for the index file
 * the `copy` step copies all the html and image files from `theSrc/internal_www` into the `browser` area
 * the `buildContentManifest` step recursively scans the `browser/content` area and produces a manifest of all the content files in the area. This is used to build the index page that is displayed on http://127.0.0.1. Without this step the author would need to keep this list up to date by manual updates to the index.html file.
 * the `connect` step starts a static content web server hosting all the files in the `browser` directory and makes them available on port 9000 of localhost (i.e., http://127.0.0.1:9000).
@@ -32,13 +32,13 @@ The internal web server is just hosting all the files in the `browser` area, whi
 
 Using the content file [theSrc/internal_www/content/examples/default.html](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/content/examples/default.html) as an example we will now go through how the widget gets drawn. Note this only applies when viewing a widget at `http://127.0.0.1:9000` (i.e., the **internal** web server). For notes on how htmlwidgets work with R, see [how the code works](https://github.com/Displayr/rhtmlTemplate/blob/master/docs/how_the_code_works.md). 
 
-* the [renderContentPage.js](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/js/renderContentPage.js) script is a bundled JS file that contains all the widget code, all the dependencies, and some code that is only used in the internal web server.
+* the [renderContentPage.js](/src/build/templates/renderContentPage.template.js) (sourced from a template file, mixed with widget config to produce the js file) script is a bundled JS file that contains all the widget code, all the dependencies, and some code that is only used in the internal web server.
 * Once the web page is loaded, the renderContentPage.js code scans the HTML content for DOM elements with a `class="example"`. 
 * For each example, it retrieves the widget config, and widget user state if provided, then builds a widget by calling the widget code using the same methods that the HtmlWidget library would use.
 
 ## Web Server Content Features
 
-There are several features provided by [renderContentPage.js](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/js/renderContentPage.js) that should be discussed. 
+There are several features provided by [renderContentPage.js](/src/build/templates/renderContentPage.template.js) that should be discussed.
 
 It is easiest to grasp by looking at an example in the rhtmlTemplate app:
  
@@ -54,7 +54,7 @@ You can line up examples in a row by wrapping them in a `<div class="row">` as s
 ![data-inline-config-vary-width-example][vary-size-inline-config]
 
 
-The widget config can be specified inline or as a reference to a file. The widget user state can also be provided as a reference to a file
+The widget config can be specified inline (as in 3 examples above) or as a reference to a file (as below). The widgets initial  state can also be provided as a reference to a file.
 
 ![data-file-reference][file-reference]
 
@@ -93,14 +93,18 @@ Note that adding `snapshot-name` also changes the css `display` property to `inl
 
 ## The renderExample.html page
 
-The features provided by `renderContentPage.js` are listed above. Using `renderContentPage.js` we can write some HTML markup that causes widgets to be rendered. An alternative approach is to use `renderExample.html`, which will take all arguments as query parameters and render a single widget. This is useful for automated testing because we do not need to craft a HTML page to render a widget, instead we just pass arguments to `renderExample.html.
+The features provided by `renderContentPage.js` are listed above. Using `renderContentPage.js` we can write some HTML markup that causes widgets to be rendered. An alternative approach is to use [renderExample.html](../build/templates/renderExample.template.html), which will take all arguments as query parameters and render a single widget. This is useful for automated testing because we do not need to craft a HTML page to render a widget, instead we just pass arguments to `renderExample.html`.
 
-When `gulp serve` is running the `rtenderExample.html` page is available at this URL : [http://localhost:9000/renderExample.html]
+When `gulp serve` is running the `renderExample.html` page is available at this URL : [http://localhost:9000/renderExample.html]
 
-The page accepts these parameters:
+`renderExample.html` is in a state of flux. It used to accept the parameters listed below, but at present it will only accept a `config` query parameter whose value is a base64 encoded json payload. This was done to facilitate the new [test_plan style specifications in rhtmlDonut](https://github.com/Displayr/rhtmlDonut/tree/master/theSrc/test_plans). However when this change was made, backwards compatability was not maintained.
+
+The config query param accepts these parameters:
 
 * width: set the widget width
 * height: set the widget height
 * config: set the widget config : the config will be retrieved from ./theSrc/internal_www/data/<config_name>/config.json
 * state: set the widget state : the state will be retrieved from ./theSrc/internal_www/data/<config_name>/<state>.json
 * rerenderControls: if set to true then add rerender controls to the page
+ 
+ In summary renderExample.html is used for interaction testing via the BDD suite, and to facilitate test_plan style content specification. It used to accept plain text query params, but that was removed, and may be readded in the future.
