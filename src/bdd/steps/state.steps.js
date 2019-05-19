@@ -20,7 +20,7 @@ module.exports = function () {
     }
   })
 
-  this.Then(/^the final state callback should match "(.*)"$/, function (expectedStateFile) {
+  this.Then(/^the final state callback should match "(.*)"(?: within ([0-9.]+))?$/, function (expectedStateFile, toleranceString) {
     if (!this.context.configName) {
       throw new Error('Cannot state match without configName')
     }
@@ -40,7 +40,14 @@ module.exports = function () {
       const actualStatePromise = this.context.getRecentState()
 
       return Promise.all([actualStatePromise, expectedStatePromise]).then(([actualState, expectedState]) => {
-        if (!_.isEqual(actualState, expectedState)) {
+        const bothNumber = (a, b) => (typeof a) === 'number' && (typeof b) === 'number'
+        const tolerance = (_.isUndefined(toleranceString)) ? 0 : parseFloat(toleranceString)
+        const areEqual = _.isEqualWith(actualState, expectedState, (a, b) => {
+          if (bothNumber(a, b)) { return Math.abs(a - b) <= tolerance }
+          return undefined
+        })
+
+        if (!areEqual) {
           console.log('actualState')
           console.log(JSON.stringify(actualState, {}, 2))
 
@@ -50,7 +57,7 @@ module.exports = function () {
           console.log('differences (left: actual, right: expected')
           console.log(JSON.stringify(deepDiff(actualState, expectedState), {}, 2))
         }
-        this.expect(actualState).to.deep.equal(expectedState)
+        this.expect(areEqual).to.equal(true)
       })
     })
   })
