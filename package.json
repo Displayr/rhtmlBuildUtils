@@ -4,7 +4,7 @@
     "node": ">=6.9.5"
   },
   "name": "rhtmlBuildUtils",
-  "version": "3.0.9",
+  "version": "3.0.10",
   "description": "build tools for Displayr rhtml widgets",
   "main": "src/index.js",
   "scripts": {
@@ -32,6 +32,7 @@
     "connect": "^3.6.2",
     "connect-livereload": "^0.6.0",
     "cucumber": "^1.2.1",
+    "deep-diff": "^1.0.2",
     "dot-object": "^1.5.4",
     "eslint": "^3.19.0",
     "eslint-config-airbnb": "^15.0.1",

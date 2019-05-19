@@ -29,7 +29,7 @@ const retrieveState = function (configName, stateName) {
   // TODO code is duplicated between renderContentTemplate and state.steps.js
   const expectedStateFileIsDotNotation = stateName.match(/[.]/)
   const replaceDotsWithSlashes = (inputString) => {
-    return inputString.replace(/[.]/, '/')
+    return inputString.replace(/[.]/g, '/')
   }
 
   const stateUrl = (expectedStateFileIsDotNotation)

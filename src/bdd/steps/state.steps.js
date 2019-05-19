@@ -1,5 +1,7 @@
 const request = require('request-promise')
 const wrapInPromiseAndLogErrors = require('../lib/wrapInPromiseAndLogErrors')
+const _ = require('lodash')
+const deepDiff = require('deep-diff')
 
 module.exports = function () {
   this.Before(function () {
@@ -27,7 +29,7 @@ module.exports = function () {
       // TODO code is duplicated between renderContentTemplate and state.steps.js
       const expectedStateFileIsDotNotation = expectedStateFile.match(/[.]/)
       const replaceDotsWithSlashes = (inputString) => {
-        return inputString.replace(/[.]/, '/')
+        return inputString.replace(/[.]/g, '/')
       }
 
       const expectedStateUrl = (expectedStateFileIsDotNotation)
@@ -38,6 +40,16 @@ module.exports = function () {
       const actualStatePromise = this.context.getRecentState()
 
       return Promise.all([actualStatePromise, expectedStatePromise]).then(([actualState, expectedState]) => {
+        if (!_.isEqual(actualState, expectedState)) {
+          console.log('actualState')
+          console.log(JSON.stringify(actualState, {}, 2))
+
+          console.log('expectedState')
+          console.log(JSON.stringify(expectedState, {}, 2))
+
+          console.log('differences (left: actual, right: expected')
+          console.log(JSON.stringify(deepDiff(actualState, expectedState), {}, 2))
+        }
         this.expect(actualState).to.deep.equal(expectedState)
       })
     })
