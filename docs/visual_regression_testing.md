@@ -19,6 +19,8 @@
     * create a new feature file in `<projectRoot>/bdd/features/` or add scenarios to an existing file, then follow the pattern of reusing existing steps or defining new steps
 * where does the applitools key go: place it in a file called `<projectRoot>/.keys/applitools.key` no formatting, no newlines or spaces, no json, just the key.
 * where is the auto generated snapshots.feature file ? `<projectRoot>/.tmp/snapshots.feature`
+* How do I manually install the webdriver dependencies ? `gulp webdriverUpdate`
+    * this should be done for you when you run `yarn install` / `npm install` ...
 * What is the applitools username and password? Ask someone who knows.
 
 ## Pre-defined Steps :
