@@ -3,7 +3,9 @@
 ## Quick Reference: how to run it and extend it 
 
 * to run the internal web server : `gulp serve`
-* to add new content to the web server: create a new file in `theSrc/internal_www/content` using the [content_template](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/content/content_template.html), or add an example to an existing content file IF IT FITS (dont mix concerns in your files)
+* there are two ways to add new content to the web server:
+     * create a new file in `theSrc/internal_www/content` directory using the [content_template](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/content/content_template.html), or add an example to an existing content file IF IT FITS (dont mix concerns in your files)
+     * create a new yaml test plan file in `theSrc/test_plans` directory using the [test plan syntax](./test_plan_syntax.md) guide for instructions.
 
 ## Objectives
 
