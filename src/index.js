@@ -9,7 +9,7 @@ const taskSequences = {
   serve: [ ['core', 'compileInternal', 'connect', 'watch'], 'openBrowser' ],
   testVisual: [ 'core', 'compileInternal', 'connect', 'runProtractor' ],
   testVisual_s: [ 'runProtractor' ],
-  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile' ]
+  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'processTestPlans' ]
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {

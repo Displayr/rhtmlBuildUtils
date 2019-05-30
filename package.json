@@ -4,13 +4,13 @@
     "node": ">=6.9.5"
   },
   "name": "rhtmlBuildUtils",
-  "version": "3.0.11",
+  "version": "3.1.0",
   "description": "build tools for Displayr rhtml widgets",
   "main": "src/index.js",
   "scripts": {
     "prepush": "node ./bin/prepush",
     "postinstall": "node ./bin/postinstall",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha src/**/*.test.js"
   },
   "author": "",
   "license": "ISC",
@@ -77,6 +77,7 @@
     "opn": "^5.0.0",
     "path": "^0.12.7",
     "protractor-cucumber-framework": "^1.0.1",
+    "recursive-readdir": "^2.2.2",
     "recursive-readdir-sync": "^1.0.6",
     "request-promise": "^4.2.1",
     "run-sequence": "^1.2.2",

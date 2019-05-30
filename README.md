@@ -8,14 +8,16 @@ This repo provides an opinionated framework for building and testing [R htmlwidg
  * **[rhtmlLabeledScatter](https://github.com/Displayr/rhtmlLabeledScatter)**: a widget for generating scatter plots, bubble plots, and trend graphs
  * **[rhtmlHeatmap](https://github.com/Displayr/rhtmlHeatmap)**: a widget for generating heatmaps (wraps d3heatmap)
  * **[rhtmlDonut](https://github.com/Displayr/rhtmlDonut)**: a widget for generating donuts (wraps d3heatmap)
- * **[rhtmlPalmTrees](https://github.com/Displayr/rhtmlPalmTrees)**: a widget for displaying palm tree statistal visualisations (good for sentiment analysis)
+ * **[rhtmlPalmTrees](https://github.com/Displayr/rhtmlPalmTrees)**: a widget for displaying palm tree statistical visualisations (good for sentiment analysis)
+ * **[rhtmlMoonPlot](https://github.com/Displayr/rhtmlMoonPlot)**: a widget for displaying a moon plot to visualise results of correspondance analysis
  
 HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) based nodejs projects that use gulp as a task manager. The twofold purpose(s) of these nodejs projects is to produce R HTMLWidget packages, and provide a framework for developing and testing the R htmlwidget packages.
  
 ## Documentation 
  
 * readme (this file): usage, installation, and task references
-* [internal web server](./docs/internal_web_server.md): how to use use the internal server features for widget develepment
+* [internal web server](./docs/internal_web_server.md): how to use the internal server features for widget development
+* [test plan syntax](./docs/test_plan_syntax.md): how to write yaml test plan files for the visual regression suite 
 * [visual regression testing](./docs/visual_regression_testing.md): how to write visual regression tests for your widget
 * [working with displayr](./docs/working_with_displayr.md): notes on the nuances of how displayr interacts with htmlwidgets
 * [widget_repo_layout](./docs/widget_repo_layout.md): how to layout your widget repo so it works with rhtmlBuildUtils
