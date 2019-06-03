@@ -2,10 +2,10 @@ const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
 
-const {basePath, internalWebSettings} = require('../lib/widgetConfig')
+const { basePath, internalWebSettings } = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     const templateFile = path.join(__dirname, '../templates/renderExample.template.html')
     const destinationDirectory = path.join(basePath, 'browser')
     const destinationFile = path.join(basePath, 'browser/renderExample.html')
@@ -15,5 +15,6 @@ module.exports = function (gulp) {
 
     fs.mkdirsSync(destinationDirectory)
     fs.writeFileSync(destinationFile, output, 'utf8')
+    done()
   }
 }

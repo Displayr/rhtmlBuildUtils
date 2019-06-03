@@ -2,12 +2,13 @@ const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
 
-const {basePath, internalWebSettings} = require('../lib/widgetConfig')
+const { basePath, internalWebSettings } = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     processInternalWwwCss()
     processIndexCss()
+    done()
   }
 }
 

@@ -2,16 +2,16 @@ const babelify = require('babelify')
 const browserify = require('browserify')
 const buffer = require('gulp-buffer')
 const fs = require('fs-extra')
-const gutil = require('gulp-util')
+const log = require('fancy-log')
 const mustache = require('mustache')
 const path = require('path')
 const sourcemaps = require('gulp-sourcemaps')
 const tap = require('gulp-tap')
 
-const {basePath, internalWebSettings} = require('../lib/widgetConfig')
+const { basePath, internalWebSettings } = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     // step 1: apply vars to template, and save renderContentPage in .tmp
     const templateFile = path.join(__dirname, '../templates/renderIndexPage.template.js')
     const entryPointDirectory = path.join(basePath, '.tmp')
@@ -28,7 +28,7 @@ module.exports = function (gulp) {
     // step 2: browserify renderIndexPage.js
     return gulp.src(entryPoint, { read: false })
       .pipe(tap(function (file) {
-        gutil.log(`bundling ${file.path}`)
+        log(`bundling ${file.path}`)
 
         file.contents = browserify(file.path, { debug: true })
           .transform(babelify, {
@@ -45,5 +45,6 @@ module.exports = function (gulp) {
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest(compiledContentDestination))
+      .on('finish', done)
   }
 }

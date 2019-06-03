@@ -9,9 +9,9 @@ module.exports = function (config) {
       'theSrc/scripts/**/*.spec.js'
     ],
 
-    frameworks: ['browserify', 'mocha', 'sinon-chai', 'chai-dom', 'chai-as-promised', 'chai', 'sinon'],
+    frameworks: ['browserify', 'mocha', 'sinon-chai', 'chai-dom', 'chai', 'sinon'],
 
-    plugins: ['karma-browserify', 'karma-mocha', 'karma-sinon-chai', 'karma-chai-dom', 'karma-chai-as-promised', 'karma-chai', 'karma-sinon', 'karma-chrome-launcher'],
+    plugins: ['karma-browserify', 'karma-mocha', 'karma-sinon-chai', 'karma-chai-dom', 'karma-chai', 'karma-sinon', 'karma-chrome-launcher'],
 
     preprocessors: {
       './theSrc/scripts/**/*.spec.js': ['browserify']

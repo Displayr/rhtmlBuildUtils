@@ -1,24 +1,25 @@
 const _ = require('lodash')
 const babelify = require('babelify')
 const browserify = require('browserify')
+const log = require('fancy-log')
+const colors = require('ansi-colors')
 const buffer = require('gulp-buffer')
 const fs = require('fs-extra')
-const gutil = require('gulp-util')
 const mustache = require('mustache')
 const path = require('path')
 const sourcemaps = require('gulp-sourcemaps')
 const tap = require('gulp-tap')
 
-const {basePath, widgetFactory, internalWebSettings} = require('../lib/widgetConfig')
+const { basePath, widgetFactory, internalWebSettings } = require('../lib/widgetConfig')
 
 const templateVariables = _.merge(
   {},
   internalWebSettings,
-  {widget_definition_path: path.join('..', widgetFactory)}
+  { widget_definition_path: path.join('..', widgetFactory) }
 )
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     // step 1: apply vars to template, and save renderContentPage in .tmp
     const templateFile = path.join(__dirname, '../templates/renderContentPage.template.js')
     const entryPointDirectory = path.join(basePath, '.tmp')
@@ -33,11 +34,11 @@ module.exports = function (gulp) {
     fs.writeFileSync(entryPoint, output, 'utf8')
 
     // step 2: browserify renderContentPage.js, which bundles all the widget code into single file for browser testing
-    return gulp.src(entryPoint, {read: false})
+    return gulp.src(entryPoint, { read: false })
       .pipe(tap(function (file) {
-        gutil.log(`bundling ${file.path}`)
+        log(`bundling ${file.path}`)
 
-        file.contents = browserify(file.path, {debug: true})
+        file.contents = browserify(file.path, { debug: true })
           .transform(babelify, {
             presets: [require('babel-preset-es2015-ie')],
             plugins: [
@@ -49,9 +50,10 @@ module.exports = function (gulp) {
           .bundle()
       }))
       .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(compiledContentDestination))
-      .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()) })
+      .on('error', function (err) { log(colors.red('[Error]'), err.toString()) })
+      .on('finish', done)
   }
 }
