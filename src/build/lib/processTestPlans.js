@@ -29,7 +29,7 @@ function processTestPlans (testPlansDir) {
   }
 }
 
-function _loadConfigs (testPlansDir, {fs = promisifiedFS} = {}) {
+function _loadConfigs (testPlansDir, { fs = promisifiedFS } = {}) {
   return readdir(testPlansDir)
     .then(filePaths => filePaths.filter(fileName => fileName.endsWith('.yaml')))
     .then(testPlanFilePaths => Promise.all(testPlanFilePaths.map(testPlanFilePath =>
@@ -40,18 +40,18 @@ function _loadConfigs (testPlansDir, {fs = promisifiedFS} = {}) {
           testname: _extractTestNameFromPath(testPlanFilePath),
           groupname: _extractGroupFromPath(testPlansDir, testPlanFilePath)
         }))
-      ))
+    ))
     )
 }
 
-function _extractGroupedTestCases (testPlanFiles, {fs = promisifiedFS} = {}) {
+function _extractGroupedTestCases (testPlanFiles, { fs = promisifiedFS } = {}) {
   return _(testPlanFiles)
     .groupBy('groupname')
     .map((testDefinitions, groupname) => {
       try {
         return {
           tests: _(testDefinitions)
-            .map(testDefinition => _configToTestCases(testDefinition, {fs}))
+            .map(testDefinition => _configToTestCases(testDefinition, { fs }))
             .flatten()
             .value(),
           groupName: groupname
@@ -64,9 +64,9 @@ function _extractGroupedTestCases (testPlanFiles, {fs = promisifiedFS} = {}) {
     .value()
 }
 
-function _configToTestCases (testDefinition, {fs = promisifiedFS} = {}) {
+function _configToTestCases (testDefinition, { fs = promisifiedFS } = {}) {
   const commonRenderExampleParts = _extractCommonParamsFromTestDefinition(testDefinition)
-  const arrayOfwidgetConfigsAndOverrides = _extractWidgetConfigsAndOverrides(testDefinition, {fs})
+  const arrayOfwidgetConfigsAndOverrides = _extractWidgetConfigsAndOverrides(testDefinition, { fs })
 
   return arrayOfwidgetConfigsAndOverrides.map((widgetConfig, outerWidgetIndex) => {
     const renderExampleConfigWithoutUrl = _.assign({}, commonRenderExampleParts, widgetConfig)
@@ -115,7 +115,7 @@ function _configToTestCases (testDefinition, {fs = promisifiedFS} = {}) {
   })
 }
 
-function _extractWidgetConfigsAndOverrides (testDefinition, {fs = promisifiedFS} = {}) {
+function _extractWidgetConfigsAndOverrides (testDefinition, { fs = promisifiedFS } = {}) {
   const parsers = {
     single_widget_single_page: function (testDefinition) {
       // NB return an array of one because this generates a single test case
@@ -124,7 +124,7 @@ function _extractWidgetConfigsAndOverrides (testDefinition, {fs = promisifiedFS}
       const configs = _toArray(testDefinition.config)
       return [
         {
-          widgets: [{config: datas.concat(configs)}]
+          widgets: [{ config: datas.concat(configs) }]
         }
       ]
     },
@@ -150,7 +150,7 @@ function _extractWidgetConfigsAndOverrides (testDefinition, {fs = promisifiedFS}
       // NB return an array of one because this generates a single test case
       return [
         {
-          widgets: _getDataStringsFromTestDefinition(testDefinition, {fs}).map((dataString) => {
+          widgets: _getDataStringsFromTestDefinition(testDefinition, { fs }).map((dataString) => {
             return { config: (_.has(testDefinition, 'config')) ? [testDefinition.config, dataString] : [dataString] }
           })
         }
@@ -160,8 +160,8 @@ function _extractWidgetConfigsAndOverrides (testDefinition, {fs = promisifiedFS}
       // TODO disallow positionalComments that use a numeric index, the test def should use file names to reference tests
 
       // NB return an array of N because this generates a test case per data file
-      const {groupname} = testDefinition
-      const dataStrings = _getDataStringsFromTestDefinition(testDefinition, {fs})
+      const { groupname } = testDefinition
+      const dataStrings = _getDataStringsFromTestDefinition(testDefinition, { fs })
       const configStrings = _toArray(testDefinition.config) || []
       return dataStrings
         .map(dataString => {
@@ -232,7 +232,7 @@ function _extractCommonParamsFromTestDefinition (testDefinition) {
   return renderExampleConfig
 }
 
-function _generateBddFeatureFile (combinedTestPlan, {fs = promisifiedFS} = {}) {
+function _generateBddFeatureFile (combinedTestPlan, { fs = promisifiedFS } = {}) {
   const featureFileContents = _generateBddFeatureFileContents(combinedTestPlan)
 
   return fs.mkdirpAsync(bddDir)
@@ -266,7 +266,7 @@ function _generateBddFeatureFileContents (combinedTestPlan) {
   return featureFileContents
 }
 
-function _generateBrowserJsonFile (combinedTestPlan, {fs = promisifiedFS} = {}) {
+function _generateBrowserJsonFile (combinedTestPlan, { fs = promisifiedFS } = {}) {
   return fs.mkdirpAsync(browserDir)
     .then(() => {
       console.log(`creating ${browserDestination}`)
@@ -331,7 +331,7 @@ function _toArray (stringOrArray) {
   return [stringOrArray]
 }
 
-function _getDataStringsFromTestDefinition (testDefinition, {fs = promisifiedFS} = {}) {
+function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS } = {}) {
   if (_.has(testDefinition, 'data_directory')) {
     const directoryPath = path.join(projectRoot, 'theSrc', 'internal_www', testDefinition.data_directory)
     const allSlashesRegExp = new RegExp('/', 'g')
@@ -346,6 +346,6 @@ function _getDataStringsFromTestDefinition (testDefinition, {fs = promisifiedFS}
 
 module.exports = {
   processTestPlans,
-  _extractGroupedTestCases,        // NB exported test only
+  _extractGroupedTestCases, // NB exported test only
   _generateBddFeatureFileContents // NB exported test only
 }

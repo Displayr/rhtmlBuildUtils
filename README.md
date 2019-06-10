@@ -27,13 +27,7 @@ HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) base
 ## Installation
  
 In your widget repo directory run : 
-
-via yarn (yarn is recommended over npm): 
-
-    yarn add --dev Displayr/rhtmlBuildUtils
-
-or via npm:
-
+ 
     npm install --save-dev Displayr/rhtmlBuildUtils
 
 then in your project gulpfile.js:
@@ -113,25 +107,25 @@ Also important: every merge to master should include an increase in the version 
 
 ## Installation to develop/contribute
 
-1. (prerequisite) : nodejs >= 6.9.5 (see the `Prequisite Installation Help` section below for install help)
-1. (prerequisite) : yarn >= 0.21 (to install run `npm install yarn`)
+1. (prerequisite) : nodejs >= 8.15.1 (see the `Prequisite Installation Help` section below for install help)
+1. (prerequisite) : npm >= 6.4.1 (comes packaged with nodejs)
 1. type `git clone git@github.com:Displayr/rhtmlBuildUtils.git` ENTER
 1. type `cd rhtmlBuildUtils` ENTER
-1. type `yarn` ENTER
-    1. `yarn` is noisy and will print several warnings about `UNMET` and `DEPRECATED`. Ignore these and only make note of errors. If it fails, try running it again.
+1. type `npm install` ENTER
+    1. `npm` is noisy and will print several warnings about `UNMET` and `DEPRECATED`. Ignore these and only make note of errors. If it fails, try running it again.
 
-## Using yarn link locally to aid development
+## Using npm link locally to aid development
 
-A common update scenario is that you are working on a specific widget and need to make a change to rhtmlBuildUtils. To enable this scenario you can use [yarn link](https://yarnpkg.com/lang/en/docs/cli/link/) locally. 
+A common update scenario is that you are working on a specific widget and need to make a change to rhtmlBuildUtils. To enable this scenario you can use [npm link](https://docs.npmjs.com/cli/link) locally. 
 
 By doing this your local widget repo will use your local rhtmlBuildUtils repo, instead of the version of rhtmlBuildUtils that is installed in the `node_modules` directory of the widget repo.
  
  Examples steps (assuming you are working on rhtmlTemplate):
  
  1. cd rhtmlBuildUtils
- 1. yarn link
+ 1. npm link
  1. cd ../rhtmlTemplate
- 1. yarn link rhtmlBuildUtils
+ 1. npm link rhtmlBuildUtils
  
 Do not forget to unlink when you are done, and after pushing the rhtmlBuildUtils code and bumping the release version, also bumping the rhtmlBuildUtils version in the package.json of the widget repo.
  

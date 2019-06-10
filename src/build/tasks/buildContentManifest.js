@@ -1,4 +1,4 @@
-const gutil = require('gulp-util')
+const Vinyl = require('vinyl')
 const stream = require('stream')
 
 const buildContentManifest = require('../lib/buildContentManifest')
@@ -6,9 +6,8 @@ const buildContentManifest = require('../lib/buildContentManifest')
 function stringSrc (filename, string) {
   const src = stream.Readable({ objectMode: true })
   src._read = function () {
-    this.push(new gutil.File({
+    this.push(new Vinyl({
       cwd: '',
-      base: '',
       path: filename,
       contents: Buffer.from(string)
     }))
@@ -18,9 +17,10 @@ function stringSrc (filename, string) {
 }
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     const contentManifest = buildContentManifest()
     return stringSrc('contentManifest.json', JSON.stringify(contentManifest, {}, 2))
       .pipe(gulp.dest('browser/content'))
+      .on('finish', done)
   }
 }

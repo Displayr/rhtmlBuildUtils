@@ -1,7 +1,8 @@
 const path = require('path')
 const browserify = require('browserify')
 const babelify = require('babelify')
-const gutil = require('gulp-util')
+const log = require('fancy-log')
+const colors = require('ansi-colors')
 const tap = require('gulp-tap')
 const buffer = require('gulp-buffer')
 const sourcemaps = require('gulp-sourcemaps')
@@ -10,15 +11,15 @@ const uglify = require('gulp-uglify')
 const widgetConfig = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     const entryPoint = path.join(widgetConfig.basePath, widgetConfig.widgetEntryPoint)
     const dest = path.join(widgetConfig.basePath, 'inst/htmlwidgets/')
 
-    return gulp.src(entryPoint, {read: false})
+    return gulp.src(entryPoint, { read: false })
       .pipe(tap(function (file) {
-        gutil.log(`bundling ${file.path}`)
+        log(`bundling ${file.path}`)
 
-        file.contents = browserify(file.path, {debug: true})
+        file.contents = browserify(file.path, { debug: true })
           .transform(babelify, {
             presets: [require('babel-preset-es2015-ie')],
             plugins: [
@@ -30,10 +31,11 @@ module.exports = function (gulp) {
           .bundle()
       }))
       .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(uglify())
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(dest))
-      .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()) })
+      .on('error', function (err) { log(colors.red('[Error]'), err.toString()) })
+      .on('finish', done)
   }
 }

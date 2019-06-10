@@ -2,7 +2,7 @@ const _ = require('lodash')
 const atob = require('atob')
 const path = require('path')
 const chai = require('chai')
-const {expect} = chai
+const { expect } = chai
 const { _extractGroupedTestCases, _generateBddFeatureFileContents } = require('./processTestPlans')
 const jsyaml = require('js-yaml')
 const sinon = require('sinon')
@@ -24,7 +24,7 @@ describe('extractGroupedTestCases', function () {
       expect(extractRenderExampleUrlContentFromTest(result[0].tests[0])).to.deep.equal({
         'testname': 'testname1',
         'type': 'single_widget_single_page',
-        'widgets': [{'config': ['data']}]
+        'widgets': [{ 'config': ['data'] }]
       })
     })
 
@@ -65,9 +65,9 @@ describe('extractGroupedTestCases', function () {
 
         const result = _extractGroupedTestCases([testDefinition])
         expect(stripRenderExampleUrlsFrom(result)[0].tests[0].widgets).to.deep.equal([
-          {'config': ['data1'], 'comment': 'this test shows some undesirable behaviour', 'status': 'yellow'},
-          {'config': ['data2'], 'comment': 'this test is broken', 'status': 'red'},
-          {'config': ['data3']}
+          { 'config': ['data1'], 'comment': 'this test shows some undesirable behaviour', 'status': 'yellow' },
+          { 'config': ['data2'], 'comment': 'this test is broken', 'status': 'red' },
+          { 'config': ['data3'] }
         ])
       })
 
@@ -85,8 +85,8 @@ describe('extractGroupedTestCases', function () {
               text: this test shows some undesirable behaviour
               status: yellow`)
 
-        const fs = {readdirSync: sinon.stub().returns(['file1.json', 'file2.json', 'file3.json'])}
-        const result = _extractGroupedTestCases([testDefinition], {fs})
+        const fs = { readdirSync: sinon.stub().returns(['file1.json', 'file2.json', 'file3.json']) }
+        const result = _extractGroupedTestCases([testDefinition], { fs })
 
         expect(stripRenderExampleUrlsFrom(result)[0].tests).to.deep.equal([
           {
@@ -185,8 +185,8 @@ describe('extractGroupedTestCases', function () {
               'height': 10,
               'rowSize': 1,
               'widgets': [
-                {'height': 20, 'width': 20, 'config': ['config1']},
-                {'config': ['config2']}
+                { 'height': 20, 'width': 20, 'config': ['config1'] },
+                { 'config': ['config2'] }
               ]
             }
           ],
@@ -220,8 +220,8 @@ describe('extractGroupedTestCases', function () {
               'width': 400,
               'height': 200,
               'widgets': [
-                {'config': ['data1', 'config1']},
-                {'config': ['data1', 'config2']}
+                { 'config': ['data1', 'config1'] },
+                { 'config': ['data1', 'config2'] }
               ]
             }
           ],
@@ -255,8 +255,8 @@ describe('extractGroupedTestCases', function () {
               'height': 200,
               'rowSize': 2,
               'widgets': [
-                {'config': ['data1']},
-                {'config': ['data2']}
+                { 'config': ['data1'] },
+                { 'config': ['data2'] }
               ]
             }
           ],
@@ -273,8 +273,8 @@ describe('extractGroupedTestCases', function () {
         type: for_each_data_in_directory
         use_config_as_title: true`)
 
-      const fs = {readdirSync: sinon.stub().returns(['a.json', 'b.json'])}
-      const result = _extractGroupedTestCases([testDefinition], {fs})
+      const fs = { readdirSync: sinon.stub().returns(['a.json', 'b.json']) }
+      const result = _extractGroupedTestCases([testDefinition], { fs })
 
       const expectedDirName = path.join('theSrc', 'internal_www', 'data/dir')
       expect(fs.readdirSync).to.have.been.calledWith(expectedDirName)
@@ -286,7 +286,7 @@ describe('extractGroupedTestCases', function () {
               'testname': 'a data.dir.a',
               'type': 'for_each_data_in_directory',
               'widgets': [
-                {'config': ['data.dir.a']}
+                { 'config': ['data.dir.a'] }
               ],
               'title': 'data.dir.a'
             },
@@ -294,7 +294,7 @@ describe('extractGroupedTestCases', function () {
               'testname': 'a data.dir.b',
               'type': 'for_each_data_in_directory',
               'widgets': [
-                {'config': ['data.dir.b']}
+                { 'config': ['data.dir.b'] }
               ],
               'title': 'data.dir.b'
             }
@@ -311,15 +311,15 @@ describe('generateBddFeatureFileContents', function () {
     const contents = _generateBddFeatureFileContents([
       {
         'tests': [
-          {'testname': 'testname-1A', 'renderExampleUrl': 'renderExampleUrl-1A'},
-          {'testname': 'testname-1B', 'renderExampleUrl': 'renderExampleUrl-1B'}
+          { 'testname': 'testname-1A', 'renderExampleUrl': 'renderExampleUrl-1A' },
+          { 'testname': 'testname-1B', 'renderExampleUrl': 'renderExampleUrl-1B' }
         ],
         'groupName': '1'
       },
       {
         'tests': [
-          {'testname': 'testname-2A', 'renderExampleUrl': 'renderExampleUrl-2A'},
-          {'testname': 'testname-2B', 'renderExampleUrl': 'renderExampleUrl-2B'}
+          { 'testname': 'testname-2A', 'renderExampleUrl': 'renderExampleUrl-2A' },
+          { 'testname': 'testname-2B', 'renderExampleUrl': 'renderExampleUrl-2B' }
         ],
         'groupName': '2'
       }

@@ -1,10 +1,10 @@
 const path = require('path')
 const projectRoot = path.join('.')
 const testPlansDir = path.join(projectRoot, 'theSrc', 'test_plans')
-const {processTestPlans} = require('../lib/processTestPlans')
+const { processTestPlans } = require('../lib/processTestPlans')
 
 function registerTaskWithGulp (gulp) {
-  return function (callback) {
+  return function (done) {
     return processTestPlans(testPlansDir)
       .catch(error => {
         console.error(error)
@@ -12,6 +12,7 @@ function registerTaskWithGulp (gulp) {
         process.exit(1)
         // callback(error.message)
       })
+      .then(() => done())
   }
 }
 

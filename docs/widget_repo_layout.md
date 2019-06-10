@@ -27,7 +27,7 @@ The following is a breakdown of the minimum set of files to create a HTMLWidget 
 * **inst/htmlwidgets/lib/DEPENDENCY.js** - a JS dependency, think jquery or d3. These must be listed in the YAML file.
 * **inst/htmlwidgets/lib/STYLE.css** - CSS dependency
 
-Given we use yarn and package.json to manage our dependencies, and given we have a browser/ directory that supports the `gulp serve` workflow, maintaining our code in the structure outlined above is not really a good option. Instead, we choose to maintain all the source code in a directory called `theSrc` (if it was called `src` then the HTMLWidget package will treat it as binaries ??) and use a gulp build process to automatically generate the R htmlwidget file structure above from the source in `theSrc`.
+Given we use npm and package.json to manage our dependencies, and given we have a browser/ directory that supports the `gulp serve` workflow, maintaining our code in the structure outlined above is not really a good option. Instead, we choose to maintain all the source code in a directory called `theSrc` (if it was called `src` then the HTMLWidget package will treat it as binaries ??) and use a gulp build process to automatically generate the R htmlwidget file structure above from the source in `theSrc`.
 
 Even though the original/gold/working/active copy of all the src is in a folder called `theSrc`, we still check all the `compiled` versions in inst into github. Why? This allows the HTML Widgets to be installable from R via a single `devtools::install_github` command.
 
@@ -85,7 +85,7 @@ What does the above really mean ?
 1. the project contains nodejs code (which is just javascript run on the "server" not in the "browser")
 1. there is a package.json file at the project root, and that package.json file defines all of the nodejs and browser javascript that is required for the project.
 
-Once a git repo has a package.json, then anyone who clones the repo onto their local machine can download all of the project dependencies simply by running `npm install` (or preferably `yarn install` if installed). This of course assumes that node and npm (and yarn) are already installed.
+Once a git repo has a package.json, then anyone who clones the repo onto their local machine can download all of the project dependencies simply by running `npm install`. This of course assumes that node and npm are already installed.
 
 **Transpile ??** : Compiling is generally understood to be converting a higher level of abstraction into a lower one, for example taking C++ and producing X86 assembly code. Transpiling is converting to/from languages of equal levels of abstraction, for example coffeescript to ES5 javascript, or ES6 javascript to ES5 javascript. This is necessary because modern web browsers still do not have consistent 100% support for ES6 (aka ES2015) javascript. At present, if you want your javascript to work in a good percentage of your customers' browsers, then you need to produce ES5. The problem is that ES5 is missing a LOT of modern language features and makes developers sad.
 

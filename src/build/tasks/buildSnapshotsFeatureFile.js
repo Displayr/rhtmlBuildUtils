@@ -12,7 +12,7 @@ const fs = bluebird.promisifyAll(require('fs-extra'))
 const widgetConfig = require('../lib/widgetConfig')
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     const contentPath = path.join(widgetConfig.basePath, 'theSrc', 'internal_www', 'content')
     const tmpDir = path.join(widgetConfig.basePath, '.tmp')
     const contentFilesWithSnapshots = shell.grep('-l', 'snapshot-name=', `${contentPath}/**/*.html`)
@@ -45,5 +45,6 @@ module.exports = function (gulp) {
         console.log(`creating ${filePath}`)
         fs.writeFileAsync(filePath, featureFileContents, 'utf-8')
       })
+      .then(() => done())
   }
 }

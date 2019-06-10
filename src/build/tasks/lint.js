@@ -11,7 +11,7 @@ function isFixed (file) {
 }
 
 module.exports = function (gulp) {
-  return function () {
+  return function (done) {
     return gulp.src([
       '**/*.js',
       '!node_modules/**',
@@ -20,9 +20,10 @@ module.exports = function (gulp) {
       '!examples/**',
       '!inst/**'
     ])
-      .pipe(eslint({fix}))
+      .pipe(eslint({ fix }))
       .pipe(eslint.format())
       .pipe(gulpIf(isFixed, gulp.dest('.')))
       .pipe(eslint.failAfterError())
+      .on('finish', done)
   }
 }
