@@ -53,13 +53,12 @@ The following fields can be used in any test definition
     height: 100
     width: 100
     widgets:
-      - config: config1
+      - config: config_can_be_string
         height: 200
         width: 200
       - config: 
-          - config1
-          - config2
-          - config2
+          - config_can_be_an_array_part1
+          - the array of configs will be merged together
 
 ## single_page_one_example_per_config
 

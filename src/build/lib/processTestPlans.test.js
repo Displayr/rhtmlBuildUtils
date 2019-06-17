@@ -158,7 +158,7 @@ describe('extractGroupedTestCases', function () {
       ])
     })
 
-    it('should handle single_widget_single_page test format', function () {
+    it('should handle multi_widget_single_page test format', function () {
       const testDefinition = jsyaml.safeLoad(`
         type: multi_widget_single_page
         testname: testname
@@ -172,7 +172,8 @@ describe('extractGroupedTestCases', function () {
             config: 
               - config1
           - config: 
-              - config2`)
+              - config2_is_array
+          - config: config3_is_string`)
 
       const result = _extractGroupedTestCases([testDefinition])
       expect(stripRenderExampleUrlsFrom(result)).to.deep.equal([
@@ -186,7 +187,8 @@ describe('extractGroupedTestCases', function () {
               'rowSize': 1,
               'widgets': [
                 { 'height': 20, 'width': 20, 'config': ['config1'] },
-                { 'config': ['config2'] }
+                { 'config': ['config2_is_array'] },
+                { 'config': ['config3_is_string'] }
               ]
             }
           ],

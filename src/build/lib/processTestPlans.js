@@ -316,7 +316,7 @@ function _generateRenderExampleUrl (renderExampleConfig) {
 function _stripEmptyConfigParts (testDefinition) {
   return testDefinition.map(testDefinitionLevel1 => {
     testDefinitionLevel1.widgets = testDefinitionLevel1.widgets.map(widgetDefinition => {
-      widgetDefinition.config = widgetDefinition.config
+      widgetDefinition.config = (_.isArray(widgetDefinition.config) ? widgetDefinition.config : [widgetDefinition.config])
         .filter(configPart => configPart.length > 0)
       return widgetDefinition
     })
