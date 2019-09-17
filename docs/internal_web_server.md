@@ -60,6 +60,8 @@ The widget config can be specified inline (as in 3 examples above) or as a refer
 
 ![data-file-reference][file-reference]
 
+If you wish to see all state updates echoed to console.log, add ?echoState=true to the URL, for example `http://localhost:9000/content/examples/minimal_example.html?echoState=true`
+
 
 By default the config is hidden, but if the `data-show-config` attribute is used, then the config will be displayed above the widget. 
 
