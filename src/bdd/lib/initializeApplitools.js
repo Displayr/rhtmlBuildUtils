@@ -26,7 +26,7 @@ function getKey () {
     applitoolsKey = fs.readFileSync(keyFile, 'utf-8')
     console.log('Got applitools key from .keys/applitools.key')
   } catch (err) {
-    console.error(`ERROR: Could not read key file: ${keyFile}`)
+    console.error(`ERROR: Could not read key file: ${keyFile}. Please create file with key in it, or if this is CI, then pass key via the APPLITOOLS_KEY environment variable`)
     process.exit(1)
   }
   return applitoolsKey
