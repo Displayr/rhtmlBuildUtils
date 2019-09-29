@@ -23,8 +23,9 @@ module.exports = function (gulp) {
           .transform(babelify, {
             presets: [require('babel-preset-es2015-ie')],
             plugins: [
-              require('babel-plugin-transform-object-assign'),
               require('babel-plugin-transform-exponentiation-operator'),
+              require('babel-plugin-transform-object-assign'),
+              require('babel-plugin-transform-object-rest-spread'),
               require('babel-plugin-array-includes').default
             ]
           })
