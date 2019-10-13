@@ -2,6 +2,7 @@ const request = require('request-promise')
 const wrapInPromiseAndLogErrors = require('../lib/wrapInPromiseAndLogErrors')
 const _ = require('lodash')
 const deepDiff = require('deep-diff')
+const widgetConfig = require('../../build/lib/widgetConfig')
 
 module.exports = function () {
   this.Before(function () {
@@ -36,10 +37,12 @@ module.exports = function () {
         ? `http://localhost:9000/${replaceDotsWithSlashes(expectedStateFile)}.json`
         : `http://localhost:9000/data/${this.context.configName}/${expectedStateFile}.json`
 
+      const { statePreprocessor } = widgetConfig.visualRegressionSuite
       const expectedStatePromise = request(expectedStateUrl).then(JSON.parse)
       const actualStatePromise = this.context.getRecentState()
 
-      return Promise.all([actualStatePromise, expectedStatePromise]).then(([actualState, expectedState]) => {
+      return Promise.all([actualStatePromise, expectedStatePromise]).then(([unprocessedActualState, expectedState]) => {
+        const actualState = statePreprocessor(unprocessedActualState)
         const bothNumber = (a, b) => (typeof a) === 'number' && (typeof b) === 'number'
         const tolerance = (_.isUndefined(toleranceString)) ? 0 : parseFloat(toleranceString)
         const areEqual = _.isEqualWith(actualState, expectedState, (a, b) => {

@@ -48,7 +48,11 @@ module.exports = {
 
     // set to true to see the console.log statements from the widget under
     // test and any other logs coming from the chrome browser during the visual regression tests
-    browserLogs: false // true|false
+    browserLogs: false, // true|false
+
+    // define a function that will preprocess the widget state before any call to test state.
+    // currently the only use of this is to strip non-deterministic values from state (such as timestamp)
+    statePreprocessor: (x) => x
   },
 
   // these are defaults used when rendering widget in the internal web server only. They do not affect the widget when
