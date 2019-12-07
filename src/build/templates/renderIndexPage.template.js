@@ -54,7 +54,8 @@ const renderTestPlanGroup = function (testPlan) {
 }
 
 const renderTestCase = function (testCase, testIndex, groupName) {
-  const testName = testCase.testname
+  const testNameParts = testCase.testname.split('.')
+  const testName = testNameParts[testNameParts.length - 1]
   const testUrl = testCase.renderExampleUrl
   const statuses = _(testCase.widgets)
     .filter(widgetConfig => _.has(widgetConfig, 'status'))
