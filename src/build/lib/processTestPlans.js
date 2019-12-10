@@ -128,6 +128,16 @@ function _extractWidgetConfigsAndOverrides (testDefinition, { fs = promisifiedFS
         }
       ]
     },
+    multi_widget_multi_page: function (testDefinition) {
+      const configs = _toArray(testDefinition.configs)
+      return configs.map(configObjectOrString => {
+        const config = (_.isString(configObjectOrString)) ? { config: configObjectOrString } : configObjectOrString
+        return {
+          widgets: [config],
+          testname: _.last(config.config.split('.'))
+        }
+      })
+    },
     multi_widget_single_page: function (testDefinition) {
       // NB return an array of one because this generates a single test case
       return [

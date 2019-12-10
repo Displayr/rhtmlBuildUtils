@@ -9,9 +9,7 @@ module.exports = function (gulp) {
     livereload.listen({ port: liveReloadPort })
 
     // watch for changes in the browser directory and reload chrome on changes
-    gulp.watch([
-      'browser/**/*'
-    ]).on('change', livereload.changed)
+    gulp.watch(['browser/**/*']).on('change', livereload.changed)
 
     // when these files change then do this,
     // for example when the json file changes rerun the copy command
@@ -19,5 +17,6 @@ module.exports = function (gulp) {
     gulp.watch(['theSrc/internal_www/js/*.js', 'theSrc/scripts/*.js', 'theSrc/scripts/**/*.js'], gulp.series('compileRenderContentPage'))
     gulp.watch(['theSrc/internal_www/styles/**/.css'], gulp.series('copy'))
     gulp.watch('theSrc/styles/**/*.less', gulp.series('less'))
+    gulp.watch('theSrc/test_plans/**/*.yaml', gulp.series('processTestPlans'))
   }
 }

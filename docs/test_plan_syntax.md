@@ -12,13 +12,14 @@ This provides coverage against any form of static visual regression.
 
 YAML is a config specification language that is meant to be easier to edit than JSON. Read more [here](https://yaml.org/spec/1.2/spec.html#id2761803) ; skip to chapter 2 for examples. 
 
-**There are 5 supported test definition types:**
+**There are 6 supported test definition types:**
 
 * **single_widget_single_page:** display a single widget on a page
 * **multi_widget_single_page:** display multiple widgets on a page, each is defined individually in the file
+* **multi_widget_multi_page:** create a page for each widget in the config, with each page containing a single widget
 * **single_page_one_example_per_config:** display multiple widgets on a page, each widget differs only be a config statement. Each widget is a merge of the single data and the variable config
 * **single_page_one_example_per_data:** display multiple widgets on a page, each widget differs only by a data statement. No merge between config and data takes place 
-* **for_each_data_in_directory:** 
+* **for_each_data_in_directory:** create a page for each file in a directory, with each page containing a single widget
 
 # Common fields
 
@@ -59,6 +60,17 @@ The following fields can be used in any test definition
       - config: 
           - config_can_be_an_array_part1
           - the array of configs will be merged together
+
+## multi_widget_multi_page
+
+    type: multi_widget_multi_page
+    height: 100
+    width: 100    
+    configs:
+      - data.widget1
+      - config: data.widget2_use_a_nonstandad_height_and_width_just_for_this_one
+        height: 1000
+        width: 1000
 
 ## single_page_one_example_per_config
 
