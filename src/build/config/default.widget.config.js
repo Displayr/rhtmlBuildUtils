@@ -16,6 +16,16 @@ module.exports = {
   // that implements 'renderValue' and 'resize' calls. The widgetFactory file is imported by the renderContentPage.js file
   widgetFactory: 'theSrc/scripts/rhtmlYourWidget.factory.js',
 
+  snapshotTesting: {
+    // the directory that contains the yaml test plans files.
+    // these files define the static snapshots to take during snapshot testing, and also populate the index page of the internal server
+    // testplanDirectory: 'theSrc/test/snapshotTest', // new default value cant use yet (it would be a breaking change)
+    testplanDirectory: 'theSrc/test_plans', // old default value, must maintain until next breaking update (i.e. 5.0.0)
+
+    // the directory to store all image snapshots taken by jest-image-snapshot while running jest based tests
+    snapshotDirectory: 'theSrc/test/snapshots'
+  },
+
   visualRegressionSuite: {
 
     // before interacting with a widget under test, we must wait for the widget to load, the "isReadySelector" is a CSS expression, that is used to test if the widget is ready. If the selector returns 1 or more elements, then we can proceed with test.
@@ -50,7 +60,7 @@ module.exports = {
     // test and any other logs coming from the chrome browser during the visual regression tests
     browserLogs: false, // true|false
 
-    // define a function that will preprocess the widget state before any call to test state.
+    // define a function that will preprocess the widget state before any equality testing is performed.
     // currently the only use of this is to strip non-deterministic values from state (such as timestamp)
     statePreprocessor: (x) => x
   },

@@ -1,8 +1,8 @@
 const path = require('path')
-const projectRoot = path.join('.')
-const testPlansDir = path.join(projectRoot, 'theSrc', 'test_plans')
 const { processTestPlans } = require('../lib/processTestPlans')
+const widgetConfig = require('../lib/widgetConfig')
 
+const testPlansDir = path.join(widgetConfig.basePath, widgetConfig.snapshotTesting.testplanDirectory)
 function registerTaskWithGulp (gulp) {
   return function (done) {
     return processTestPlans(testPlansDir)

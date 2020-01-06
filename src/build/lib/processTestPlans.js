@@ -9,9 +9,12 @@ const readdir = require('recursive-readdir')
 // TODO highly opinionated. Assumes gulp is run from the root of the target project !
 const projectRoot = path.join('.')
 const browserDir = path.join(projectRoot, 'browser')
-const browserDestination = path.join(browserDir, 'test_plan.json')
-const bddDir = path.join(projectRoot, '.tmp')
-const bddDestination = path.join(bddDir, 'testplan.feature')
+const tmpDir = path.join(projectRoot, '.tmp')
+const testPlanDestinations = [
+  path.join(browserDir, 'test_plan.json'),
+  path.join(tmpDir, 'test_plan.json')
+]
+const bddDestination = path.join(tmpDir, 'testplan.feature')
 const renderExampleBasePath = '/renderExample.html'
 
 // Big Workers first
@@ -245,7 +248,7 @@ function _extractCommonParamsFromTestDefinition (testDefinition) {
 function _generateBddFeatureFile (combinedTestPlan, { fs = promisifiedFS } = {}) {
   const featureFileContents = _generateBddFeatureFileContents(combinedTestPlan)
 
-  return fs.mkdirpAsync(bddDir)
+  return fs.mkdirpAsync(tmpDir)
     .then(() => {
       console.log(`creating ${bddDestination}`)
       return fs.writeFileAsync(bddDestination, featureFileContents, 'utf-8')
@@ -279,8 +282,10 @@ function _generateBddFeatureFileContents (combinedTestPlan) {
 function _generateBrowserJsonFile (combinedTestPlan, { fs = promisifiedFS } = {}) {
   return fs.mkdirpAsync(browserDir)
     .then(() => {
-      console.log(`creating ${browserDestination}`)
-      return fs.writeFileAsync(browserDestination, JSON.stringify(combinedTestPlan, {}, 2))
+      _(testPlanDestinations).each(testPlanDestination => {
+        console.log(`creating ${testPlanDestination}`)
+        return fs.writeFileAsync(testPlanDestination, JSON.stringify(combinedTestPlan, {}, 2))
+      })
     })
     .then(() => combinedTestPlan)
 }
@@ -346,6 +351,7 @@ function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS
     const directoryPath = path.join(projectRoot, 'theSrc', 'internal_www', testDefinition.data_directory)
     const allSlashesRegExp = new RegExp('/', 'g')
     return fs.readdirSync(directoryPath)
+      .filter(fileName => fileName.match(/.json$/))
       .map(fileName => `${testDefinition.data_directory.replace(allSlashesRegExp, '.')}.${_extractTestNameFromPath(fileName)}`)
   } else if (_.has(testDefinition, 'data')) {
     return _toArray(testDefinition.data)
