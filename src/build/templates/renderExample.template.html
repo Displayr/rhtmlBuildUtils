@@ -24,7 +24,7 @@
    *   width: int,
    *   height: int,
    *   title: string,
-   *   rowSize: int
+   *   rowSize: int | array of ints
    *   snapshotName: string
    *   widgets: Array of object:
    *     width
@@ -78,8 +78,14 @@
         if (renderExampleConfig.testname) { examplesContainer.attr('snapshot-name', renderExampleConfig.testname) }
 
         const widgetConfigs = (_.isArray(renderExampleConfig.widgets)) ? renderExampleConfig.widgets : [renderExampleConfig.widgets]
-        const rowSize = parseInt(renderExampleConfig.rowSize)
-        const rowsOfWidgetConfigs = _.chunk(widgetConfigs, rowSize)
+
+        const rowSizeIsArray = (_.isArray(renderExampleConfig.rowSize))
+        let rowsOfWidgetConfigs = null
+        if (rowSizeIsArray) {
+          // TODO build this up so i can show baseline at top and examples afterwards
+        } else {
+          rowsOfWidgetConfigs = _.chunk(widgetConfigs, parseInt(renderExampleConfig.rowSize))
+        }
 
         if (renderExampleConfig.title) {
           const descriptionDiv = $('<h3 class="description">').html(renderExampleConfig.title)

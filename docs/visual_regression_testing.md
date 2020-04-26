@@ -1,5 +1,7 @@
 # Visual Regression Testing
 
+**THIS IS DEPRECATED** See snapshotting system
+
 ## Quick Reference: how to use and extend it
 
 > At present, applitools does not work locally on osx, but it does in CI, so if running the visual suite locally, always add `--applitools.enabled=false`

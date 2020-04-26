@@ -4,12 +4,13 @@ const opn = require('opn')
 const cliArgs = require('yargs').argv
 
 const taskSequences = {
-  build: [ 'clean', ['compileES6', 'core', 'lint'], ['makeDocs', 'testSpecs'] ],
+  build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
   core: [ 'less', 'copy' ],
   serve: [ ['core', 'compileInternal', 'connect', 'openBrowser'], 'watch' ],
-  testVisual: [ 'core', 'compileInternal', 'connect', 'runProtractor' ],
-  testVisual_s: [ 'runProtractor' ],
-  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'processTestPlans' ]
+  testSpecs: ['jestSpecTests'],
+  testVisual: [ 'core', 'compileInternal', 'connect', 'takeSnapshotsForEachTestDefinition' ],
+  testVisual_s: [ 'takeSnapshotsForEachTestDefinition' ],
+  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'processTestPlans' ]
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {
@@ -17,17 +18,13 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
     return !exclusions.includes(taskName)
   }
 
-  const pathToTaskFiles = path.join(__dirname, 'build', 'tasks')
-  fs.readdirSync(pathToTaskFiles)
-    .filter(onlyDotJsFiles)
-    .map(stripJsSuffix)
-    .map(function (taskName) {
-      if (shouldRegister(taskName)) {
-        const modulePath = path.join(pathToTaskFiles, taskName)
-        gulp.task(taskName, require(modulePath)(gulp))
-      }
-    })
+  const taskDirectories = [
+    path.join(__dirname, 'build', 'tasks'),
+    path.join(__dirname, 'snapshot', 'tasks')
+  ]
+  taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp , taskDirectory, shouldRegister }))
 
+  // move to task directory
   if (shouldRegister('openBrowser')) {
     const port = cliArgs.port || 9000
     const openBrowser = function (done) {
@@ -57,6 +54,10 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
     gulp.task('testVisual_s', gulp.series(...taskSequences.testVisual_s))
   }
 
+  if (shouldRegister('testSpecs')) {
+    gulp.task('testSpecs', gulp.series(...taskSequences.testSpecs))
+  }
+
   if (shouldRegister('build')) {
     gulp.task('build', gulp.series(...taskSequences.build))
   }
@@ -66,6 +67,18 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   }
 
   return gulp
+}
+
+function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
+  fs.readdirSync(taskDirectory)
+    .filter(onlyDotJsFiles)
+    .map(stripJsSuffix)
+    .map(function (taskName) {
+      if (shouldRegister(taskName)) {
+        const modulePath = path.join(taskDirectory, taskName)
+        gulp.task(taskName, require(modulePath)(gulp))
+      }
+    })
 }
 
 function onlyDotJsFiles (file) {
@@ -78,5 +91,9 @@ function stripJsSuffix (file) {
 
 module.exports = {
   registerGulpTasks,
-  taskSequences
+  taskSequences,
+  snapshotTesting: {
+    puppeteer: require('puppeteer'),
+    'renderExamplePageTestHelper': require('./snapshot/lib/renderExamplePageTest.helper')
+  }
 }

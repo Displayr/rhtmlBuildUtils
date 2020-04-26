@@ -1,8 +1,8 @@
+/* global window */
 // This is a template, that is processed by build/tasks/compileRenderContentPage.js. All the {{X}} and {{{X}}} are replaced.
 
 import $ from 'jquery'
 import _ from 'lodash'
-/* global window */
 
 const WidgetFactory = require('{{{widget_definition_path}}}')
 

@@ -6,26 +6,17 @@ const promisifiedFS = bluebird.promisifyAll(require('fs-extra'))
 const jsyaml = require('js-yaml')
 const readdir = require('recursive-readdir')
 
-// TODO highly opinionated. Assumes gulp is run from the root of the target project !
-const projectRoot = path.join('.')
-const browserDir = path.join(projectRoot, 'browser')
-const tmpDir = path.join(projectRoot, '.tmp')
-const testPlanDestinations = [
-  path.join(browserDir, 'test_plan.json'),
-  path.join(tmpDir, 'test_plan.json')
-]
-const bddDestination = path.join(tmpDir, 'testplan.feature')
+const widgetConfig = require('../../build/lib/widgetConfig')
 const renderExampleBasePath = '/renderExample.html'
 
 // Big Workers first
 // ---------
 
-function processTestPlans (testPlansDir) {
+function processTestPlans (testPlansDir, testPlanDestinations) {
   if (fs.existsSync(testPlansDir)) {
     return _loadConfigs(testPlansDir)
       .then(_extractGroupedTestCases)
-      .then(_generateBddFeatureFile)
-      .then(_generateBrowserJsonFile)
+      .then(combinedTestPlan => _generateBrowserJsonFile(combinedTestPlan, testPlanDestinations))
   } else {
     console.log(`no test plan dir at '${testPlansDir}. Skipping step`)
     return Promise.resolve()
@@ -245,48 +236,14 @@ function _extractCommonParamsFromTestDefinition (testDefinition) {
   return renderExampleConfig
 }
 
-function _generateBddFeatureFile (combinedTestPlan, { fs = promisifiedFS } = {}) {
-  const featureFileContents = _generateBddFeatureFileContents(combinedTestPlan)
-
-  return fs.mkdirpAsync(tmpDir)
-    .then(() => {
-      console.log(`creating ${bddDestination}`)
-      return fs.writeFileAsync(bddDestination, featureFileContents, 'utf-8')
+function _generateBrowserJsonFile (combinedTestPlan, testPlanDestinations, { fs = promisifiedFS } = {}) {
+  const fileCreationPromises = testPlanDestinations
+    .map(testPlanDestination => {
+      console.log(`creating ${testPlanDestination}`)
+      return fs.mkdirpAsync(path.dirname(testPlanDestination)) // todo must split destinations into dir and file name then call this
+        .then(() => fs.writeFileAsync(testPlanDestination, JSON.stringify(combinedTestPlan, {}, 2)))
     })
-    .then(() => combinedTestPlan)
-}
-
-function _generateBddFeatureFileContents (combinedTestPlan) {
-  const tests = _(combinedTestPlan)
-    .map('tests')
-    .flatten()
-    .value()
-
-  let featureFileContents = `
-    Feature: Take Snapshots in Content Directory
-    `
-
-  const scenarioStrings = tests.map(({ testname, renderExampleUrl }) => {
-    return `
-      @applitools @autogen,
-      Scenario: ${testname},
-        When I take all the snapshots on the page "${renderExampleUrl}"
-      `
-  })
-
-  featureFileContents += scenarioStrings.join('')
-  featureFileContents += '\n'
-  return featureFileContents
-}
-
-function _generateBrowserJsonFile (combinedTestPlan, { fs = promisifiedFS } = {}) {
-  return fs.mkdirpAsync(browserDir)
-    .then(() => {
-      _(testPlanDestinations).each(testPlanDestination => {
-        console.log(`creating ${testPlanDestination}`)
-        return fs.writeFileAsync(testPlanDestination, JSON.stringify(combinedTestPlan, {}, 2))
-      })
-    })
+  return Promise.all(fileCreationPromises)
     .then(() => combinedTestPlan)
 }
 
@@ -348,7 +305,7 @@ function _toArray (stringOrArray) {
 
 function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS } = {}) {
   if (_.has(testDefinition, 'data_directory')) {
-    const directoryPath = path.join(projectRoot, 'theSrc', 'internal_www', testDefinition.data_directory)
+    const directoryPath = path.join(widgetConfig.basePath, 'theSrc', 'internal_www', testDefinition.data_directory)
     const allSlashesRegExp = new RegExp('/', 'g')
     return fs.readdirSync(directoryPath)
       .filter(fileName => fileName.match(/.json$/))
@@ -362,6 +319,5 @@ function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS
 
 module.exports = {
   processTestPlans,
-  _extractGroupedTestCases, // NB exported test only
-  _generateBddFeatureFileContents // NB exported test only
+  _extractGroupedTestCases // NB exported test only
 }
