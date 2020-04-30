@@ -59,7 +59,7 @@
     "gulp-tap": "^1.0.1",
     "gulp-uglify": "^3.0.2",
     "husky": "^0.13.4",
-    "jquery": "^3.2.1",
+    "jquery": "^3.5.0",
     "karma": "^4.1.0",
     "karma-browserify": "^6.0.0",
     "karma-chai": "^0.1.0",
