@@ -2,12 +2,12 @@ const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
-const widgetConfig = require('../../build/lib/widgetConfig')
-const getCommandLineArgs = require('../lib/takeSnapshotsForEachTestDefinition/parseCommandLineArguments')
-const buildRoot = path.join(__dirname, '../../../')
+const widgetConfig = require('../../../build/lib/widgetConfig')
+const getCommandLineArgs = require('./parseCommandLineArguments')
+const buildRoot = path.join(__dirname, '../../../../')
 
 // NB must work around this issue : https://github.com/facebook/jest/issues/2145
-const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../config/jest.allow_tests_in_node_modules_directory.js')
+const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../../config/jest.allow_tests_in_node_modules_directory.js')
 
 const ECHO_PASSTHROUGH_CONFIG = true
 
@@ -23,7 +23,6 @@ module.exports = () => {
     // * (--slowMo) slowmotion: --snapshotTesting.puppeteer.slowMo=60
     // * (--snapshotDirectory) snapshots directory
     // * (--acceptNewSnapshots) accept new snapshots
-
     const args = getCommandLineArgs()
 
     const testRoots = getTestRoots({ buildRoot, widgetConfig })
@@ -65,10 +64,10 @@ const getJestPath = ({ buildRoot, widgetConfig }) => {
 }
 
 const getTestRoots = ({ buildRoot, widgetConfig }) => {
-  const runSnapshotTestPath = path.join(__dirname, '../jestSuites/')
+  const takeSnapshotForEachTestDefinition = __dirname
   const interactionTestPath = path.join(widgetConfig.basePath, widgetConfig.snapshotTesting.interactionTestDirectory)
   return [
-    runSnapshotTestPath,
+    takeSnapshotForEachTestDefinition,
     interactionTestPath
   ]
 }
@@ -77,7 +76,7 @@ const getCommandString = ({ testRoots, jestPath, args }) => {
   const roots = testRoots.map(root => `--roots="${root}"`).join(' ')
   const acceptNewSnapshots = (args.acceptNewSnapshots) ? `--ci=0` : ''
   const testNamePattern = (args.testNamePattern) ? `-t=${args.testNamePattern}` : ''
-  const testFilePattern = "--testMatch='**/*.jest.test.js' --testMatch='**/takeSnapshotsForEachTestDefinition.js'"
+  const testFilePattern = "--testMatch='**/*.jest.test.js' --testMatch='**/jestRunner.js'"
   const jestConfig = `--config=${jestAllowTestInNodeModulesConfigPath}`
   const updateSnapshots = (args.updateSnapshots) ? `-u` : ''
 

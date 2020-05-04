@@ -71,12 +71,10 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 
 function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
   fs.readdirSync(taskDirectory)
-    .filter(onlyDotJsFiles)
-    .map(stripJsSuffix)
     .map(function (taskName) {
       if (shouldRegister(taskName)) {
         const modulePath = path.join(taskDirectory, taskName)
-        gulp.task(taskName, require(modulePath)(gulp))
+        gulp.task(stripJsSuffix(taskName), require(modulePath)(gulp))
       }
     })
 }
