@@ -6,11 +6,26 @@ const cliArgs = require('yargs').argv
 const taskSequences = {
   build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
   core: [ 'less', 'copy' ],
-  serve: [ ['core', 'compileInternal', 'connect', 'openBrowser'], 'watch' ],
+  serve: [ ['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch' ],
   testSpecs: ['jestSpecTests'],
   testVisual: [ 'core', 'compileInternal', 'connect', 'takeSnapshotsForEachTestDefinition' ],
   testVisual_s: [ 'takeSnapshotsForEachTestDefinition' ],
-  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'processTestPlans' ]
+  compileInternal: [
+    'buildContentManifest',
+    'prepareInternalWwwCss',
+    'prepareRenderExamplePage',
+    'compileRenderContentPage',
+    'compileRenderIndexPage',
+    'processTestPlans'
+  ],
+  compileExperiments: [
+    'copyExperimentHtmlAndSnapshots',
+    'compileExperimentList',
+    'compileSnapshotList',
+    'compileSnapshotComparison',
+    'compileCrossExperimentSnapshotComparison',
+    'compileCrossExperimentSnapshotList'
+  ]
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {
@@ -32,6 +47,10 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
       done()
     }
     gulp.task('openBrowser', gulp.series(openBrowser))
+  }
+
+  if (shouldRegister('compileExperiments')) {
+    gulp.task('compileExperiments', gulp.series(...taskSequences.compileExperiments))
   }
 
   if (shouldRegister('compileInternal')) {
