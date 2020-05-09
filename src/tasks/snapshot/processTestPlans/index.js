@@ -1,6 +1,6 @@
 const path = require('path')
-const { processTestPlans } = require('../lib/processTestPlans')
-const widgetConfig = require('../../lib/widgetConfig')
+const { processTestPlans: index } = require('../../../lib/processTestPlans')
+const widgetConfig = require('../../../lib/widgetConfig')
 
 const projectRoot = widgetConfig.basePath
 const testPlansDir = path.join(projectRoot, widgetConfig.snapshotTesting.testplanDirectory)
@@ -14,7 +14,7 @@ const testPlanDestinations = [
 
 function registerTaskWithGulp (gulp) {
   return function (done) {
-    return processTestPlans(testPlansDir, testPlanDestinations)
+    return index(testPlansDir, testPlanDestinations)
       .catch(error => {
         console.error(error)
         // this is not failing cleanly, so i am going to process.exit to make sure i notice errors

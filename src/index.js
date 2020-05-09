@@ -3,6 +3,8 @@ const path = require('path')
 const opn = require('opn')
 const cliArgs = require('yargs').argv
 
+const DEBUG = 1
+
 const taskSequences = {
   build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
   core: [ 'less', 'copy' ],
@@ -36,7 +38,8 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   const taskDirectories = [
     path.join(__dirname, 'tasks/misc'),
     path.join(__dirname, 'tasks/webserver'),
-    path.join(__dirname, 'snapshot/tasks')
+    path.join(__dirname, 'tasks/snapshot'),
+    path.join(__dirname, 'tasks/experiment')
   ]
   taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp , taskDirectory, shouldRegister }))
 
@@ -92,6 +95,7 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
   fs.readdirSync(taskDirectory)
     .map(function (taskName) {
+      if (DEBUG) { console.log(`dir: ${taskDirectory} task: ${taskName}`) }
       if (shouldRegister(taskName)) {
         const modulePath = path.join(taskDirectory, taskName)
         gulp.task(stripJsSuffix(taskName), require(modulePath)(gulp))
@@ -112,6 +116,6 @@ module.exports = {
   taskSequences,
   snapshotTesting: {
     puppeteer: require('puppeteer'),
-    'renderExamplePageTestHelper': require('./snapshot/lib/renderExamplePageTest.helper')
+    'renderExamplePageTestHelper': require('./lib/renderExamplePageTest.helper')
   }
 }

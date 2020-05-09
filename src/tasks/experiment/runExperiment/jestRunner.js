@@ -13,7 +13,7 @@ const {
   jestTimeout,
   testSnapshots,
   waitForWidgetToLoad
-} = require('../../lib/renderExamplePageTest.helper')
+} = require('../../../lib/renderExamplePageTest.helper')
 
 jest.setTimeout(jestTimeout)
 

@@ -2,13 +2,13 @@ const shell = require('shelljs')
 const fs = require('fs')
 const path = require('path')
 const widgetConfig = require('../../../lib/widgetConfig')
-const { processTestPlans } = require('../../lib/processTestPlans')
+const { processTestPlans } = require('../../../lib/processTestPlans')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 
 const ECHO_PASSTHROUGH_CONFIG = 1
 
 // NB must work around this issue : https://github.com/facebook/jest/issues/2145
-const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../../config/jest.allow_tests_in_node_modules_directory.js')
+const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../../../lib/jest.allow_tests_in_node_modules_directory.js')
 
 module.exports = () => {
   return function (done) {

@@ -24,9 +24,9 @@ At first glance in the widget repos you see quite a bit of non production code s
 
 The internal web server is just hosting all the files in the `browser` area, which is an auto generated section of the repo. Several gulp steps work in conjunction to build the content in the `browser` directory and serve it at http://127.0.0.1:9000. The 'important' ones are described below:
  
-* the `compileRenderContentPage` and `compileRenderIndexPage` steps compiles ES6 into ES5 for the browser. These steps also convert the compileRenderContentPage.template.js into the index.js, adding widget specific config to the generic compileRenderContentPage.template.js to create a index.js specific for the widget under test. Same process for the index file
+* the `compileRenderContentPage` and `compileRenderIndexPage` steps compiles ES6 into ES5 for the browser. These steps also convert the compileRenderContentPage.template.js into the compileRenderContentPage.js, adding widget specific config to the generic compileRenderContentPage.template.js to create a compileRenderContentPage.js specific for the widget under test. Same process for the index file
 * the `copy` step copies all the html and image files from `theSrc/internal_www` into the `browser` area
-* the `index` step recursively scans the `browser/content` area and produces a manifest of all the content files in the area. This is used to build the index page that is displayed on http://127.0.0.1. Without this step the author would need to keep this list up to date by manual updates to the index.html file.
+* the `buildContentManifest` step recursively scans the `browser/content` area and produces a manifest of all the content files in the area. This is used to build the index page that is displayed on http://127.0.0.1. Without this step the author would need to keep this list up to date by manual updates to the index.html file.
 * the `connect` step starts a static content web server hosting all the files in the `browser` directory and makes them available on port 9000 of localhost (i.e., http://127.0.0.1:9000).
 * the `watch` step runs constantly and monitors all the source code and content files. Any time the files are saved, the `watch` step will rerun one of the other build steps to update the content, and then send a signal to the browser to force a page reload.
  
@@ -40,7 +40,7 @@ Using the content file [theSrc/internal_www/content/examples/default.html](https
 
 ## Web Server Content Features
 
-There are several features provided by [renderContentPage.js](/src/tasks/web_server/compileRenderContentPage/renderContentPage.template.js) that should be discussed.
+There are several features provided by [renderContentPage.js](/src/tasks/webserver/compileRenderContentPage/renderContentPage.template.js) that should be discussed.
 
 It is easiest to grasp by looking at an example in the rhtmlTemplate app:
  

@@ -7,8 +7,7 @@ const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
 
 // NB must work around this issue : https://github.com/facebook/jest/issues/2145
-const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../../config/jest.allow_tests_in_node_modules_directory.js')
-
+const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../../../lib/jest.allow_tests_in_node_modules_directory.js')
 const ECHO_PASSTHROUGH_CONFIG = true
 
 module.exports = () => {

@@ -6,13 +6,12 @@ const promisifiedFS = bluebird.promisifyAll(require('fs-extra'))
 const jsyaml = require('js-yaml')
 const readdir = require('recursive-readdir')
 
-const widgetConfig = require('../../lib/widgetConfig')
-const renderExampleBasePath = '/renderExample.html'
+const widgetConfig = require('../widgetConfig')
 
 // Big Workers first
 // ---------
 
-function processTestPlans (testPlansDir, testPlanDestinations) {
+function index (testPlansDir, testPlanDestinations) {
   if (fs.existsSync(testPlansDir)) {
     return _loadConfigs(testPlansDir)
       .then(_extractGroupedTestCases)
@@ -264,6 +263,7 @@ function _extractTestNameFromPath (testFilePath) {
   return fileName.replace(/.(yaml|json)/, '')
 }
 
+const renderExampleBasePath = '/renderExample.html'
 function _generateRenderExampleUrl (renderExampleConfig) {
   const configString = new Buffer(JSON.stringify(renderExampleConfig)).toString('base64') // eslint-disable-line node/no-deprecated-api
   return `${renderExampleBasePath}?config=${configString}`
@@ -318,6 +318,6 @@ function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS
 }
 
 module.exports = {
-  processTestPlans,
+  processTestPlans: index,
   _extractGroupedTestCases // NB exported test only
 }

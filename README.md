@@ -41,6 +41,7 @@ then in your project gulpfile.js:
       exclusions: dontRegisterTheseTasks 
     })
 
+TODO: UPDATE DOC LINE : file path incorect
 By calling registerGulpTasks you will add all the tasks defined in [src/build/tasks](src/tasks/tasks) to your project. These tasks are enumerated [below](#gulp-task-reference).
 
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
