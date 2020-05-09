@@ -12,7 +12,7 @@ $(document).ready(function () {
 
   Promise.all([getSnapshotList(experimentName), getExperimentDefinition(experimentName), getExperimentNotes(experimentName)])
     .then(([snapshotList, experimentDefinition, notesHtml]) => {
-      const { dimensions, baseline } = experimentDefinition
+      const { dimensions } = experimentDefinition
       const hasBaseline = _.has(experimentDefinition, 'baseline')
       renderPage({ experimentName, snapshotList, dimensions, hasBaseline, notesHtml })
     })
@@ -68,7 +68,7 @@ const renderPage = ({ experimentName, snapshotList, dimensions, hasBaseline, not
   $('body').append(preAmble)
   $('body').append(testGroupContainer)
 
-  const dimensionQueryParams = (dimensions.length == 2)
+  const dimensionQueryParams = (dimensions.length === 2)
     ? `dimension1=${dimensions[0].join(',')}&dimension2=${dimensions[1].join(',')}`
     : `dimension1=${dimensions[0].join(',')}`
 

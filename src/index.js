@@ -41,7 +41,7 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
     path.join(__dirname, 'tasks/snapshot'),
     path.join(__dirname, 'tasks/experiment')
   ]
-  taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp , taskDirectory, shouldRegister }))
+  taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp, taskDirectory, shouldRegister }))
 
   // move to task directory
   if (shouldRegister('openBrowser')) {
@@ -101,10 +101,6 @@ function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegiste
         gulp.task(stripJsSuffix(taskName), require(modulePath)(gulp))
       }
     })
-}
-
-function onlyDotJsFiles (file) {
-  return (/\.js$/i).test(file)
 }
 
 function stripJsSuffix (file) {

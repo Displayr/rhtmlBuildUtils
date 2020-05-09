@@ -1,3 +1,4 @@
+const colors = require('ansi-colors')
 const babelify = require('babelify')
 const browserify = require('browserify')
 const buffer = require('gulp-buffer')
@@ -27,7 +28,7 @@ module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, 
     .pipe(sourcemaps.init({ loadMaps: true }))
 
   const postMinifiedStream = (minify)
-    ?  browserifyStream.pipe(uglify())
+    ? browserifyStream.pipe(uglify())
     : browserifyStream
 
   return postMinifiedStream

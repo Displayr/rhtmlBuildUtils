@@ -19,7 +19,7 @@ module.exports = () => {
     }
 
     const testPlanFile = path.join(widgetConfig.basePath, '.tmp/experimentTestPlan.json')
-    const experimentResultsDirectory = path.join(experimentDirectory,  'results')
+    const experimentResultsDirectory = path.join(experimentDirectory, 'results')
     const experimentConfigFile = path.join(experimentDirectory, 'experimentConfig')
     const experimentRunnerDirectory = __dirname
     const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp', 'experiment_dynamic_config.json')
@@ -55,7 +55,6 @@ module.exports = () => {
           setOverrides(override)
           shell.exec(snapshotTestCommand)
         }
-
       })
       .then(() => done())
       .catch(error => done(error))

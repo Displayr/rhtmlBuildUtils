@@ -17,7 +17,6 @@ $(document).ready(function () {
   $('body').append($(`<h2>Status: <span class="status-${status}">${status}</span></h2>`))
   $('body').append($(`<h2>Note: ${note}</h2>`))
 
-
   console.log(`hasBaseline:`, hasBaseline)
   if (hasBaseline) {
     $('body').append(makeBaselineRow({ experimentName, snapshotName }))
@@ -38,7 +37,6 @@ $(document).ready(function () {
   if (urlVars['dimension3']) {
     console.error(`currently dont support rendering experiments with 3 dimensions`)
   }
-
 })
 
 // TODO extract into utils
@@ -75,7 +73,7 @@ const makeHeaderRow = ({ columns }) => {
 
 const makeRow = ({ experimentName, snapshotName, row = null, columns }) => {
   const rowElement = $('<div class="row">')
-  const rowHeader = $(`<div class="row-header">${(row) ? row : ''}</div>`)
+  const rowHeader = $(`<div class="row-header">${(row) || ''}</div>`)
   rowElement.append(rowHeader)
   _(columns).each(column => {
     const resultSetName = (row) ? `${row}-${column}` : column

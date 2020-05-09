@@ -11,7 +11,6 @@ const testPlanDestinations = [
   path.join(tmpDir, 'test_plan.json')
 ]
 
-
 function registerTaskWithGulp (gulp) {
   return function (done) {
     return index(testPlansDir, testPlanDestinations)
