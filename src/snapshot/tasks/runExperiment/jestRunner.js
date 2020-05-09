@@ -2,7 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const puppeteer = require('puppeteer')
 
-const widgetConfig = require('../../../build/lib/widgetConfig')
+const widgetConfig = require('../../../lib/widgetConfig')
 const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp', 'experiment_dynamic_config.json')
 const { snapshotDirectory, testPlanFile } = require(experimentDynamicConfigFile)
 const testPlan = require(testPlanFile)

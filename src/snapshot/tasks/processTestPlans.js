@@ -1,6 +1,6 @@
 const path = require('path')
 const { processTestPlans } = require('../lib/processTestPlans')
-const widgetConfig = require('../../build/lib/widgetConfig')
+const widgetConfig = require('../../lib/widgetConfig')
 
 const projectRoot = widgetConfig.basePath
 const testPlansDir = path.join(projectRoot, widgetConfig.snapshotTesting.testplanDirectory)

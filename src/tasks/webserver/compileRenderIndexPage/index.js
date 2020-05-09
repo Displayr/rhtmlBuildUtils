@@ -1,13 +1,13 @@
 const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
-const compileES6 = require('../lib/compileES6')
-const { basePath, internalWebSettings } = require('../lib/widgetConfig')
+const compileES6 = require('../../../lib/compileES6')
+const { basePath, internalWebSettings } = require('../../../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function (callback) {
     // step 1: apply vars to template, and save renderContentPage in .tmp
-    const templateFile = path.join(__dirname, '../templates/renderIndexPage.template.js')
+    const templateFile = path.join(__dirname, './renderIndexPage.template.js')
     const entryPointDirectory = path.join(basePath, '.tmp')
     const entryPointFile = path.join(basePath, '.tmp/renderIndexPage.js')
     const destinationDirectory = path.join(basePath, 'browser/js/')

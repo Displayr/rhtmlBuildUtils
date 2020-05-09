@@ -6,7 +6,7 @@ const promisifiedFS = bluebird.promisifyAll(require('fs-extra'))
 const jsyaml = require('js-yaml')
 const readdir = require('recursive-readdir')
 
-const widgetConfig = require('../../build/lib/widgetConfig')
+const widgetConfig = require('../../lib/widgetConfig')
 const renderExampleBasePath = '/renderExample.html'
 
 // Big Workers first

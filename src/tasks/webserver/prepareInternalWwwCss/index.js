@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
 
-const { basePath, internalWebSettings } = require('../lib/widgetConfig')
+const { basePath, internalWebSettings } = require('../../../lib/widgetConfig')
 
 module.exports = function (gulp) {
   return function (done) {
@@ -13,7 +13,7 @@ module.exports = function (gulp) {
 }
 
 const processInternalWwwCss = () => {
-  const templateFile = path.join(__dirname, '../templates/internal_www.template.css')
+  const templateFile = path.join(__dirname, './internal_www.template.css')
   const destinationDirectory = path.join(basePath, 'browser/styles')
   const destinationFile = path.join(basePath, 'browser/styles/internal_www.css')
 
@@ -25,7 +25,7 @@ const processInternalWwwCss = () => {
 }
 
 const processIndexCss = () => {
-  const cssFile = path.join(__dirname, '../templates/index.css')
+  const cssFile = path.join(__dirname, './index.css')
   const destinationDirectory = path.join(basePath, 'browser/styles')
   const destinationFile = path.join(basePath, 'browser/styles/index.css')
 

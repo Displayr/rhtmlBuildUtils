@@ -1,5 +1,5 @@
-const compileES6 = require('../../../build/lib/compileES6')
-const { basePath } = require('../../../build/lib/widgetConfig')
+const compileES6 = require('../../../lib/compileES6')
+const { basePath } = require('../../../lib/widgetConfig')
 const path = require('path')
 
 module.exports = function (gulp) {

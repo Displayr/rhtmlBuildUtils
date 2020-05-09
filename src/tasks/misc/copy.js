@@ -1,5 +1,5 @@
 const rename = require('gulp-rename')
-const widgetConfig = require('../lib/widgetConfig')
+const widgetConfig = require('../../lib/widgetConfig')
 
 // TODO the method for knowing when we are done is crude and
 // relies on author to keep requiredCount and all calls to incrementFinishCount up to date

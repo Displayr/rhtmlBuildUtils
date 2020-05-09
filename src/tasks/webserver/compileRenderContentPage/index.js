@@ -2,8 +2,8 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
-const compileES6 = require('../lib/compileES6')
-const { basePath, widgetFactory, internalWebSettings } = require('../lib/widgetConfig')
+const compileES6 = require('../../../lib/compileES6')
+const { basePath, widgetFactory, internalWebSettings } = require('../../../lib/widgetConfig')
 
 const templateVariables = _.merge(
   {},
@@ -14,7 +14,7 @@ const templateVariables = _.merge(
 module.exports = function (gulp) {
   return function (callback) {
     // step 1: apply vars to template, and save renderContentPage in .tmp
-    const templateFile = path.join(__dirname, '../templates/renderContentPage.template.js')
+    const templateFile = path.join(__dirname, './renderContentPage.template.js')
     const entryPointDirectory = path.join(basePath, '.tmp')
     const entryPointFile = path.join(basePath, '.tmp/renderContentPage.js')
     const destinationDirectory = path.join(basePath, 'browser/js/')

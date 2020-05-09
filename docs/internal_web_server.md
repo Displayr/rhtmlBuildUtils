@@ -24,9 +24,9 @@ At first glance in the widget repos you see quite a bit of non production code s
 
 The internal web server is just hosting all the files in the `browser` area, which is an auto generated section of the repo. Several gulp steps work in conjunction to build the content in the `browser` directory and serve it at http://127.0.0.1:9000. The 'important' ones are described below:
  
-* the `compileRenderContentPage` and `compileRenderIndexPage` steps compiles ES6 into ES5 for the browser. These steps also convert the compileRenderContentPage.template.js into the compileRenderContentPage.js, adding widget specific config to the generic compileRenderContentPage.template.js to create a compileRenderContentPage.js specific for the widget under test. Same process for the index file
+* the `compileRenderContentPage` and `compileRenderIndexPage` steps compiles ES6 into ES5 for the browser. These steps also convert the compileRenderContentPage.template.js into the index.js, adding widget specific config to the generic compileRenderContentPage.template.js to create a index.js specific for the widget under test. Same process for the index file
 * the `copy` step copies all the html and image files from `theSrc/internal_www` into the `browser` area
-* the `buildContentManifest` step recursively scans the `browser/content` area and produces a manifest of all the content files in the area. This is used to build the index page that is displayed on http://127.0.0.1. Without this step the author would need to keep this list up to date by manual updates to the index.html file.
+* the `index` step recursively scans the `browser/content` area and produces a manifest of all the content files in the area. This is used to build the index page that is displayed on http://127.0.0.1. Without this step the author would need to keep this list up to date by manual updates to the index.html file.
 * the `connect` step starts a static content web server hosting all the files in the `browser` directory and makes them available on port 9000 of localhost (i.e., http://127.0.0.1:9000).
 * the `watch` step runs constantly and monitors all the source code and content files. Any time the files are saved, the `watch` step will rerun one of the other build steps to update the content, and then send a signal to the browser to force a page reload.
  
@@ -34,13 +34,13 @@ The internal web server is just hosting all the files in the `browser` area, whi
 
 Using the content file [theSrc/internal_www/content/examples/default.html](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/content/examples/default.html) as an example we will now go through how the widget gets drawn. Note this only applies when viewing a widget at `http://127.0.0.1:9000` (i.e., the **internal** web server). For notes on how htmlwidgets work with R, see [how the code works](https://github.com/Displayr/rhtmlTemplate/blob/master/docs/how_the_code_works.md). 
 
-* the [renderContentPage.js](/src/build/templates/renderContentPage.template.js) (sourced from a template file, mixed with widget config to produce the js file) script is a bundled JS file that contains all the widget code, all the dependencies, and some code that is only used in the internal web server.
+* the [renderContentPage.js](/src/tasks/web_server/compileRenderContentPage/renderContentPage.template.js) (sourced from a template file, mixed with widget config to produce the js file) script is a bundled JS file that contains all the widget code, all the dependencies, and some code that is only used in the internal web server.
 * Once the web page is loaded, the renderContentPage.js code scans the HTML content for DOM elements with a `class="example"`. 
 * For each example, it retrieves the widget config, and widget user state if provided, then builds a widget by calling the widget code using the same methods that the HtmlWidget library would use.
 
 ## Web Server Content Features
 
-There are several features provided by [renderContentPage.js](/src/build/templates/renderContentPage.template.js) that should be discussed.
+There are several features provided by [renderContentPage.js](/src/tasks/web_server/compileRenderContentPage/renderContentPage.template.js) that should be discussed.
 
 It is easiest to grasp by looking at an example in the rhtmlTemplate app:
  

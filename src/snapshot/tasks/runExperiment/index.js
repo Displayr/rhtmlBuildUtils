@@ -1,7 +1,7 @@
 const shell = require('shelljs')
 const fs = require('fs')
 const path = require('path')
-const widgetConfig = require('../../../build/lib/widgetConfig')
+const widgetConfig = require('../../../lib/widgetConfig')
 const { processTestPlans } = require('../../lib/processTestPlans')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 

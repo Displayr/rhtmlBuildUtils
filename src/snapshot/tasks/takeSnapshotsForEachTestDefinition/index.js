@@ -2,7 +2,7 @@ const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
-const widgetConfig = require('../../../build/lib/widgetConfig')
+const widgetConfig = require('../../../lib/widgetConfig')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
 

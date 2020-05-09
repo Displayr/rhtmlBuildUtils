@@ -1,4 +1,4 @@
-const { experimentDirectory } = require('../../../build/lib/widgetConfig')
+const { experimentDirectory } = require('../../../lib/widgetConfig')
 const path = require('path')
 
 module.exports = (gulp) => {

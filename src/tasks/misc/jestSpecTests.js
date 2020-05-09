@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
 const yargs = require('yargs')
-const widgetConfig = require('../lib/widgetConfig')
+const widgetConfig = require('../../lib/widgetConfig')
 const buildRoot = path.join(__dirname, '../../../')
 
 module.exports = () => {

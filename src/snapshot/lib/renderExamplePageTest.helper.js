@@ -4,7 +4,7 @@ const { mkdirp } = require('fs-extra')
 const path = require('path')
 const request = require('request-promise')
 const { configureToMatchImageSnapshot } = require('jest-image-snapshot')
-const widgetConfig = require('../../build/lib/widgetConfig')
+const widgetConfig = require('../../lib/widgetConfig')
 
 const configureImageSnapshotMatcher = (...snapshotCollectionName) => {
   const snapshotDirectory = path.join(

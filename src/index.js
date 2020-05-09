@@ -34,8 +34,9 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   }
 
   const taskDirectories = [
-    path.join(__dirname, 'build', 'tasks'),
-    path.join(__dirname, 'snapshot', 'tasks')
+    path.join(__dirname, 'tasks/misc'),
+    path.join(__dirname, 'tasks/webserver'),
+    path.join(__dirname, 'snapshot/tasks')
   ]
   taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp , taskDirectory, shouldRegister }))
 

@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const recursiveReaddirSync = require('recursive-readdir-sync')
 
-const widgetConfig = require('./widgetConfig')
+const widgetConfig = require('../../../lib/widgetConfig')
 
 const getContentFiles = function () {
   const baseContentPath = path.join(widgetConfig.basePath, 'theSrc/internal_www/content')

@@ -2,7 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const puppeteer = require('puppeteer')
 
-const widgetConfig = require('../../../build/lib/widgetConfig')
+const widgetConfig = require('../../../lib/widgetConfig')
 const testPlan = require(path.join(widgetConfig.basePath, '.tmp/test_plan'))
 
 const {
