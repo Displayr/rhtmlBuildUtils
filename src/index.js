@@ -3,7 +3,7 @@ const path = require('path')
 const opn = require('opn')
 const cliArgs = require('yargs').argv
 
-const DEBUG = 1
+const DEBUG = 0
 
 const taskSequences = {
   build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
