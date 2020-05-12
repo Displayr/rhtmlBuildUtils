@@ -3,10 +3,10 @@ const fs = require('fs')
 const path = require('path')
 const recursiveReaddirSync = require('recursive-readdir-sync')
 
-const widgetConfig = require('../../../lib/widgetConfig')
+const { basePath } = require('../../../lib/widgetConfig')
 
 const getContentFiles = function () {
-  const baseContentPath = path.join(widgetConfig.basePath, 'theSrc/internal_www/content')
+  const baseContentPath = path.join(basePath, 'theSrc/internal_www/content')
   const htmlExtensionRegex = new RegExp(/\.html$/)
   const contentTemplateRegex = new RegExp(/content_template\.html$/)
 

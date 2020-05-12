@@ -21,6 +21,8 @@ const taskSequences = {
     'processTestPlans'
   ],
   compileExperiments: [
+    'moveCrossExperimentSnapshotComparisonListToBrowser',
+    'buildExperimentManifest',
     'copyExperimentHtmlAndSnapshots',
     'compileExperimentList',
     'compileSnapshotList',

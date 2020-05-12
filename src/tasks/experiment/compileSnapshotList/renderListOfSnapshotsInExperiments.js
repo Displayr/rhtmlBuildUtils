@@ -5,6 +5,7 @@ import jsyaml from 'js-yaml'
 
 const EXPERIMENT_CONFIG_FILENAME = 'experimentConfig.json'
 const EXPERIMENT_TESTPLAN_FILENAME = 'testplan.yaml'
+const EXPERIMENT_NOTES_FILENAME = 'notes.html'
 
 $(document).ready(function () {
   const urlVars = getUrlVars()
@@ -27,7 +28,7 @@ const getExperimentDefinition = (experimentName) => fetch(`/experiments/${experi
   .then(response => response.text())
   .then(JSON.parse)
 
-const getExperimentNotes = (experimentName) => fetch(`/experiments/${experimentName}/notes.html`)
+const getExperimentNotes = (experimentName) => fetch(`/experiments/${experimentName}/${EXPERIMENT_NOTES_FILENAME}`)
   .then(response => response.text())
 
 const extractSnapshotNamesFromTestPlan = (testPlan) => {
@@ -53,8 +54,10 @@ const getUrlVars = () => {
 // NB reusing style definitions from index.css
 const renderPage = ({ experimentName, snapshotList, dimensions, hasBaseline, notesHtml }) => {
   const preAmble = $(`
-    <h1>Experiment: ${experimentName}</h1>
-    ${notesHtml}
+    <div>
+      <h1>Experiment: ${experimentName}</h1>
+      ${notesHtml}
+    </div>
   `)
 
   const testGroupContainer = $(`

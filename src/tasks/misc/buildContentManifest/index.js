@@ -1,7 +1,7 @@
 const Vinyl = require('vinyl')
 const stream = require('stream')
 
-const index = require('./buildContentManifest')
+const buildContentManifest = require('./buildContentManifest')
 
 function stringSrc (filename, string) {
   const src = stream.Readable({ objectMode: true })
@@ -18,7 +18,7 @@ function stringSrc (filename, string) {
 
 module.exports = function (gulp) {
   return function (done) {
-    const contentManifest = index()
+    const contentManifest = buildContentManifest()
     return stringSrc('contentManifest.json', JSON.stringify(contentManifest, {}, 2))
       .pipe(gulp.dest('browser/content'))
       .on('finish', done)

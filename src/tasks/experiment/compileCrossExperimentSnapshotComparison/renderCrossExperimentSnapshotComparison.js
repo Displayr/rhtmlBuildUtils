@@ -22,8 +22,8 @@ $(document).ready(function () {
   $('body').append(headerRowElement)
 
   const rowElement = $('<div class="row">')
-  const imageA = $(`<img class="experiment-image" src="/experiments/${experimentA}/results/${configA}/snapshots/${snapshotName}-snap.png"/>`)
-  const imageB = $(`<img class="experiment-image" src="/experiments/${experimentB}/results/${configB}/snapshots/${snapshotName}-snap.png"/>`)
+  const imageA = $(`<img class="experiment-image" src="/experiments/${experimentA}/results/${configA}/${snapshotName}-snap.png"/>`)
+  const imageB = $(`<img class="experiment-image" src="/experiments/${experimentB}/results/${configB}/${snapshotName}-snap.png"/>`)
 
   rowElement.append(imageA)
   rowElement.append(imageB)
