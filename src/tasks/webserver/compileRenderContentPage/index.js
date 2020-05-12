@@ -1,8 +1,8 @@
 const _ = require('lodash')
 const fs = require('fs-extra')
-const mustache = require('mustache')
 const path = require('path')
 const compileES6 = require('../../../lib/compileES6')
+const createFileFromTemplate = require('../../../lib/createFileFromTemplate')
 const { basePath, widgetFactory, internalWebSettings } = require('../../../lib/widgetConfig')
 
 const templateVariables = _.merge(
@@ -13,20 +13,18 @@ const templateVariables = _.merge(
 
 module.exports = function (gulp) {
   return function (callback) {
-    // step 1: apply vars to template, and save renderContentPage in .tmp
-    const templateFile = path.join(__dirname, './renderContentPage.template.js')
-    const entryPointDirectory = path.join(basePath, '.tmp')
     const entryPointFile = path.join(basePath, '.tmp/renderContentPage.js')
+
+    // step 1: apply vars to template, and save output in .tmp
+    createFileFromTemplate({
+      templateFile: path.join(__dirname, './renderContentPage.template.js'),
+      destinationFile: entryPointFile,
+      templateVariables
+    })
+
+    // step 2: browserify, which bundles all the code into single file for browser testing
     const destinationDirectory = path.join(basePath, 'browser/js/')
-
-    fs.mkdirsSync(entryPointDirectory)
     fs.mkdirsSync(destinationDirectory)
-
-    const templateContent = fs.readFileSync(templateFile, 'utf8')
-    const output = mustache.render(templateContent, templateVariables)
-    fs.writeFileSync(entryPointFile, output, 'utf8')
-
-    // step 2: browserify renderContentPage.js, which bundles all the widget code into single file for browser testing
     return compileES6({ gulp, entryPointFile, destinationDirectory, minify: false, callback })
   }
 }
