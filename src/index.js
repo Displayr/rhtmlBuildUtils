@@ -24,11 +24,7 @@ const taskSequences = {
     'moveCrossExperimentSnapshotComparisonListToBrowser',
     'buildExperimentManifest',
     'copyExperimentHtmlAndSnapshots',
-    'compileExperimentList',
-    'compileSnapshotList',
-    'compileSnapshotComparison',
-    'compileCrossExperimentSnapshotComparison',
-    'compileCrossExperimentSnapshotList'
+    'compileExperimentJs'
   ]
 }
 
@@ -95,7 +91,9 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 }
 
 function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
+  const excludedFilesAndDirectories = ['assets']
   fs.readdirSync(taskDirectory)
+    .filter(fileName => !excludedFilesAndDirectories.includes(fileName))
     .map(function (taskName) {
       if (DEBUG) { console.log(`dir: ${taskDirectory} task: ${taskName}`) }
       if (shouldRegister(taskName)) {
