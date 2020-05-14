@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const mustache = require('mustache')
 const path = require('path')
 
-module.exports = function ({templateFile, templateVariables, destinationFile}) {
+module.exports = function ({ templateFile, templateVariables, destinationFile }) {
   const destinationDirectory = path.dirname(destinationFile)
   fs.mkdirsSync(destinationDirectory)
 

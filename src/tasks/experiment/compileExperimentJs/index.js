@@ -19,7 +19,6 @@ module.exports = function (gulp) {
       .then(jsFilePaths => {
         const compilePromises = jsFilePaths.map(jsFilePath => {
           return new Promise((resolve, reject) => {
-
             const destinationDirectory = determineDestinationDirectory({ jsFilePath })
 
             compileES6({

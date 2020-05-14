@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import $ from 'jquery'
 import jsyaml from 'js-yaml'
+/* global fetch */
 
 const getExperimentList = () => fetch('/content/experimentManifest.json')
   .then(response => response.text())
@@ -10,16 +11,15 @@ const getCrossExperimentList = () => fetch('/content/crossExperimentSnapshotComp
   .then(response => response.text())
   .then(jsyaml.safeLoad)
   .then(x => x['crossExperimentSnapshotComparisons'])
-  .catch(err => {
+  .catch(() => {
     console.log('could not fetch /content/crossExperimentSnapshotComparisons.yaml. Skipping')
     return []
   })
 
-
 $(document).ready(function () {
   Promise.all([getExperimentList(), getCrossExperimentList()])
     .then(([experimentNames, crossExperimentList]) => {
-      renderExperimentList(experimentNames),
+      renderExperimentList(experimentNames)
       renderCrossExperimentList(crossExperimentList)
     })
 })
