@@ -11,12 +11,6 @@ module.exports = () => {
     boolean: true,
     default: true
   })
-  yargs.option('updateSnapshots', {
-    alias: 'u',
-    describe: 'accept all snapshots',
-    boolean: true,
-    default: false
-  })
   yargs.option('branch', {
     alias: 'b',
     string: true,
@@ -28,19 +22,14 @@ module.exports = () => {
     describe: 'which env are we testing (used to choose snapshot set)',
     choices: ['local', 'travis']
   })
-  yargs.option('testNamePattern', {
-    alias: 't',
-    string: true,
-    describe: 'filter tests using pattern'
+  yargs.option('headless', {
+    alias: 'h',
+    describe: 'do not show browser during test',
+    boolean: true
   })
   yargs.option('log', {
     alias: 'l',
     describe: 'echo browser ouptut',
-    boolean: true
-  })
-  yargs.option('headless', {
-    alias: 'h',
-    describe: 'do not show browser during test',
     boolean: true
   })
   yargs.option('slowMo', {
@@ -52,6 +41,17 @@ module.exports = () => {
     alias: 'd',
     string: true,
     describe: 'base snapshot directory'
+  })
+  yargs.option('testNamePattern', {
+    alias: 't',
+    string: true,
+    describe: 'filter tests using pattern'
+  })
+  yargs.option('updateSnapshots', {
+    alias: 'u',
+    describe: 'accept all snapshots',
+    boolean: true,
+    default: false
   })
   return yargs.parse()
 }

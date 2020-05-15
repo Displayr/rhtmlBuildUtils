@@ -46,7 +46,6 @@ then in your project gulpfile.js:
       exclusions: dontRegisterTheseTasks 
     })
 
-TODO: UPDATE DOC LINE : file path incorect
 By calling registerGulpTasks you will add all the tasks defined in [src/tasks](src/tasks) to your project. These tasks are enumerated [below](#gulp-task-reference).
 
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
@@ -97,15 +96,14 @@ The top level tasks are those you will likely run as part of the widget build pr
 
 `gulp testVisual` : start server (`i.e., gulp serve`), take snapshots for each test definition. This command takes several parameters
 
-* (--acceptNewSnapshots) accept new snapshots. Defaults to true
-* (--branch) which branch. This determines where to save updated snapshots, and which snapshot set to use for a baseline
-* (--env) which env (local or travis). Always use local unless you are in travis.ci
-* (--headless) show or hide chrome during testing. Default true, which means hide chrome
-* (--log) echo browser log output. Not currently implemented
-* (--slowMo) numeriuc. add an X millisecond delay between each browser command. Useful for debugging interaction tests 
-* (--snapshotDirectory) snapshots directory. where to read and write snapshots. This defaults to <widgetConfig.snapshotDirectory>/<ENV>/<BRANCH>
-* (--testNamePattern -t) run subset of tests using this string to filter snapshots. Can be file name or test name
-* (--updateSnapshots -u) accept all snapshots even if they have changed. Write the new snapshots into the snapshot directory
+* **--acceptNewSnapshots**: accept new snapshots. Defaults to true
+* **--branch**: which branch. This determines where to save updated snapshots, and which snapshot set to use for a baseline
+* **--env**: which env (local or travis). Always use local unless you are in travis.ci
+* **--headless**: show or hide chrome during testing. Default true, which means hide chrome
+* **--slowMo**: numeric. add an X millisecond delay between each browser command. Useful for debugging interaction tests 
+* **--snapshotDirectory**: snapshots directory. where to read and write snapshots. This defaults to <widgetConfig.snapshotDirectory>/<ENV>/<BRANCH>
+* **--testNamePattern**: run subset of tests using this string to filter snapshots. Can be file name or test name
+* **--updateSnapshots**: accept all snapshots even if they have changed. Write the new snapshots into the snapshot directory
 
 `gulp testVisual_s` : just run the visual regression suite (skip the other steps, `gulp serve` must already be running).
 

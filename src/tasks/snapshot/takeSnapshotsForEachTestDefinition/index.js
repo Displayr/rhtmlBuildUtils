@@ -13,15 +13,15 @@ const ECHO_PASSTHROUGH_CONFIG = true
 module.exports = () => {
   return function (done) {
     // args
-    // * (--updateSnapshots -u) accept all snapshots
+    // * (--acceptNewSnapshots) accept new snapshots
     // * (--branch) which branch
     // * (--env) which env (local or travis)
-    // * (--testNamePattern -t) run subset of tests
-    // * (--log) echo browser log output
     // * (--headless) headless: --snapshotTesting.puppeteer.headless=0
+    // * (--log) echo browser log output
     // * (--slowMo) slowmotion: --snapshotTesting.puppeteer.slowMo=60
     // * (--snapshotDirectory) snapshots directory
-    // * (--acceptNewSnapshots) accept new snapshots
+    // * (--testNamePattern -t) run subset of tests
+    // * (--updateSnapshots -u) accept all snapshots
     const args = getCommandLineArgs()
 
     const testRoots = getTestRoots({ buildRoot, widgetConfig })
