@@ -1,14 +1,16 @@
 # Overview
 
-The test plan is composed of yaml files in the `theSrc/test_plans` directory that are used to build html pages that render the widgets with specific configs. See the following repos for examples of test_plans:
+The test plan is composed of yaml files in the `theSrc/test/snapshotTestDefinitions` directory that are used to build html pages that render the widgets with specific configs. See the following repos for examples of test_plans:
 
+ * [rhtmlTemplate](https://github.com/Displayr/rhtmlTemplate)
+ * [rhtmlLabeledScatter](https://github.com/Displayr/rhtmlLabeledScatter)
  * [rhtmlDonut](https://github.com/Displayr/rhtmlDonut)
  * [rhtmlPalmTrees](https://github.com/Displayr/rhtmlPalmTrees)
  * [rhtmlMoonPlot](https://github.com/Displayr/rhtmlMoonPlot)
 
-During the BDD test phase in Travis CI snapshots are taken of these pages, and compared to a baseline using Applitools.
+During the test phase run locally and in Travis CI snapshots are taken of these pages, and compared to a baseline that is maintained in the `theSrc/test/snapshots` directory of the widget repo.
 
-This provides coverage against any form of static visual regression. 
+This provides coverage against static visual regressions. 
 
 YAML is a config specification language that is meant to be easier to edit than JSON. Read more [here](https://yaml.org/spec/1.2/spec.html#id2761803) ; skip to chapter 2 for examples. 
 

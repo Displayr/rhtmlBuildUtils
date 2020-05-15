@@ -34,13 +34,13 @@ The internal web server is just hosting all the files in the `browser` area, whi
 
 Using the content file [theSrc/internal_www/content/examples/default.html](https://github.com/Displayr/rhtmlTemplate/blob/master/theSrc/internal_www/content/examples/default.html) as an example we will now go through how the widget gets drawn. Note this only applies when viewing a widget at `http://127.0.0.1:9000` (i.e., the **internal** web server). For notes on how htmlwidgets work with R, see [how the code works](https://github.com/Displayr/rhtmlTemplate/blob/master/docs/how_the_code_works.md). 
 
-* the [renderContentPage.js](/src/build/templates/renderContentPage.template.js) (sourced from a template file, mixed with widget config to produce the js file) script is a bundled JS file that contains all the widget code, all the dependencies, and some code that is only used in the internal web server.
+* the [renderContentPage.js](/src/tasks/web_server/compileRenderContentPage/renderContentPage.template.js) (sourced from a template file, mixed with widget config to produce the js file) script is a bundled JS file that contains all the widget code, all the dependencies, and some code that is only used in the internal web server.
 * Once the web page is loaded, the renderContentPage.js code scans the HTML content for DOM elements with a `class="example"`. 
 * For each example, it retrieves the widget config, and widget user state if provided, then builds a widget by calling the widget code using the same methods that the HtmlWidget library would use.
 
 ## Web Server Content Features
 
-There are several features provided by [renderContentPage.js](/src/build/templates/renderContentPage.template.js) that should be discussed.
+There are several features provided by [renderContentPage.js](/src/tasks/webserver/compileRenderContentPage/renderContentPage.template.js) that should be discussed.
 
 It is easiest to grasp by looking at an example in the rhtmlTemplate app:
  

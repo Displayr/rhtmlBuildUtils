@@ -3,13 +3,29 @@ const path = require('path')
 const opn = require('opn')
 const cliArgs = require('yargs').argv
 
+const DEBUG = 0
+
 const taskSequences = {
-  build: [ 'clean', ['compileES6', 'core', 'lint'], ['makeDocs', 'testSpecs'] ],
+  build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
   core: [ 'less', 'copy' ],
-  serve: [ ['core', 'compileInternal', 'connect', 'openBrowser'], 'watch' ],
-  testVisual: [ 'core', 'compileInternal', 'connect', 'runProtractor' ],
-  testVisual_s: [ 'runProtractor' ],
-  compileInternal: [ 'buildContentManifest', 'prepareInternalWwwCss', 'prepareRenderExamplePage', 'compileRenderContentPage', 'compileRenderIndexPage', 'buildSnapshotsFeatureFile', 'processTestPlans' ]
+  serve: [ ['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch' ],
+  testSpecs: ['jestSpecTests'],
+  testVisual: [ 'core', 'compileInternal', 'connect', 'takeSnapshotsForEachTestDefinition' ],
+  testVisual_s: [ 'takeSnapshotsForEachTestDefinition' ],
+  compileInternal: [
+    'buildContentManifest',
+    'prepareInternalWwwCss',
+    'prepareRenderExamplePage',
+    'compileRenderContentPage',
+    'compileRenderIndexPage',
+    'processTestPlans'
+  ],
+  compileExperiments: [
+    'moveCrossExperimentSnapshotComparisonListToBrowser',
+    'buildExperimentManifest',
+    'copyExperimentHtmlAndSnapshots',
+    'compileExperimentJs'
+  ]
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {
@@ -17,17 +33,15 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
     return !exclusions.includes(taskName)
   }
 
-  const pathToTaskFiles = path.join(__dirname, 'build', 'tasks')
-  fs.readdirSync(pathToTaskFiles)
-    .filter(onlyDotJsFiles)
-    .map(stripJsSuffix)
-    .map(function (taskName) {
-      if (shouldRegister(taskName)) {
-        const modulePath = path.join(pathToTaskFiles, taskName)
-        gulp.task(taskName, require(modulePath)(gulp))
-      }
-    })
+  const taskDirectories = [
+    path.join(__dirname, 'tasks/misc'),
+    path.join(__dirname, 'tasks/webserver'),
+    path.join(__dirname, 'tasks/snapshot'),
+    path.join(__dirname, 'tasks/experiment')
+  ]
+  taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp, taskDirectory, shouldRegister }))
 
+  // move to task directory
   if (shouldRegister('openBrowser')) {
     const port = cliArgs.port || 9000
     const openBrowser = function (done) {
@@ -35,6 +49,10 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
       done()
     }
     gulp.task('openBrowser', gulp.series(openBrowser))
+  }
+
+  if (shouldRegister('compileExperiments')) {
+    gulp.task('compileExperiments', gulp.series(...taskSequences.compileExperiments))
   }
 
   if (shouldRegister('compileInternal')) {
@@ -57,6 +75,10 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
     gulp.task('testVisual_s', gulp.series(...taskSequences.testVisual_s))
   }
 
+  if (shouldRegister('testSpecs')) {
+    gulp.task('testSpecs', gulp.series(...taskSequences.testSpecs))
+  }
+
   if (shouldRegister('build')) {
     gulp.task('build', gulp.series(...taskSequences.build))
   }
@@ -68,8 +90,17 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
   return gulp
 }
 
-function onlyDotJsFiles (file) {
-  return (/\.js$/i).test(file)
+function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
+  const excludedFilesAndDirectories = ['assets']
+  fs.readdirSync(taskDirectory)
+    .filter(fileName => !excludedFilesAndDirectories.includes(fileName))
+    .map(function (taskName) {
+      if (DEBUG) { console.log(`dir: ${taskDirectory} task: ${taskName}`) }
+      if (shouldRegister(taskName)) {
+        const modulePath = path.join(taskDirectory, taskName)
+        gulp.task(stripJsSuffix(taskName), require(modulePath)(gulp))
+      }
+    })
 }
 
 function stripJsSuffix (file) {
@@ -78,5 +109,9 @@ function stripJsSuffix (file) {
 
 module.exports = {
   registerGulpTasks,
-  taskSequences
+  taskSequences,
+  snapshotTesting: {
+    puppeteer: require('puppeteer'),
+    'renderExamplePageTestHelper': require('./lib/renderExamplePageTest.helper')
+  }
 }
