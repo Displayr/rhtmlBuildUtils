@@ -97,7 +97,7 @@
 
 # Widget Renderer : Bonuses
 
-* can build tutorials as its all just HTML
+* can build tutorials as its all just HTML: see Pictograph repo
 * can specify widget sizing
 * can add rerender capabilities
 * can add resize capabilities
