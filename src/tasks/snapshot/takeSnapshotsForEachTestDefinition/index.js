@@ -1,3 +1,5 @@
+// TODO address duplication between takeExperimentSnapshots/index.js and takeSnapshotsForEachTestDefinition/index.js
+
 const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
@@ -6,8 +8,6 @@ const widgetConfig = require('../../../lib/widgetConfig')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
 
-// NB must work around this issue : https://github.com/facebook/jest/issues/2145
-const jestAllowTestInNodeModulesConfigPath = path.join(__dirname, '../../../config/jest/allow_tests_in_node_modules_directory.js')
 const ECHO_PASSTHROUGH_CONFIG = true
 
 module.exports = () => {
@@ -63,7 +63,8 @@ const getJestPath = ({ buildRoot, widgetConfig }) => {
 }
 
 const getTestRoots = ({ buildRoot, widgetConfig }) => {
-  const takeSnapshotForEachTestDefinition = __dirname
+  // NB takeSnapshots.jest.test.js is copied into <project_root>/.tmp (done by copySnapshotJestRunnerToProject task)
+  const takeSnapshotForEachTestDefinition = path.join(widgetConfig.basePath, '.tmp')
   const interactionTestPath = path.join(widgetConfig.basePath, widgetConfig.snapshotTesting.interactionTestDirectory)
   return [
     takeSnapshotForEachTestDefinition,
@@ -75,11 +76,10 @@ const getCommandString = ({ testRoots, jestPath, args }) => {
   const roots = testRoots.map(root => `--roots="${root}"`).join(' ')
   const acceptNewSnapshots = (args.acceptNewSnapshots) ? `--ci=0` : ''
   const testNamePattern = (args.testNamePattern) ? `-t=${args.testNamePattern}` : ''
-  const testFilePattern = "--testMatch='**/*.jest.test.js' --testMatch='**/jestRunner.js'"
-  const jestConfig = `--config=${jestAllowTestInNodeModulesConfigPath}`
+  const testFilePattern = "--testMatch='**/*.jest.test.js'"
   const updateSnapshots = (args.updateSnapshots) ? `-u` : ''
 
-  return `${jestPath} ${roots} ${testFilePattern} ${acceptNewSnapshots} ${updateSnapshots} ${testNamePattern} ${jestConfig}`
+  return `${jestPath} ${roots} ${testFilePattern} ${acceptNewSnapshots} ${updateSnapshots} ${testNamePattern}`
 }
 
 const writePassThroughConfigFile = ({ widgetConfig, args }) => {

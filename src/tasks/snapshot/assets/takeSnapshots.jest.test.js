@@ -1,17 +1,26 @@
+// TODO address duplication between takeExperimentSnapshots.jest.test.js and takeSnapshots.jest.test
+
 const _ = require('lodash')
-const path = require('path')
 const puppeteer = require('puppeteer')
-
-const widgetConfig = require('../../../lib/widgetConfig')
-const testPlan = require(path.join(widgetConfig.basePath, '.tmp/test_plan'))
-
 const {
-  configureImageSnapshotMatcher,
-  puppeteerSettings,
-  jestTimeout,
-  testSnapshots,
-  waitForWidgetToLoad
-} = require('../../../lib/renderExamplePageTest.helper')
+  widgetConfig,
+  snapshotTesting: {
+    renderExamplePageTestHelper: {
+      configureImageSnapshotMatcher,
+      puppeteerSettings,
+      jestTimeout,
+      testSnapshots,
+      waitForWidgetToLoad
+    }
+  }
+} = require('rhtmlBuildUtils')
+
+// NB assume test_plan is in <project_root>/.tmp
+// NB assume that this file is copied into <project_root>/.tmp (done by copySnapshotJestRunnerToProject task)
+// we have to copy this test file into place in the project because JEST really does not want to run jest test files that are inside node_modules directory.
+//   and rhtmlBuildUtils will be in the node_modules directory for the widget being tested
+
+const testPlan = require('./test_plan') // NB assume test_plan is in <project_root>/.tmp
 
 jest.setTimeout(jestTimeout)
 
@@ -39,17 +48,13 @@ describe('snapshots', () => {
   })
 
   test.each(arrayOfTests)(`%#: %s`, async (testName, testConfig) => {
-    console.log(testName)
-
     configureImageSnapshotMatcher('testPlans', testConfig.groupName)
 
     const page = await browser.newPage()
-
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testName))
     await page.goto(`http://localhost:9000${testConfig.renderExampleUrl}`)
     await waitForWidgetToLoad({ page })
     await testSnapshots({ page, snapshotName: testConfig.testname })
-
     await page.close()
   })
 

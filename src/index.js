@@ -7,11 +7,12 @@ const DEBUG = 0
 
 const taskSequences = {
   build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
-  core: [ 'less', 'copy' ],
-  serve: [ ['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch' ],
-  testSpecs: ['jestSpecTests'],
-  testVisual: [ 'core', 'compileInternal', 'connect', 'takeSnapshotsForEachTestDefinition' ],
-  testVisual_s: [ 'takeSnapshotsForEachTestDefinition' ],
+  compileExperiments: [
+    'moveCrossExperimentSnapshotComparisonListToBrowser',
+    'buildExperimentManifest',
+    'copyExperimentHtmlAndSnapshots',
+    'compileExperimentJs'
+  ],
   compileInternal: [
     'buildContentManifest',
     'prepareInternalWwwCss',
@@ -20,12 +21,12 @@ const taskSequences = {
     'compileRenderIndexPage',
     'processTestPlans'
   ],
-  compileExperiments: [
-    'moveCrossExperimentSnapshotComparisonListToBrowser',
-    'buildExperimentManifest',
-    'copyExperimentHtmlAndSnapshots',
-    'compileExperimentJs'
-  ]
+  core: [ 'less', 'copy' ],
+  runExperiment: [ 'copyExperimentSnapshotJestRunnerToProject', 'takeExperimentSnapshots' ],
+  serve: [ ['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch' ],
+  testSpecs: ['jestSpecTests'],
+  testVisual: [ 'core', 'compileInternal', 'connect', 'copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition' ],
+  testVisual_s: [ 'copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition' ]
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {
@@ -51,37 +52,23 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
     gulp.task('openBrowser', gulp.series(openBrowser))
   }
 
-  if (shouldRegister('compileExperiments')) {
-    gulp.task('compileExperiments', gulp.series(...taskSequences.compileExperiments))
-  }
-
-  if (shouldRegister('compileInternal')) {
-    gulp.task('compileInternal', gulp.series(...taskSequences.compileInternal))
-  }
-
-  if (shouldRegister('core')) {
-    gulp.task('core', gulp.series(...taskSequences.core))
-  }
-
-  if (shouldRegister('serve')) {
-    gulp.task('serve', gulp.series(...taskSequences.serve))
-  }
-
-  if (shouldRegister('testVisual')) {
-    gulp.task('testVisual', gulp.series(...taskSequences.testVisual))
-  }
-
-  if (shouldRegister('testVisual_s')) {
-    gulp.task('testVisual_s', gulp.series(...taskSequences.testVisual_s))
-  }
-
-  if (shouldRegister('testSpecs')) {
-    gulp.task('testSpecs', gulp.series(...taskSequences.testSpecs))
-  }
-
-  if (shouldRegister('build')) {
-    gulp.task('build', gulp.series(...taskSequences.build))
-  }
+  // NB order matters: a task cannot reference an undefined task
+  const conditionallyRegisterTheseTasks = [
+    'core',
+    'build',
+    'compileExperiments',
+    'compileInternal',
+    'serve',
+    'runExperiment',
+    'testVisual',
+    'testVisual_s',
+    'testSpecs'
+  ]
+  conditionallyRegisterTheseTasks.forEach(taskName => {
+    if (shouldRegister(taskName)) {
+      gulp.task(taskName, gulp.series(...taskSequences[taskName]))
+    }
+  })
 
   if (shouldRegister('default')) {
     gulp.task('default', gulp.series('build'))
@@ -108,6 +95,7 @@ function stripJsSuffix (file) {
 }
 
 module.exports = {
+  widgetConfig: require('./lib/widgetConfig'),
   registerGulpTasks,
   taskSequences,
   snapshotTesting: {

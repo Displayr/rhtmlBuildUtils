@@ -1,20 +1,24 @@
+// TODO address duplication between takeExperimentSnapshots.jest.test.js and takeSnapshots.jest.test
+
 const _ = require('lodash')
 const path = require('path')
 const puppeteer = require('puppeteer')
+const {
+  widgetConfig,
+  snapshotTesting: {
+    renderExamplePageTestHelper: {
+      baseConfigureImageSnapshotMatcher,
+      puppeteerSettings,
+      jestTimeout,
+      testSnapshots,
+      waitForWidgetToLoad
+    }
+  }
+} = require('rhtmlBuildUtils')
 
-const widgetConfig = require('../../../lib/widgetConfig')
-const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp', 'experiment_dynamic_config.json')
+const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp/experiment_dynamic_config.json')
 const { snapshotDirectory, testPlanFile } = require(experimentDynamicConfigFile)
 const testPlan = require(testPlanFile)
-
-const {
-  baseConfigureImageSnapshotMatcher,
-  puppeteerSettings,
-  jestTimeout,
-  testSnapshots,
-  waitForWidgetToLoad
-} = require('../../../lib/renderExamplePageTest.helper')
-
 jest.setTimeout(jestTimeout)
 
 const arrayOfTests = _(testPlan)
