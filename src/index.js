@@ -80,12 +80,13 @@ function registerGulpTasks ({ gulp, exclusions = [] }) {
 function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
   const excludedFilesAndDirectories = ['assets']
   fs.readdirSync(taskDirectory)
+    .map(stripJsSuffix)
     .filter(fileName => !excludedFilesAndDirectories.includes(fileName))
     .map(function (taskName) {
       if (DEBUG) { console.log(`dir: ${taskDirectory} task: ${taskName}`) }
       if (shouldRegister(taskName)) {
         const modulePath = path.join(taskDirectory, taskName)
-        gulp.task(stripJsSuffix(taskName), require(modulePath)(gulp))
+        gulp.task(taskName, require(modulePath)(gulp))
       }
     })
 }

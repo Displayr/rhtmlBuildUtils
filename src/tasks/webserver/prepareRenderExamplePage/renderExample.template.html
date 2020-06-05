@@ -64,7 +64,7 @@
     // A) renderContentPage.js does not pick up the class=example before we have added the data- properties to render-example-container
     // B) renderContentPage.js has added addExampleTo the window
     setTimeout(() => {
-      const urlVars = getUrlVars();
+      const urlVars = getUrlVars()
 
       const configPromise = (_.has(urlVars, 'config'))
         ? parseConfig(urlVars.config)
