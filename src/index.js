@@ -99,6 +99,9 @@ module.exports = {
   widgetConfig: require('./lib/widgetConfig'),
   registerGulpTasks,
   taskSequences,
+  lib: {
+    compileES6: require('./lib/compileES6')
+  },
   snapshotTesting: {
     puppeteer: require('puppeteer'),
     'renderExamplePageTestHelper': require('./lib/renderExamplePageTest.helper')

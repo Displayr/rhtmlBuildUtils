@@ -60,7 +60,6 @@ module.exports = {
       failureThresholdType: 'percent' // pixel or percent
     },
 
-    // TODO this is scatterplot specific
     consoleLogHandler: (msg, testName) => console.log(msg._text)
   },
 
