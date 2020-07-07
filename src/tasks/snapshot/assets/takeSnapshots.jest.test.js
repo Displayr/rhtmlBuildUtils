@@ -54,6 +54,7 @@ describe('snapshots', () => {
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testName))
     await page.goto(`http://localhost:9000${testConfig.renderExampleUrl}`)
     await waitForWidgetToLoad({ page })
+    await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
     await testSnapshots({ page, snapshotName: testConfig.testname })
     await page.close()
   })
