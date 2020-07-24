@@ -75,7 +75,10 @@
         console.log(JSON.stringify(renderExampleConfig, {}, 2))
 
         const examplesContainer = $('#examples-container')
-        if (renderExampleConfig.testname) { examplesContainer.attr('snapshot-name', renderExampleConfig.testname) }
+        if (renderExampleConfig.testname) {
+          const testnameDiv = $('<h3 class="testname">').html(renderExampleConfig.testname)
+          examplesContainer.append(testnameDiv)
+        }
 
         const widgetConfigs = (_.isArray(renderExampleConfig.widgets)) ? renderExampleConfig.widgets : [renderExampleConfig.widgets]
 
