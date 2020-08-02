@@ -4,7 +4,7 @@
     "node": ">=6.9.5"
   },
   "name": "rhtmlBuildUtils",
-  "version": "5.0.4",
+  "version": "6.0.0",
   "description": "build tools for Displayr rhtml widgets",
   "main": "src/index.js",
   "scripts": {
