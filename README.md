@@ -26,6 +26,7 @@ HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) base
 * [snapshotting_system](./docs/snapshotting_system.md): how to write visual regression tests for your widget
 * [working with displayr](./docs/working_with_displayr.md): notes on the nuances of how displayr interacts with htmlwidgets
 * [widget_repo_layout](./docs/widget_repo_layout.md): how to layout your widget repo so it works with rhtmlBuildUtils
+* [experiment_framework](./docs/experiment_framework.md): (WIP) experiment framework docs
 
 # Usage in a widget repo
 
