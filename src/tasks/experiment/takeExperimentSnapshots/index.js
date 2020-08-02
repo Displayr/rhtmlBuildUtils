@@ -13,7 +13,8 @@ const ECHO_PASSTHROUGH_CONFIG = true
 
 module.exports = () => {
   return function (done) {
-    const { name: experimentName } = getCommandLineArgs()
+    const { name: experimentName, iteration: iterationFilter, baseline: runBaseline } = getCommandLineArgs()
+
     const experimentDirectory = path.join(widgetConfig.basePath, widgetConfig.experimentDirectory, experimentName)
     if (!fs.existsSync(experimentDirectory)) {
       throw new Error(`experiment directory "${experimentDirectory}" not found`)
@@ -37,7 +38,7 @@ module.exports = () => {
     const snapshotTestCommand = `${jestPath} --roots="${experimentRunnerDirectory}" --testMatch="**/takeExperimentSnapshots.jest.test.js"`
     processTestPlans(experimentDirectory, [testPlanFile])
       .then(() => {
-        if (baseline) {
+        if (baseline && runBaseline) {
           console.log('running experiment config baseline')
           writePassThroughConfigFile({ experimentConfigName: 'baseline', experimentResultsDirectory, testPlanFile, experimentDynamicConfigFile })
           setOverrides(baseline.override)
@@ -48,10 +49,14 @@ module.exports = () => {
 
         for (let i = 0; i < experiments.length; i++) {
           const { name, override } = experiments[i]
-          console.log(`running experiment config ${name}`)
-          writePassThroughConfigFile({ experimentConfigName: name, experimentResultsDirectory, testPlanFile, experimentDynamicConfigFile })
-          setOverrides(override)
-          shell.exec(snapshotTestCommand)
+          if (!iterationFilter || name === iterationFilter) {
+            console.log(`running experiment config ${name}`)
+            writePassThroughConfigFile({ experimentConfigName: name, experimentResultsDirectory, testPlanFile, experimentDynamicConfigFile })
+            setOverrides(override)
+            shell.exec(snapshotTestCommand)
+          } else {
+            console.log(`skipping experiment config ${name}`)
+          }
         }
       })
       .then(() => done())
