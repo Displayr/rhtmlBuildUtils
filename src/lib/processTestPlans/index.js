@@ -11,7 +11,7 @@ const widgetConfig = require('../widgetConfig')
 // Big Workers first
 // ---------
 
-function index (testPlansDir, testPlanDestinations) {
+function processTestPlans (testPlansDir, testPlanDestinations) {
   if (fs.existsSync(testPlansDir)) {
     return _loadConfigs(testPlansDir)
       .then(_extractGroupedTestCases)
@@ -232,6 +232,11 @@ function _extractCommonParamsFromTestDefinition (testDefinition) {
       throw new Error(`invalid rowSize: ${testDefinition.rowSize}`)
     }
   }
+
+  if (_.has(testDefinition, 'pixelmatchConfig')) {
+    renderExampleConfig.pixelmatchConfig = testDefinition.pixelmatchConfig
+  }
+
   return renderExampleConfig
 }
 
@@ -318,6 +323,6 @@ function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS
 }
 
 module.exports = {
-  processTestPlans: index,
+  processTestPlans,
   _extractGroupedTestCases // NB exported test only
 }

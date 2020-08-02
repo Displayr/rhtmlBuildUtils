@@ -48,7 +48,10 @@ describe('snapshots', () => {
   })
 
   test.each(arrayOfTests)(`%#: %s`, async (testName, testConfig) => {
-    configureImageSnapshotMatcher('testPlans', testConfig.groupName)
+    configureImageSnapshotMatcher({
+      collectionIdentifier: ['testPlans', testConfig.groupName],
+      pixelMatchConfig: (testConfig.pixelmatchConfig) ? testConfig.pixelmatchConfig : {}
+    })
 
     const page = await browser.newPage()
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testName))

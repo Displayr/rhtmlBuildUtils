@@ -6,21 +6,22 @@ const request = require('request-promise')
 const { configureToMatchImageSnapshot } = require('jest-image-snapshot')
 const widgetConfig = require('./widgetConfig')
 
-const configureImageSnapshotMatcher = (...snapshotCollectionName) => {
+const configureImageSnapshotMatcher = ({ collectionIdentifier, pixelMatchConfig = {} } = {}) => {
+  const collectionParts = (_.isArray(collectionIdentifier)) ? collectionIdentifier : [collectionIdentifier]
   const snapshotDirectory = path.join(
     widgetConfig.basePath,
     widgetConfig.snapshotTesting.snapshotDirectory,
     widgetConfig.snapshotTesting.env,
     widgetConfig.snapshotTesting.branch,
-    ...snapshotCollectionName
+    ...collectionParts
   )
-  return baseConfigureImageSnapshotMatcher(snapshotDirectory)
+  return baseConfigureImageSnapshotMatcher(snapshotDirectory, pixelMatchConfig)
 }
 
-const baseConfigureImageSnapshotMatcher = (snapshotDirectory) => {
+const baseConfigureImageSnapshotMatcher = (snapshotDirectory, pixelMatchConfig) => {
   console.log('snapshotDirectory', snapshotDirectory)
   mkdirp(snapshotDirectory)
-  const config = _.defaults({}, widgetConfig.snapshotTesting.pixelmatch, { customSnapshotsDir: snapshotDirectory })
+  const config = _.defaults({}, pixelMatchConfig, widgetConfig.snapshotTesting.pixelmatch, { customSnapshotsDir: snapshotDirectory })
   const toMatchImageSnapshot = configureToMatchImageSnapshot(config)
   expect.extend({ toMatchImageSnapshot })
 }
