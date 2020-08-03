@@ -13,16 +13,16 @@ module.exports = function (gulp) {
 
 const processInternalWwwCss = () => {
   createFileFromTemplate({
-    templateFile: path.join(__dirname, './internal_www.template.css'),
-    destinationFile: path.join(basePath, 'browser/styles/internal_www.css'),
+    templateFile: path.join(__dirname, 'internal_www.template.css'),
+    destinationFile: path.join(basePath, 'browser', 'styles', 'internal_www.css'),
     templateVariables: internalWebSettings
   })
 }
 
 const processIndexCss = () => {
-  const cssFile = path.join(__dirname, './index.css')
-  const destinationDirectory = path.join(basePath, 'browser/styles')
-  const destinationFile = path.join(basePath, 'browser/styles/index.css')
+  const cssFile = path.join(__dirname, 'index.css')
+  const destinationDirectory = path.join(basePath, 'browser', 'styles')
+  const destinationFile = path.join(basePath, 'browser', 'styles', 'index.css')
 
   fs.mkdirsSync(destinationDirectory)
   fs.copyFileSync(cssFile, destinationFile)

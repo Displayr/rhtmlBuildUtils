@@ -11,7 +11,8 @@ module.exports = (gulp) => {
       .pipe(gulp.dest('browser/experiments'))
       .on('finish', incrementFinishedCount)
 
-    gulp.src([`${path.join(__dirname, '../assets/ui')}/**/*.html`, `${path.join(__dirname, '../assets/ui')}/**/*.css`], {})
+    const uiDirectory = path.join(__dirname, '..', 'assets', 'ui')
+    gulp.src([`${uiDirectory}/**/*.html`, `${uiDirectory}/**/*.css`], {})
       .pipe(gulp.dest('browser/experiments/ui'))
       .on('finish', incrementFinishedCount)
 

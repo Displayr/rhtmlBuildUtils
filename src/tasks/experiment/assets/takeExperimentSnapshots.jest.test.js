@@ -16,7 +16,7 @@ const {
   }
 } = require('rhtmlBuildUtils')
 
-const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp/experiment_dynamic_config.json')
+const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp', 'experiment_dynamic_config.json')
 const { snapshotDirectory, testPlanFile } = require(experimentDynamicConfigFile)
 const testPlan = require(testPlanFile)
 jest.setTimeout(jestTimeout)

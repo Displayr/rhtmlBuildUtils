@@ -3,8 +3,8 @@ const readdir = require('recursive-readdir')
 
 const { basePath } = require('../../../lib/widgetConfig')
 
-const experimentUiAssetDirectory = path.join(__dirname, '../assets/ui')
-const experimentUiDestinationDirectory = path.join(basePath, '/browser/experiments/ui')
+const experimentUiAssetDirectory = path.join(__dirname, '..', 'assets', 'ui')
+const experimentUiDestinationDirectory = path.join(basePath, 'browser', 'experiments', 'ui')
 
 const compileES6 = require('../../../lib/compileES6')
 

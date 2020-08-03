@@ -4,7 +4,7 @@ const path = require('path')
 const shell = require('shelljs')
 const yargs = require('yargs')
 const widgetConfig = require('../../lib/widgetConfig')
-const buildRoot = path.join(__dirname, '../../../')
+const buildRoot = path.join(__dirname, '..', '..', '..')
 
 module.exports = () => {
   return function (done) {
@@ -29,8 +29,8 @@ module.exports = () => {
 // TODO this is shared in two places
 const getJestPath = ({ buildRoot, widgetConfig }) => {
   const jestPathCandidates = [
-    path.join(widgetConfig.basePath, 'node_modules/.bin/jest'),
-    path.join(buildRoot, 'node_modules/.bin/jest')
+    path.join(widgetConfig.basePath, 'node_modules', '.bin', 'jest'),
+    path.join(buildRoot, 'node_modules', '.bin', 'jest')
   ]
 
   const jestPath = _.find(jestPathCandidates, fs.existsSync)

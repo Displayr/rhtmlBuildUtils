@@ -279,7 +279,7 @@ describe('extractGroupedTestCases', function () {
       const fs = { readdirSync: sinon.stub().returns(['a.json', 'b.json']) }
       const result = _extractGroupedTestCases([testDefinition], { fs })
 
-      const expectedDirName = path.join('theSrc', 'internal_www', 'data/dir')
+      const expectedDirName = path.join('theSrc', 'internal_www', 'data', 'dir')
       expect(fs.readdirSync).to.have.been.calledWith(expectedDirName)
 
       expect(stripRenderExampleUrlsFrom(result)).to.deep.equal([

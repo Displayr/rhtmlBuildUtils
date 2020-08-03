@@ -6,7 +6,7 @@ const path = require('path')
 const shell = require('shelljs')
 const widgetConfig = require('../../../lib/widgetConfig')
 const getCommandLineArgs = require('./parseCommandLineArguments')
-const buildRoot = path.join(__dirname, '../../../../')
+const buildRoot = path.join(__dirname, '..', '..', '..', '..')
 
 const ECHO_PASSTHROUGH_CONFIG = true
 
@@ -51,8 +51,8 @@ module.exports = () => {
 // TODO this is shared in two places
 const getJestPath = ({ buildRoot, widgetConfig }) => {
   const jestPathCandidates = [
-    path.join(widgetConfig.basePath, 'node_modules/.bin/jest'),
-    path.join(buildRoot, 'node_modules/.bin/jest')
+    path.join(widgetConfig.basePath, 'node_modules', '.bin', 'jest'),
+    path.join(buildRoot, 'node_modules', '.bin', 'jest')
   ]
 
   const jestPath = _.find(jestPathCandidates, fs.existsSync)

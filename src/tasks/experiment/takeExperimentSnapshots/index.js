@@ -7,7 +7,7 @@ const path = require('path')
 const widgetConfig = require('../../../lib/widgetConfig')
 const { processTestPlans } = require('../../../lib/processTestPlans')
 const getCommandLineArgs = require('./parseCommandLineArguments')
-const buildRoot = path.join(__dirname, '../../../../')
+const buildRoot = path.join(__dirname, '..', '..', '..', '..')
 
 const ECHO_PASSTHROUGH_CONFIG = true
 
@@ -20,13 +20,13 @@ module.exports = () => {
       throw new Error(`experiment directory "${experimentDirectory}" not found`)
     }
 
-    const testPlanFile = path.join(widgetConfig.basePath, '.tmp/experimentTestPlan.json')
+    const testPlanFile = path.join(widgetConfig.basePath, '.tmp', 'experimentTestPlan.json')
     const experimentResultsDirectory = path.join(experimentDirectory, 'results')
     const experimentConfigFile = path.join(experimentDirectory, 'experimentConfig')
     // NB takeExperimentSnapshots.jest.test.js is copied into <project_root>/.tmp (done by copyExperimentSnapshotJestRunnerToProject task)
     const experimentRunnerDirectory = path.join(widgetConfig.basePath, '.tmp')
-    const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp/experiment_dynamic_config.json')
-    const experimentOverrideFile = path.join(widgetConfig.basePath, 'browser/config/experiment_variable_config.json')
+    const experimentDynamicConfigFile = path.join(widgetConfig.basePath, '.tmp', 'experiment_dynamic_config.json')
+    const experimentOverrideFile = path.join(widgetConfig.basePath, 'browser', 'config', 'experiment_variable_config.json')
 
     const setOverrides = (overrides) => {
       fs.writeFileSync(experimentOverrideFile, JSON.stringify(overrides), 'utf8')
@@ -68,8 +68,8 @@ module.exports = () => {
 // TODO this is shared in two places
 const getJestPath = ({ buildRoot, widgetConfig }) => {
   const jestPathCandidates = [
-    path.join(widgetConfig.basePath, 'node_modules/.bin/jest'),
-    path.join(buildRoot, 'node_modules/.bin/jest')
+    path.join(widgetConfig.basePath, 'node_modules', '.bin', 'jest'),
+    path.join(buildRoot, 'node_modules', '.bin', 'jest')
   ]
 
   const jestPath = _.find(jestPathCandidates, fs.existsSync)
