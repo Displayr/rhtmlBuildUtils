@@ -8,7 +8,6 @@ const DEBUG = 0
 const taskSequences = {
   build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
   compileExperiments: [
-    'moveCrossExperimentSnapshotComparisonListToBrowser',
     'buildExperimentManifest',
     'copyExperimentHtmlAndSnapshots',
     'compileExperimentJs'

@@ -13,9 +13,8 @@ $(document).ready(function () {
 
   Promise.all([getSnapshotList(experimentName), getExperimentDefinition(experimentName), getExperimentNotes(experimentName)])
     .then(([snapshotList, experimentDefinition, notesHtml]) => {
-      const { dimensions } = experimentDefinition
-      const hasBaseline = _.has(experimentDefinition, 'baseline')
-      renderPage({ experimentName, snapshotList, dimensions, hasBaseline, notesHtml })
+      const { ui: { grid } } = experimentDefinition
+      renderPage({ experimentName, snapshotList, grid, notesHtml })
     })
 })
 
@@ -52,7 +51,7 @@ const getUrlVars = () => {
 }
 
 // NB reusing style definitions from index.css
-const renderPage = ({ experimentName, snapshotList, dimensions, hasBaseline, notesHtml }) => {
+const renderPage = ({ experimentName, snapshotList, grid, notesHtml }) => {
   const preAmble = $(`
     <div>
       <h1>Experiment: ${experimentName}</h1>
@@ -71,12 +70,13 @@ const renderPage = ({ experimentName, snapshotList, dimensions, hasBaseline, not
   $('body').append(preAmble)
   $('body').append(testGroupContainer)
 
-  const dimensionQueryParams = (dimensions.length === 2)
-    ? `dimension1=${dimensions[0].join(',')}&dimension2=${dimensions[1].join(',')}`
-    : `dimension1=${dimensions[0].join(',')}`
+  const rowQueryParamsArray = grid
+    .map((rowEntries, rowIndex) => `row${rowIndex}=${rowEntries.join(',')}`)
+
+  const rowsQueryParam = rowQueryParamsArray.join('&')
 
   _(snapshotList).each(({ name, note = '', status = 'none' }) => {
-    const snapshotComparisonUrl = `/experiments/ui/snapshot/?experimentName=${experimentName}&snapshotName=${name}&note=${note}&status=${status}&hasBaseline=${hasBaseline}&${dimensionQueryParams}`
+    const snapshotComparisonUrl = `/experiments/ui/snapshot/?experimentName=${experimentName}&snapshotName=${name}&note=${note}&status=${status}&${rowsQueryParam}`
     const listItem = $(`
       <li class="test-case status-${status}">
         <a class="load-link status-${status}" title="${note}" href="${snapshotComparisonUrl}" class="test-link">${name}</a>

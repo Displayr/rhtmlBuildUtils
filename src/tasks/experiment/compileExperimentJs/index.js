@@ -35,9 +35,6 @@ module.exports = function (gulp) {
   }
 }
 
-// input: ${experimentUiAssetDirectory}/cross-experiment.js
-// output: ${experimentUiDestinationDirectory}/cross-experiment.js
-
 // input: ${experimentUiAssetDirectory}/snapshot/index.js
 // output: ${experimentUiDestinationDirectory}/snapshot/index.js
 const determineDestinationDirectory = ({ jsFilePath }) => {

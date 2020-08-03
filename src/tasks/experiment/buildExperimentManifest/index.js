@@ -9,7 +9,6 @@ const getExperimentNames = function () {
   const baseContentPath = path.join(basePath, experimentDirectory)
   if (!fs.existsSync(baseContentPath)) { return [] }
   return fs.readdirSync(baseContentPath)
-    .filter(experimentName => !experimentName.match(/crossExperimentSnapshotComparisons.yaml/))
     .sort()
 }
 
