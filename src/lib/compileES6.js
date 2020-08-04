@@ -8,6 +8,7 @@ const tap = require('gulp-tap')
 const uglify = require('gulp-uglify')
 
 module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, callback } = {}) => {
+  console.log(`compileEs6 1`)
   const browserifyStream = gulp.src(entryPointFile, { read: false })
     .pipe(tap(function (file) {
       log(`bundling ${file.path}`)
@@ -34,6 +35,10 @@ module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, 
   return postMinifiedStream
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(destinationDirectory))
-    .on('error', function (err) { log(colors.red('[Error]'), err.toString()) })
+    .on('error', function (err) {
+      console.log(`error error error`)
+      console.log(err.stack)
+      log(colors.red('[Error]'), err.toString())
+    })
     .on('finish', callback)
 }

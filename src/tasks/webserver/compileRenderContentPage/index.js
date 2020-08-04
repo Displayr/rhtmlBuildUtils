@@ -12,8 +12,10 @@ const templateVariables = _.merge(
 )
 
 module.exports = function (gulp) {
+  console.log(`compileRenderContentPage 1`)
   return function (callback) {
     const entryPointFile = path.join(basePath, '.tmp', 'renderContentPage.js')
+    console.log(`compileRenderContentPage 2 entryPointFile`, entryPointFile)
 
     // step 1: apply vars to template, and save output in .tmp
     createFileFromTemplate({
@@ -24,6 +26,7 @@ module.exports = function (gulp) {
 
     // step 2: browserify, which bundles all the code into single file for browser testing
     const destinationDirectory = path.join(basePath, 'browser', 'js')
+    console.log(`compileRenderContentPage 2 destinationDirectory`, destinationDirectory)
     fs.mkdirsSync(destinationDirectory)
     return compileES6({ gulp, entryPointFile, destinationDirectory, minify: false, callback })
   }
