@@ -127,7 +127,7 @@ function _extractWidgetConfigsAndOverrides (testDefinition, { fs = promisifiedFS
         const config = (_.isString(configObjectOrString)) ? { config: configObjectOrString } : configObjectOrString
         return {
           widgets: [config],
-          testname: _.last(config.config.split('.'))
+          testname: (config.title) ? config.title : _.last(config.config.split('.'))
         }
       })
     },
