@@ -311,9 +311,11 @@ function _toArray (stringOrArray) {
 function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS } = {}) {
   if (_.has(testDefinition, 'data_directory')) {
     const directoryPath = path.join(widgetConfig.basePath, 'theSrc', 'internal_www', testDefinition.data_directory)
+    const excludedFiles = (testDefinition.excluded_files || []).map(withoutJsonExtension => `${withoutJsonExtension}.json`)
     const allSlashesRegExp = new RegExp('/', 'g')
     return fs.readdirSync(directoryPath)
       .filter(fileName => fileName.match(/.json$/))
+      .filter(fileName => !excludedFiles.includes(fileName))
       .map(fileName => `${testDefinition.data_directory.replace(allSlashesRegExp, '.')}.${_extractTestNameFromPath(fileName)}`)
   } else if (_.has(testDefinition, 'data')) {
     return _toArray(testDefinition.data)
