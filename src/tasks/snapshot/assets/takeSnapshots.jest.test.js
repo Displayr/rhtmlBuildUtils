@@ -32,10 +32,6 @@ const arrayOfTests = _(testPlan)
   .map(testConfig => [`${testConfig.groupName}-${testConfig.testname}`, testConfig])
   .value()
 
-// on test naming
-// jest test name = group + testname <-- allows us to filter by group or by name
-// snapshot name = testname <-- the group name is in the directory so group does not need to be repeated in the snapshot name
-
 describe('snapshots', () => {
   let browser
 
@@ -47,18 +43,22 @@ describe('snapshots', () => {
     await browser.close()
   })
 
-  test.each(arrayOfTests)(`%#: %s`, async (testName, testConfig) => {
+  // NB on test naming
+  // jest test name = group + testname <-- allows us to filter by group or by name
+  // snapshot name = testname <-- the group name is in the directory so group does not need to be repeated in the snapshot name
+  test.each(arrayOfTests)(`%#: %s`, async (testNameWithGroupName, testConfig) => {
+    const testNameWithoutGroupName = testConfig.testname
     configureImageSnapshotMatcher({
       collectionIdentifier: ['testPlans', testConfig.groupName],
       pixelMatchConfig: (testConfig.pixelmatchConfig) ? testConfig.pixelmatchConfig : {}
     })
 
     const page = await browser.newPage()
-    page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testName))
+    page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testNameWithGroupName))
     await page.goto(`http://localhost:9000${testConfig.renderExampleUrl}`)
     await waitForWidgetToLoad({ page })
     await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
-    await testSnapshots({ page, snapshotName: testConfig.testname })
+    await testSnapshots({ page, testName: testNameWithoutGroupName, snapshotNames: testConfig.widgets.map(({ title }) => title) })
     await page.close()
   })
 
