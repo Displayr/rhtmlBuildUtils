@@ -1,5 +1,6 @@
 const livereload = require('gulp-livereload')
 const cliArgs = require('yargs').argv
+const { snapshotTesting: { testplanDirectory } } = require('../../lib/widgetConfig')
 
 const port = cliArgs.port || 9000
 const liveReloadPort = 35729 + (parseInt(port) - 9000)
@@ -17,6 +18,6 @@ module.exports = function (gulp) {
     gulp.watch(['theSrc/internal_www/js/*.js', 'theSrc/scripts/*.js', 'theSrc/scripts/**/*.js'], gulp.series('compileRenderContentPage'))
     gulp.watch(['theSrc/internal_www/styles/**/.css'], gulp.series('copy'))
     gulp.watch('theSrc/styles/**/*.less', gulp.series('less'))
-    gulp.watch('theSrc/test_plans/**/*.yaml', gulp.series('processTestPlans'))
+    gulp.watch(`${testplanDirectory}/**/*.yaml`, gulp.series('processTestPlans'))
   }
 }
