@@ -210,6 +210,10 @@ const addExampleTo = function () {
       $(`.${exampleNumber} .rerender-button`).bind('click', rerenderHandler)
     }
 
+    if (_.has(dataAttributes, 'title')) {
+      element.append(`<div style="max-width:${dataAttributes.width}px" class="widget-title">${dataAttributes.title}</div>`)
+    }
+
     const surroundingDiv = $('<div>')
       .attr('id', 'widget-container')
       .attr('class', 'widget-container')

@@ -102,10 +102,17 @@ const getRecentState = async function (page) {
   })
 }
 
-const testSnapshots = async ({ page, snapshotName }) => {
+const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
   await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
   let widgets = await page.$$(widgetConfig.internalWebSettings.singleWidgetSnapshotSelector)
-  console.log(`taking ${widgets.length} snapshot(s) for ${snapshotName}`)
+  console.log(`taking ${widgets.length} snapshot(s) for ${testName}`)
+
+  const getSnapshotName = (index) => {
+    if (widgets.length === 1) { return testName }
+    const snapshotName = _.get(snapshotNames, `[${index}]`, `${index + 1}`)
+    const filesystemSafeSnapshotName = snapshotName.replace(/ /g, '_').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase()
+    return `${testName}-${filesystemSafeSnapshotName}`
+  }
 
   async function asyncForEach (array, callback) {
     for (let index = 0; index < array.length; index++) {
@@ -115,8 +122,7 @@ const testSnapshots = async ({ page, snapshotName }) => {
 
   await asyncForEach(widgets, async (widget, index) => {
     let image = await widget.screenshot({})
-    const snapshotNameWithIndex = (widgets.length === 1) ? snapshotName : `${snapshotName}-${index + 1}`
-    expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotNameWithIndex })
+    expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: getSnapshotName(index) })
   })
 }
 
