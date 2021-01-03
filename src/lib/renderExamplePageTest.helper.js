@@ -107,11 +107,16 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
   let widgets = await page.$$(widgetConfig.internalWebSettings.singleWidgetSnapshotSelector)
   console.log(`taking ${widgets.length} snapshot(s) for ${testName}`)
 
+  const filesystemSafe = input => input
+    .replace(/ /g, '_')
+    .replace(/\./g, '_')
+    .replace(/[^a-zA-Z0-9_]/g, '')
+    .toLowerCase()
+
   const getSnapshotName = (index) => {
-    if (widgets.length === 1) { return testName }
+    if (widgets.length === 1) { return filesystemSafe(testName) }
     const snapshotName = _.get(snapshotNames, `[${index}]`, `${index + 1}`)
-    const filesystemSafeSnapshotName = snapshotName.replace(/ /g, '_').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase()
-    return `${testName}-${filesystemSafeSnapshotName}`
+    return `${filesystemSafe(testName)}-${filesystemSafe(snapshotName)}`
   }
 
   async function asyncForEach (array, callback) {
