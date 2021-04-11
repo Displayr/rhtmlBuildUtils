@@ -67,8 +67,9 @@ const retrieveConfig = function (configString) {
     }
   }
 
-  const configPartPaths = configString.split('|').map(_.trim)
-  const retrievalPromises = configPartPaths.map(getConfigPart)
+  const retrievalPromises = (_.isString(configString))
+    ? configString.split('|').map(_.trim).map(getConfigPart)
+    : [Promise.resolve(configString)]
 
   return Promise.all(retrievalPromises).then((configParts) => {
     return _.merge(...configParts)
