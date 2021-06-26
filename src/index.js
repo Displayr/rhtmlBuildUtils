@@ -104,6 +104,7 @@ module.exports = {
   },
   snapshotTesting: {
     puppeteer: require('puppeteer'),
-    'renderExamplePageTestHelper': require('./lib/renderExamplePageTest.helper')
+    renderExamplePageTestHelper: require('./lib/renderExamplePageTest.helper'),
+    interactions: require('./lib/interactions')
   }
 }
