@@ -1,10 +1,10 @@
 {
   "private": true,
   "engines": {
-    "node": ">=6.9.5"
+    "node": ">=12.9.0"
   },
   "name": "rhtmlBuildUtils",
-  "version": "7.0.3",
+  "version": "7.1.1",
   "description": "build tools for Displayr rhtml widgets",
   "main": "src/index.js",
   "scripts": {
