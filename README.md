@@ -34,7 +34,7 @@ HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) base
  
 In your widget repo directory run : 
  
-    npm install --only=dev Displayr/rhtmlBuildUtils
+    npm install -D "github:Displayr/rhtmlBuildUtils"
 
 then in your project gulpfile.js:
 
@@ -112,16 +112,18 @@ The top level tasks are those you will likely run as part of the widget build pr
 
 # Developing / Contributing
 
-Most important: consider this repo is used by multiple widgets. Ensure your changes are generic, can be overriden in the widget repos if necessary, and do not break the build steps of other widget repos.
+1. Most important: consider this repo is used by multiple widgets. Ensure your changes are generic, can be overriden in the widget repos if necessary, and do not break the build steps of other widget repos.
 
-Also important: every merge to master should include an increase in the version of the rhtmlBuildUtils repo. Steps to manage this are included below.
+2. Also important: every merge to master should include an increase in the version of the rhtmlBuildUtils repo. Steps to manage this are included below.
 
 The **[rhtmlTemplate](https://github.com/Displayr/rhtmlTemplate)** is a minimal implmentation of a htmlwidget, and is a good test bed to ensure changes to rhtmlBuildUtils work. Any enhancements to rhtmlBuildUtils should be reflected in rhtmlTemplate.
 
+3. we use `npm-force-resolutions` to force some transitive dependencies to secure versions. This is typically done automatically via a `preinstall` hook in the `package.json`. But this does not work when the repo is a module that is used by other npm modules. So for now we must remember to manually run `npx npm-force-resolutions` before pushing updates, to ensure we do not reintroduce insecure transitive dependencies.  
+
 ## Installation to develop/contribute
 
-1. (prerequisite) : nodejs >= 8.15.1 (see the `Prequisite Installation Help` section below for install help)
-1. (prerequisite) : npm >= 6.4.1 (comes packaged with nodejs)
+1. (prerequisite) : nodejs >= 12.9 (see the `Prequisite Installation Help` section below for install help)
+1. (prerequisite) : npm >= 6.10 (comes packaged with nodejs)
 1. `git clone git@github.com:Displayr/rhtmlBuildUtils.git`
 1. `cd rhtmlBuildUtils`
 1. `npm install`
