@@ -13,6 +13,8 @@
     
     ```mkdir .tmp/diffs/; for I in `find theSrc/test/snapshots/local/VIS-513 -type d -name __diff_output__`; do cp $I/* .tmp/diffs/; done```
 
+    or more simply `npm run gatherMasterDiffs` or `npm run gatherDiffs`
+
 * to add a new visual regression test that does not require interaction with the widget: create a new yaml file in the `<projectRoot>/theSrc/test/snapshotTestDefinitions` directory or add to an existing yaml test definition file
 * to add a new visual regression test that does require interaction with the widget:
     * create a new test file in `<projectRoot>/theSrc/test/bin`, then follow the patterns established in other repos that use rhtmlBuildUtils and consult the [puppeteer documentation](https://github.com/puppeteer/puppeteer/blob/master/docs/api.md) 
@@ -58,6 +60,8 @@ During work on VIS-513 I probably went through 10 rounds of changes where I said
 
 ## AWS dependencies
 
+*NOTE* this feature is still available but currently disabled in all the widget repos.
+
 The snapshotting system saves the snapshot images to the local disk. In the travisCI case that means the images, and importantly the "diff images", are saved to the disk on the travisCI machine. Some questions follow from this : 
 
 * We want those images, so how do we get them? 
@@ -66,7 +70,6 @@ The snapshotting system saves the snapshot images to the local disk. In the trav
 Travis CI provides a solution to save "artifcats" produced during a travis build. In our case the snapshot images are artifacts. In the Travis CI config for the widget repo, we specify an AWS bucket, region, client ID, and client secret. This allows Travis CI to upload the snapshot images to an area in AWS S3 that we can retrieve.
 
 The Travis -> AWS S3 solution required 3 steps
-
 
 1. Configure your AWS account to allow upload to a specific bucket to anyone who possesses a programmatic access key. I do not yet have step by step documentation but anyone with moderate AWS muddling skills can get this working.
 
@@ -84,6 +87,71 @@ Travis docs :
 * artifact API https://docs.travis-ci.com/user/uploading-artifacts/
 * same info in blog format : https://blog.travis-ci.com/2012-12-18-travis-artifacts
 
+## Image matching sensitivity
+
+The snapshotting system uses the [pixelmatch](https://github.com/mapbox/pixelmatch) library to compare images. The rhtmlBuildUtils framework exposes two configuration values to control the behaviour of the pixelmatch library.
+
+1. What is a diff : the library allows you to configure a sensitivity where small differences will not be considered "different". See the images [here](./snapshotting_system) to see examples of results at different sensitivities
+2. How many differences are allowed : the library allows you to specify how many differences are allowed before the test fails
+
+The rhtmlBuildUtils framework also allows you to specify these settings at different levels: 
+
+1. the repo level, via modifying the `build/config/widget.config.js` config
+   
+```js
+{
+  snapshotTesting: {
+    pixelmatch: {
+      // smaller values -> more sensitive : https://github.com/mapbox/pixelmatch#pixelmatchimg1-img2-output-width-height-options
+      customDiffConfig: {
+        threshold: 0.0001, // how much diff is actually classified as a diff
+      },
+      failureThreshold: 0.0001, // how many diffs are allowed before the test fails
+      failureThresholdType: 'percent', // pixel or percent
+    },
+  },
+}
+```
+
+see [here](https://github.com/Displayr/rhtmlDonut/blob/master/build/config/widget.config.js#L26) for example use in rhtmlDonut
+
+2. for specific static snapshots, via adding config the snapshot `yaml` file
+
+```yaml
+version: 1
+type: multi_widget_single_page
+pixelmatchConfig:
+    customDiffConfig:
+        threshold: 0.01
+    failureThreshold: 1000
+    failureThresholdType: pixel
+widgets:
+    ...
+```
+
+see [here](https://github.com/Displayr/rhtmlDonut/blob/master/theSrc/test/snapshotTestDefinitions/test_plans/label_performance_tests/increasing_values_150_with_offsets.yaml#L9) for example use in rhtmlDonut
+
+3. for specific interaction tests, via adding config in the jest test file 
+
+```js
+// custom pixelmatch threshold as several tests consistently have a few 1000 pixel diff
+configureImageSnapshotMatcher({
+  collectionIdentifier: 'tooltip_interaction',
+  pixelMatchConfig: {
+    failureThreshold: 8000,
+    failureThresholdType: 'pixel', // pixel or percent
+  },
+})
+```
+
+see [here](https://github.com/Displayr/rhtmlDonut/blob/master/theSrc/test/bin/tooltipInteractions.jest.test.js#L15) for example use in rhtmlDonut
+
+## How to manually compare images ?
+
+pixelmatch is also exposed as an executable from the command line:
+
+```pixelmatch A.png B.png diff.png 0.1```
+
 ## Future Work
 
 ### Easier Travis Snapshot Updating
@@ -97,16 +165,3 @@ The current process to update travis snapshots is pretty laborious:
     * get green build
     
 Proposal is to put something in the commit message that will cause the build to add the -u flag to the `gulp testVisual command`
-
-### Documentation  
-
-* Task : Document:
-  * this is how to manually invoke pixelmatch to create a diff
-    * pixelmatch theSrc/test/snapshots/local/{master,VIS-513}/testPlans/displayr_regression_set8/tsne_perplexity_7-snap.png .tmp/diff.png 0.1
-
-* Task : Document:
-  * I did some playing around and took notes to show the impact of changing the diff sensitivity. See ./docs/pixelmatch_threshold_example
-               
-
-    
-    
