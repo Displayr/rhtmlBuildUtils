@@ -91,7 +91,7 @@ Travis docs :
 
 The snapshotting system uses the [pixelmatch](https://github.com/mapbox/pixelmatch) library to compare images. The rhtmlBuildUtils framework exposes two configuration values to control the behaviour of the pixelmatch library.
 
-1. What is a diff : the library allows you to configure a sensitivity where small differences will not be considered "different". See the images [here](./snapshotting_system) to see examples of results at different sensitivities
+1. What is a diff : the library allows you to configure a sensitivity where small differences will not be considered "different". See the images [here](./snapshotting_system/pixelmatch_sensitivity_example.md) to see examples of results at different sensitivities
 2. How many differences are allowed : the library allows you to specify how many differences are allowed before the test fails
 
 The rhtmlBuildUtils framework also allows you to specify these settings at different levels: 
