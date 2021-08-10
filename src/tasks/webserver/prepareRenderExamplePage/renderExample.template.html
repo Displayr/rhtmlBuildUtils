@@ -71,8 +71,8 @@
         : fetchAndParseConfig(urlVars.configPath)
 
       configPromise.then(renderExampleConfig => {
-        console.log('renderExampleConfig')
-        console.log(JSON.stringify(renderExampleConfig, {}, 2))
+        // console.log('renderExampleConfig')
+        // console.log(JSON.stringify(renderExampleConfig, {}, 2))
 
         const examplesContainer = $('#examples-container')
         if (renderExampleConfig.testname) {
