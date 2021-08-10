@@ -58,7 +58,7 @@ describe('snapshots', () => {
     const logs = []
     page.on('console', (msg) => {
       // logs.push(msg.args()[0].toString())
-      logs.push({type: msg.type(), text: msg.text()})
+      logs.push({ type: msg.type(), text: msg.text() })
     })
 
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testNameWithGroupName))
@@ -86,7 +86,7 @@ describe('snapshots', () => {
           pass = _.every(logs, log => log.type !== assertion['type'] || !log.text.match(assertion['notmatch']))
           assertionDescription += 'not match ' + assertion['notmatch']
         } else {
-          throw new Error("message")
+          throw new Error('message')
         }
 
         if (!pass) {
