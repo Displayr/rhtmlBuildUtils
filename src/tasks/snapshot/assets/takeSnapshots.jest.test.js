@@ -57,7 +57,6 @@ describe('snapshots', () => {
 
     const logs = []
     page.on('console', (msg) => {
-      // logs.push(msg.args()[0].toString())
       logs.push({ type: msg.type(), text: msg.text() })
     })
 
