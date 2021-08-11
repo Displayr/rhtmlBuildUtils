@@ -67,8 +67,8 @@ describe('snapshots', () => {
     await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
     await testSnapshots({ page, testName: testNameWithoutGroupName, snapshotNames: testConfig.widgets.map(({ title }) => title) })
 
-    if (testConfig.assert) {
-      testConfig.assert.forEach(assertion => {
+    if (testConfig.assert_log) {
+      testConfig.assert_log.forEach(assertion => {
         let pass
         let assertionDescription = assertion['type'] + ' '
         if (assertion.hasOwnProperty('exist')) {
