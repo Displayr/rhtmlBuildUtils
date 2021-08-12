@@ -237,6 +237,10 @@ function _extractCommonParamsFromTestDefinition (testDefinition) {
     renderExampleConfig.pixelmatchConfig = testDefinition.pixelmatchConfig
   }
 
+  if (_.has(testDefinition, 'assert_log')) {
+    renderExampleConfig.assert_log = testDefinition.assert_log
+  }
+
   return renderExampleConfig
 }
 

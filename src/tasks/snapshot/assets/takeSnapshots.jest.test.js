@@ -54,11 +54,48 @@ describe('snapshots', () => {
     })
 
     const page = await browser.newPage()
+
+    const logs = []
+    page.on('console', (msg) => {
+      logs.push({ type: msg.type(), text: msg.text() })
+    })
+
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testNameWithGroupName))
     await page.goto(`http://localhost:9000${testConfig.renderExampleUrl}`)
     await waitForWidgetToLoad({ page })
     await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
     await testSnapshots({ page, testName: testNameWithoutGroupName, snapshotNames: testConfig.widgets.map(({ title }) => title) })
+
+    if (testConfig.assert_log) {
+      testConfig.assert_log.forEach(assertion => {
+        let pass
+        let assertionDescription = assertion['type'] + ' '
+        if (assertion.hasOwnProperty('exist')) {
+          if (assertion['exist']) {
+            pass = _.some(logs, log => log.type === assertion['type'])
+            assertionDescription += 'exist'
+          } else {
+            pass = _.every(logs, log => log.type !== assertion['type'])
+            assertionDescription += 'not exist'
+          }
+        } else if (assertion.hasOwnProperty('match')) {
+          pass = _.some(logs, log => log.type === assertion['type'] && log.text.match(assertion['match']))
+          assertionDescription += 'match ' + assertion['match']
+        } else if (assertion.hasOwnProperty('notmatch')) {
+          pass = _.every(logs, log => log.type !== assertion['type'] || !log.text.match(assertion['notmatch']))
+          assertionDescription += 'not match ' + assertion['notmatch']
+        } else {
+          throw new Error('message')
+        }
+
+        if (!pass) {
+          console.log(`${'-'.repeat(100)}\nThe following assertion failed: ${assertionDescription}\n${'-'.repeat(100)}`)
+        }
+
+        expect(pass).toEqual(true)
+      })
+    }
+
     await page.close()
   })
 
