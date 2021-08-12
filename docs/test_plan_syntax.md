@@ -27,18 +27,19 @@ YAML is a config specification language that is meant to be easier to edit than 
 
 The following fields can be used in any test definition 
 
-* **testname:** string. name of test. Defaults to the filename
-* **groupname:** string. group name of test. Used on the index page to group tests. Defaults to top level directory of test file within the test_plan diractory. e.g. test_plan/a/b/c -> groupname : a
-* **title:** string. text to display at top of page
+* **testname:** string. Name of test. Defaults to the filename
+* **groupname:** string. Group name of test. Used on the index page to group tests. Defaults to top level directory of test file within the test_plan diractory. e.g. test_plan/a/b/c -> groupname : a
+* **title:** string. Text to display at top of page
 * **type:** string. One of the five testDefinition types
 * **width:** int. Default width of each widget on page. Can be overriden for each widget in *multi_widget_single_page* types
-* **width:** int. Default height of each widget on page. Can be overriden for each widget in *multi_widget_single_page* types
+* **height:** int. Default height of each widget on page. Can be overriden for each widget in *multi_widget_single_page* types
 * **rowSize:** int. how many widgets per row on the page    
 * **data:** string or array of strings. See TODO for more details.
 * **data_directory:** path to a data directory, relative to the internal_www directory.
 * **config:** string or array of strings. See TODO for more details.
 * **general_comments:** string or array of strings. These comments will appear at top of file. Accepts HTML. See TODO add palmtree ordering URL as an example
 * **comments:** array of comment objects, each containing location, text, and status. See TODO for more detail.
+* **assert_log:** array of assertion objects, each containing type (log, error) and one of exist (boolean), match (string), notmatch (string). Note that the match and notmatch strings are parsed as regular expressions.
 
 # Test Definition Types          
 
@@ -47,6 +48,11 @@ The following fields can be used in any test definition
     testname: example of single_widget_single_page
     type: single_widget_single_page
     config: data.test_plan.abc_rbg
+    assert_log:
+      - type: log
+        match: foobar
+      - type: error
+        exist: false
 
 ## multi_widget_single_page
 
@@ -188,3 +194,15 @@ TODO also reference test (which is source of truth for current behaviour)
 
 Note for `for_each_data_in_directory` testDefinitions, the best comment location to use is the fileName, as this will not change.
 
+# Adding log assertions
+
+Assertions can be specified for the console log output. For example to assert that a log contains the string "foobar" and that an error does not appear, use the following assert_log field in the example below. Note that with multiple widgets in a single page, since log messages are mixed together, the assertions apply to the mixed logs and not individual widgets.
+
+    testname: example of single_widget_single_page
+    type: single_widget_single_page
+    config: data.test_plan.abc_rbg
+    assert_log:
+      - type: log
+        match: foobar
+      - type: error
+        exist: false
