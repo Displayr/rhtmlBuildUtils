@@ -197,7 +197,7 @@ Note for `for_each_data_in_directory` testDefinitions, the best comment location
 
 # Adding log assertions
 
-Assertions can be specified for the console log output. For example to assert that a log contains the string "foobar", no log contains "foobaa" and that an error does not appear, use the following assert_log field in the example below. Note that with multiple widgets in a single page, since log messages are mixed together, the assertions apply to the mixed logs and not individual widgets.
+Assertions can be specified for the console log output. For example to assert that a log contains the string "foobar", no log contains "foobaa" and that an error does not appear, use the following assert_log field in the example below. Note that with multiple widgets in a single page, since log messages are mixed together, the assertions apply to the mixed logs and not individual widgets, hence string matching may not be as useful in this situation.
 
     testname: example of single_widget_single_page
     type: single_widget_single_page
