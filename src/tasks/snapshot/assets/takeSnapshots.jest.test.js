@@ -66,7 +66,7 @@ describe('snapshots', () => {
     await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
     await testSnapshots({ page, testName: testNameWithoutGroupName, snapshotNames: testConfig.widgets.map(({ title }) => title) })
 
-    if (widgetConfig.snapshotTesting.noError) {
+    if (widgetConfig.snapshotTesting.assertNoLogError) {
       let pass = _.every(logs, log => log.type !== 'error')
       if (!pass) {
         console.log(`${'-'.repeat(100)}\nAn error occured in a widget\n${'-'.repeat(100)}`)

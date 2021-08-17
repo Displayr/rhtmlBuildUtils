@@ -61,7 +61,7 @@ module.exports = {
     },
 
     // if true, assert that no errors occur; if false, does nothing
-    noError: true,
+    assertNoLogError: true,
 
     consoleLogHandler: (msg, testName) => console.log(msg._text)
   },
