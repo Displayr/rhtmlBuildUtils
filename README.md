@@ -66,7 +66,7 @@ When calling rhtmlBuildUtils.registerGulpTasks, pass an exclusions array with a 
 
 ### Modifying widget.config.js
 
-The `rhtmlBuildUtils` package assumes the callee widget repo will contain a config file at \<projectRoot\>/build/config/widget.config.js (example: [rhtmlTemplate/build/config/widget.config.js](https://github.com/Displayr/rhtmlTemplate/blob/master/build/config/widget.config.js)). The descriptions and defaults for all values in the config are defined in the [rhtmlBuildUtils/build/config/default.widget.config.js](https://github.com/Displayr/rhtmlBuildUtils/blob/master/src/config/default.widget.config.js) file.
+The `rhtmlBuildUtils` package assumes the callee widget repo will contain a config file at \<projectRoot\>/build/config/widget.config.js (example: [rhtmlTemplate/build/config/widget.config.js](https://github.com/Displayr/rhtmlTemplate/blob/master/build/config/widget.config.js)). The descriptions and defaults for all values in the config are defined in the [rhtmlBuildUtils/src/config/default.widget.config.js](https://github.com/Displayr/rhtmlBuildUtils/blob/master/src/config/default.widget.config.js) file.
 
 # gulp task reference
 
