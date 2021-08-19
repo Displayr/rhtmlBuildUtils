@@ -60,6 +60,9 @@ module.exports = {
       failureThresholdType: 'percent' // pixel or percent
     },
 
+    // if true, assert that no errors occur; if false, does nothing
+    assertNoLogError: true,
+
     consoleLogHandler: (msg, testName) => console.log(msg._text)
   },
 
