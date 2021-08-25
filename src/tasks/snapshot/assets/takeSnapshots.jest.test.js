@@ -57,7 +57,7 @@ describe('snapshots', () => {
 
     const logs = []
     page.on('console', (msg) => {
-      logs.push({ type: msg.type(), text: msg.text() })
+      logs.push({ type: msg.type(), text: msg.text(), location: msg.location() })
     })
 
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testNameWithGroupName))
@@ -67,7 +67,7 @@ describe('snapshots', () => {
     await testSnapshots({ page, testName: testNameWithoutGroupName, snapshotNames: testConfig.widgets.map(({ title }) => title) })
 
     if (widgetConfig.snapshotTesting.assertNoLogError) {
-      let pass = _.every(logs, log => log.type !== 'error')
+      let pass = _.every(logs, log => log.type !== 'error' || log.location.url.match('livereload'))
       if (!pass) {
         console.log(`${'-'.repeat(100)}\nAn error occured in a widget\n${'-'.repeat(100)}`)
       }
