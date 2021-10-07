@@ -82,3 +82,7 @@ Then the whole process becomes (assuming a widget called Displayr/rhtmlFoo and a
     $ gulp #<-- build the widget
     $ git commit -m 'message' && git push origin head <-- push code to git
     $ numpush "Displayr/rhtmlFoo@JIRA-1234" <-- push code to R Server
+
+**Widget status attribute**
+
+Widgets should be adding the attribute `rhtmlwidget-status` with the value `loading` to their root element div when they are first added to the document, and then setting the value to `ready` once the widget has finished drawing. This is so that Displayr can determine when a widget is ready to be snapshotted when testing.
