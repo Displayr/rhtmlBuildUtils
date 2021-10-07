@@ -85,4 +85,4 @@ Then the whole process becomes (assuming a widget called Displayr/rhtmlFoo and a
 
 **Widget status attribute**
 
-Widgets should be adding the attribute `rhtmlwidget-status` with the value `loading` to their root element div when they are first added to the document, and then setting the value to `ready` once the widget has finished drawing. This is so that Displayr can determine when a widget is ready to be snapshotted when testing.
+Widgets should be adding the attribute `rhtmlwidget-status` with the value `loading` to their root element (div) when they are first added to the document, and then setting the value to `ready` once the widget has finished drawing. This is so that Displayr can determine when a widget is ready to be snapshotted when testing.
