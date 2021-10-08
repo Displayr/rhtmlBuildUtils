@@ -60,18 +60,18 @@ During work on VIS-513 I probably went through 10 rounds of changes where I said
 
 ## AWS dependencies
 
-*NOTE* this feature is still available but currently disabled in all the widget repos.
+*NOTE* this feature is currently disabled in some widget repos but is gradually being made available when repos are worked on.
 
 The snapshotting system saves the snapshot images to the local disk. In the travisCI case that means the images, and importantly the "diff images", are saved to the disk on the travisCI machine. Some questions follow from this : 
 
 * We want those images, so how do we get them? 
 * We want to fail a build if the snapshots change, therefore we need to have a baseline that was produced in the TravisCI environment; how do I get that baseline ?
 
-Travis CI provides a solution to save "artifcats" produced during a travis build. In our case the snapshot images are artifacts. In the Travis CI config for the widget repo, we specify an AWS bucket, region, client ID, and client secret. This allows Travis CI to upload the snapshot images to an area in AWS S3 that we can retrieve.
+Travis CI provides a solution to save "artifacts" produced during a travis build. In our case the snapshot images are artifacts. In the Travis CI config for the widget repo, we specify an AWS bucket, client ID, and client secret. This allows Travis CI to upload the snapshot images to an area in AWS S3 that we can retrieve.
 
 The Travis -> AWS S3 solution required 3 steps
 
-1. Configure your AWS account to allow upload to a specific bucket to anyone who possesses a programmatic access key. I do not yet have step by step documentation but anyone with moderate AWS muddling skills can get this working.
+1. Configure your AWS account to allow upload to a specific bucket to anyone who possesses a programmatic access key. I do not yet have step by step documentation but anyone with moderate AWS muddling skills can get this working. There is already an S3 bucket set up for widget snapshots under the Displayr AWS account.
 
 2. Add this to the .travis.yml in your repo
 
@@ -80,7 +80,7 @@ The Travis -> AWS S3 solution required 3 steps
         paths:
           - theSrc/test/snapshots/travis
 
-3. In travis UI add the required AWS settings
+3. In travis UI add the required AWS settings as environment variables (AWS bucket, client ID, and client secret). Contact Justin Yap or someone with admin access to the Displayr AWS account for the name of the AWS S3 bucket for widget snapshots, client ID, and client secret.
 
 Travis docs : 
 
