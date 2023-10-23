@@ -62,7 +62,7 @@
     "opn": "^5.5.0",
     "path": "^0.12.7",
     "puppeteer": "^3.3.0",
-    "recursive-readdir": "^2.2.2",
+    "recursive-readdir": "^2.2.3",
     "recursive-readdir-sync": "^1.0.6",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
