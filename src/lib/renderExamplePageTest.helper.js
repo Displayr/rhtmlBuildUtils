@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const fs = require('fs-extra')
 const deepDiff = require('deep-diff')
 const { mkdirp } = require('fs-extra')
 const path = require('path')
@@ -127,7 +128,15 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
 
   await asyncForEach(widgets, async (widget, index) => {
     let image = await widget.screenshot({})
-    expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: getSnapshotName(index) })
+    const snapshotName = getSnapshotName(index)
+    try {
+      expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
+    } catch (e) {
+      fs.writeFile(path.join('new', `${snapshotName}-snapshotNames.png`), image, 'binary', (err) => {
+        if (err) console.log('Error saving new image snapshot: ' + err)
+      })
+      throw e
+    }
   })
 }
 
