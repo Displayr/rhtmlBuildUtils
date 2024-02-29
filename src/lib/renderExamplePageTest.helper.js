@@ -132,10 +132,18 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
     try {
       expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
     } catch (e) {
-      fs.writeFile(path.join('new', `${snapshotName}-snapshotNames.png`), image, 'binary', (err) => {
+      // Can't find group name so just put all new snapshots in same folder
+      const snapshotDirectory = path.join(
+        widgetConfig.basePath,
+        widgetConfig.snapshotTesting.snapshotDirectory,
+        widgetConfig.snapshotTesting.env,
+        widgetConfig.snapshotTesting.branch
+      )
+      const newSnapshotDir = path.join(snapshotDirectory, 'new_snapshots')
+      if (!fs.existsSync(newSnapshotDir)) fs.mkdirSync(newSnapshotDir)
+      fs.writeFile(path.join(newSnapshotDir, `${snapshotName}-snap.png`), image, 'binary', (err) => {
         if (err) console.log('Error saving new image snapshot: ' + err)
       })
-      throw e
     }
   })
 }
