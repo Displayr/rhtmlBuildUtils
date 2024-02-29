@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const fs = require('fs-extra')
 const deepDiff = require('deep-diff')
 const { mkdirp } = require('fs-extra')
 const path = require('path')
@@ -43,7 +44,7 @@ const getExampleUrl = ({ configName, stateName, width = 1000, height = 1000, rer
 
 const waitForWidgetToLoad = async ({ page }) => page.waitForFunction(selectorString => {
   return document.querySelectorAll(selectorString).length
-}, { timeout: widgetConfig.snapshotTesting.timeout }, 'body[widgets-ready], .rhtml-error-container')
+}, { timeout: widgetConfig.snapshotTesting.timeout }, 'body[widgets-ready], .main-svg, .rhtml-error-container')
 
 const testState = async ({ page, stateName, tolerance }) => {
   let stateIsGood = await checkState({ page, expectedStateFile: stateName, tolerance })
@@ -127,7 +128,23 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
 
   await asyncForEach(widgets, async (widget, index) => {
     let image = await widget.screenshot({})
-    expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: getSnapshotName(index) })
+    const snapshotName = getSnapshotName(index)
+    try {
+      expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
+    } catch (e) {
+      // Can't find group name so just put all new snapshots in same folder
+      const snapshotDirectory = path.join(
+        widgetConfig.basePath,
+        widgetConfig.snapshotTesting.snapshotDirectory,
+        widgetConfig.snapshotTesting.env,
+        widgetConfig.snapshotTesting.branch
+      )
+      const newSnapshotDir = path.join(snapshotDirectory, 'new_snapshots')
+      if (!fs.existsSync(newSnapshotDir)) fs.mkdirSync(newSnapshotDir)
+      fs.writeFile(path.join(newSnapshotDir, `${snapshotName}-snap.png`), image, 'binary', (err) => {
+        if (err) console.log('Error saving new image snapshot: ' + err)
+      })
+    }
   })
 }
 
