@@ -44,7 +44,7 @@ const getExampleUrl = ({ configName, stateName, width = 1000, height = 1000, rer
 
 const waitForWidgetToLoad = async ({ page }) => page.waitForFunction(selectorString => {
   return document.querySelectorAll(selectorString).length
-}, { timeout: widgetConfig.snapshotTesting.timeout }, 'body[widgets-ready], .main-svg, .rhtml-error-container')
+}, { timeout: widgetConfig.snapshotTesting.timeout }, 'body[widgets-ready], .rhtml-error-container')
 
 const testState = async ({ page, stateName, tolerance }) => {
   let stateIsGood = await checkState({ page, expectedStateFile: stateName, tolerance })
