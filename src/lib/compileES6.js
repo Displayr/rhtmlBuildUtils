@@ -7,25 +7,14 @@ const sourcemaps = require('gulp-sourcemaps')
 const tap = require('gulp-tap')
 const uglify = require('gulp-uglify')
 
-const EXTERNALS = [
-  { require: 'lodash', expose: 'underscore' },
-  { require: 'd3', expose: 'd3' },
-  { require: 'plotly.js-dist-min', expose: 'Plotly' }
-]
-
 module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, callback } = {}) => {
   const browserifyStream = gulp.src(entryPointFile, { read: false })
     .pipe(tap(function (file) {
       log(`bundling ${file.path}`)
 
       file.contents = browserify(file.path, { debug: true })
-        .on('prebundle', function(bundle) {
-            EXTERNALS.forEach (function(external){
-              if (external.expose) {
-                bundle.require external.require, expose: external.expose
-              } else {
-                bundle.require external.require
-            })
+        .on('prebundle', function (bundle) {
+          bundle.require('plotly.js-dist-min', { expose: 'Plotly' })
         })
         .transform(babelify, {
           presets: [require('babel-preset-es2015-ie')],
