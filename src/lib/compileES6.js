@@ -14,7 +14,7 @@ module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, 
 
       file.contents = browserify(file.path, { debug: true })
         .on('prebundle', function (bundle) {
-          bundle.require('plotly.js-dist-min', { expose: 'Plotly' })
+          bundle.external('plotly.js-dist-min', { expose: 'Plotly' })
         })
         .transform(babelify, {
           presets: [require('babel-preset-es2015-ie')],
