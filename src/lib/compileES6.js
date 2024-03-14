@@ -1,5 +1,4 @@
 const colors = require('ansi-colors')
-const babelify = require('babelify')
 const browserify = require('browserify')
 const buffer = require('gulp-buffer')
 const log = require('fancy-log')
@@ -13,15 +12,6 @@ module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, 
       log(`bundling ${file.path}`)
 
       file.contents = browserify(file.path, { debug: true })
-        .transform(babelify, {
-          presets: [require('babel-preset-es2015-ie')],
-          plugins: [
-            require('babel-plugin-transform-exponentiation-operator'),
-            require('babel-plugin-transform-object-assign'),
-            require('babel-plugin-transform-object-rest-spread'),
-            require('babel-plugin-array-includes').default
-          ]
-        })
         .bundle()
     }))
     .pipe(buffer())
