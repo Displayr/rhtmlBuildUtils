@@ -22,11 +22,10 @@ module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, 
             require('babel-plugin-array-includes').default
           ]
         })
-        .external('plotly.js-dist-min', { expose: 'Plotly' })
         .bundle()
     }))
     .pipe(buffer())
-    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(sourcemaps.init({ includeContent: false, loadMaps: true }))
 
   const postMinifiedStream = (minify)
     ? browserifyStream.pipe(uglify())
