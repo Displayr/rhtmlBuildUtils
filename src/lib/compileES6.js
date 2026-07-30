@@ -1,39 +1,50 @@
+const _ = require('lodash')
 const colors = require('ansi-colors')
-const babelify = require('babelify')
-const browserify = require('browserify')
-const buffer = require('gulp-buffer')
 const log = require('fancy-log')
-const sourcemaps = require('gulp-sourcemaps')
-const tap = require('gulp-tap')
-const uglify = require('gulp-uglify')
+const path = require('path')
+const { esbuildOptions } = require('./widgetConfig')
+
+// lodash merge is deep, which is what we want for `define`, but we want a consumer-supplied
+// array (target, inject, plugins) to replace ours outright, not merge element-wise.
+const replaceArrays = (objValue, srcValue) => (Array.isArray(srcValue) ? srcValue : undefined)
 
 module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, callback } = {}) => {
-  const browserifyStream = gulp.src(entryPointFile, { read: false })
-    .pipe(tap(function (file) {
-      log(`bundling ${file.path}`)
+  // Required lazily, not at module top-level: src/index.js requires this file eagerly to expose
+  // the public lib.compileES6 export, so a top-level require would load esbuild's native binary
+  // any time a consumer merely imports the rhtmlBuildUtils package — including inside a jest
+  // jsdom worker for an unrelated export. esbuild's internal `Buffer instanceof Uint8Array`
+  // startup check fails inside that jsdom realm ("your JavaScript environment is broken"),
+  // breaking test suites that never call compileES6 at all. Lazy require confines the load to
+  // the real Node process that actually invokes bundling.
+  const esbuild = require('esbuild')
+  log(`bundling ${entryPointFile}`)
 
-      file.contents = browserify(file.path, { debug: true })
-        .transform(babelify, {
-          presets: [require('babel-preset-es2015-ie')],
-          plugins: [
-            require('babel-plugin-transform-exponentiation-operator'),
-            require('babel-plugin-transform-object-assign'),
-            require('babel-plugin-transform-object-rest-spread'),
-            require('babel-plugin-array-includes').default
-          ]
-        })
-        .bundle()
-    }))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({ loadMaps: true }))
+  const options = _.mergeWith({
+    entryPoints: [entryPointFile],
+    outdir: destinationDirectory,
+    bundle: true,
+    write: true,
+    sourcemap: true, // 'linked': writes the .map AND appends //# sourceMappingURL
+    minify,
+    target: ['es2017'], // see Context: es5 hard-errors on async/await
+    platform: 'browser',
+    format: 'iife',
+    logLevel: 'silent', // we surface errors and warnings ourselves, below
+    inject: [path.join(__dirname, 'esbuildPolyfillShim.js')],
+    alias: { crypto: 'crypto-browserify' }, // browserify shimmed node builtins implicitly
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(minify ? 'production' : 'development'),
+      global: 'window'
+    }
+  }, esbuildOptions, replaceArrays)
 
-  const postMinifiedStream = (minify)
-    ? browserifyStream.pipe(uglify())
-    : browserifyStream
-
-  return postMinifiedStream
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(destinationDirectory))
-    .on('error', function (err) { log(colors.red('[Error]'), err.toString()) })
-    .on('finish', callback)
+  return esbuild.build(options)
+    .then((result) => {
+      result.warnings.forEach((warning) => log(colors.yellow('[Warning]'), warning.text))
+      if (callback) callback()
+    })
+    .catch((err) => {
+      log(colors.red('[Error]'), err.toString())
+      if (callback) { callback(err) } else { throw err }
+    })
 }
