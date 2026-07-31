@@ -131,7 +131,9 @@ The top level tasks are those you will likely run as part of the widget build pr
 
 The **[rhtmlTemplate](https://github.com/Displayr/rhtmlTemplate)** is a minimal implmentation of a htmlwidget, and is a good test bed to ensure changes to rhtmlBuildUtils work. Any enhancements to rhtmlBuildUtils should be reflected in rhtmlTemplate.
 
-3. we use `npm-force-resolutions` to force some transitive dependencies to secure versions. This is typically done automatically via a `preinstall` hook in the `package.json`. But this does not work when the repo is a module that is used by other npm modules. So for now we must remember to manually run `npx npm-force-resolutions` before pushing updates, to ensure we do not reintroduce insecure transitive dependencies.  
+3. we use npm's [`overrides`](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides) field to force some transitive dependencies to secure versions. npm applies these during dependency resolution, so a plain `npm install` is enough - there is no extra command to remember before pushing. (This replaces the `resolutions` field and the `npm-force-resolutions` package, which patched `package-lock.json` after the fact and no longer works reliably with modern lockfiles.)
+
+    Note that npm only honours `overrides` from the **top level** project - an `overrides` block inside a dependency's `package.json` is ignored. So the block in this repo protects this repo's own dev tree only; each consuming widget repo needs its own copy to protect its tree.  
 
 ## Installation to develop/contribute
 
