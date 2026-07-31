@@ -34,7 +34,7 @@ HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) base
  
 In your widget repo directory run : 
  
-    npm install -D "github:Displayr/rhtmlBuildUtils"
+    npm install -D "github:Displayr/rhtmlBuildUtils#8.0.0"
 
 then in your project gulpfile.js:
 
@@ -67,6 +67,19 @@ When calling rhtmlBuildUtils.registerGulpTasks, pass an exclusions array with a 
 ### Modifying widget.config.js
 
 The `rhtmlBuildUtils` package assumes the callee widget repo will contain a config file at \<projectRoot\>/build/config/widget.config.js (example: [rhtmlTemplate/build/config/widget.config.js](https://github.com/Displayr/rhtmlTemplate/blob/master/build/config/widget.config.js)). The descriptions and defaults for all values in the config are defined in the [rhtmlBuildUtils/src/config/default.widget.config.js](https://github.com/Displayr/rhtmlBuildUtils/blob/master/src/config/default.widget.config.js) file.
+
+#### `esbuildOptions`
+
+JS bundling is done with [esbuild](https://esbuild.github.io/) (see `src/lib/compileES6.js`). The `esbuildOptions` key in your widget.config.js is passed through and deep-merged over rhtmlBuildUtils' own esbuild config (arrays, such as `target`, `inject` or `plugins`, are replaced outright rather than merged element-wise).
+
+This is the escape hatch for a widget repo that hits an edge case rhtmlBuildUtils' default esbuild config doesn't handle - for example needing a different `loader`, an extra `alias` for a node builtin, a custom `define`, an esbuild `plugin`, or a different `target` - without having to fork rhtmlBuildUtils or pin back to an older version.
+
+Example:
+
+    esbuildOptions: {
+      target: ['es2020'],
+      loader: { '.js': 'jsx' }
+    }
 
 # gulp task reference
 
@@ -118,7 +131,9 @@ The top level tasks are those you will likely run as part of the widget build pr
 
 The **[rhtmlTemplate](https://github.com/Displayr/rhtmlTemplate)** is a minimal implmentation of a htmlwidget, and is a good test bed to ensure changes to rhtmlBuildUtils work. Any enhancements to rhtmlBuildUtils should be reflected in rhtmlTemplate.
 
-3. we use `npm-force-resolutions` to force some transitive dependencies to secure versions. This is typically done automatically via a `preinstall` hook in the `package.json`. But this does not work when the repo is a module that is used by other npm modules. So for now we must remember to manually run `npx npm-force-resolutions` before pushing updates, to ensure we do not reintroduce insecure transitive dependencies.  
+3. we use npm's [`overrides`](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides) field to force some transitive dependencies to secure versions. npm applies these during dependency resolution, so a plain `npm install` is enough - there is no extra command to remember before pushing. (This replaces the `resolutions` field and the `npm-force-resolutions` package, which patched `package-lock.json` after the fact and no longer works reliably with modern lockfiles.)
+
+    Note that npm only honours `overrides` from the **top level** project - an `overrides` block inside a dependency's `package.json` is ignored. So the block in this repo protects this repo's own dev tree only; each consuming widget repo needs its own copy to protect its tree.  
 
 ## Installation to develop/contribute
 

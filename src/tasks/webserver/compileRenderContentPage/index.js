@@ -22,7 +22,7 @@ module.exports = function (gulp) {
       templateVariables
     })
 
-    // step 2: browserify, which bundles all the code into single file for browser testing
+    // step 2: esbuild, which bundles all the code into single file for browser testing
     const destinationDirectory = path.join(basePath, 'browser/js/')
     fs.mkdirsSync(destinationDirectory)
     return compileES6({ gulp, entryPointFile, destinationDirectory, minify: false, callback })

@@ -8,8 +8,14 @@ module.exports = {
 
   // widgetEntryPoint is used by the compileES6 to generate the JS for the inst/html directory.
   // The widgetEntryPoint must be a path to a JS file where the widget is registered with HTMLWidgets.
-  // Browserify will follow all import statements from this file to create a single bundle of all your Javascript
+  // esbuild will follow all import statements from this file to create a single bundle of all your Javascript
   widgetEntryPoint: 'theSrc/scripts/rhtmlYourWidget.js',
+
+  // Passed through to esbuild.build() in src/lib/compileES6.js, deep-merged over the defaults
+  // (arrays replace rather than merge). Use this to override target / define / loader / alias /
+  // plugins for one widget repo without forking rhtmlBuildUtils.
+  // e.g. esbuildOptions: { target: ['es2020'], loader: { '.js': 'jsx' } }
+  esbuildOptions: {},
 
   // widgetfactory is used by the renderContentPage to include your widget code in the JS used for the internal web server.
   // The widgetFactory must be a path to a JS file that exports the widget "factory" function, which returns an object
