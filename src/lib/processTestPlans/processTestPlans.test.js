@@ -8,8 +8,8 @@ const jsyaml = require('js-yaml')
 const sinon = require('sinon')
 chai.use(require('sinon-chai'))
 
-// TODO test extractGroupFromPath and extractTestNameFromPath
 // TODO this wont work and needs to be ported to jest
+// NB path extraction is covered by pathExtraction.jest.test.js
 
 describe('extractGroupedTestCases', function () {
   describe('test definition behaviours', function () {
