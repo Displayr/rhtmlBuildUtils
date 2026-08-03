@@ -46,6 +46,10 @@ const waitForWidgetToLoad = async ({ page }) => page.waitForFunction(selectorStr
   return document.querySelectorAll(selectorString).length
 }, { timeout: widgetConfig.snapshotTesting.timeout }, 'body[widgets-ready], .rhtml-error-container')
 
+// NB puppeteer removed page.waitFor(milliseconds) in v14 and its replacement page.waitForTimeout in
+// v22, with no successor. Callers that need a plain delay use this instead.
+const sleep = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds))
+
 const testState = async ({ page, stateName, tolerance }) => {
   let stateIsGood = await checkState({ page, expectedStateFile: stateName, tolerance })
   expect(stateIsGood).toEqual(true)
@@ -104,7 +108,7 @@ const getRecentState = async function (page) {
 }
 
 const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
-  await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
+  await sleep(widgetConfig.snapshotTesting.snapshotDelay)
   let widgets = await page.$$(widgetConfig.internalWebSettings.singleWidgetSnapshotSelector)
   console.log(`taking ${widgets.length} snapshot(s) for ${testName}`)
 
@@ -127,7 +131,11 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
   }
 
   await asyncForEach(widgets, async (widget, index) => {
-    let image = await widget.screenshot({})
+    // NB puppeteer now declares screenshot() as resolving a Uint8Array. It still hands back a
+    // Buffer in practice, but jest-image-snapshot passes this straight to pngjs, which calls
+    // Buffer-only methods on it, so do not depend on the undeclared part of that contract.
+    const rawImage = await widget.screenshot({})
+    let image = Buffer.isBuffer(rawImage) ? rawImage : Buffer.from(rawImage)
     const snapshotName = getSnapshotName(index)
     try {
       expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
@@ -157,6 +165,7 @@ module.exports = {
   jestTimeout: widgetConfig.snapshotTesting.timeout,
   puppeteerSettings: _.cloneDeep(widgetConfig.snapshotTesting.puppeteer),
   replaceDotsWithSlashes,
+  sleep,
   testSnapshots,
   testState,
   waitForWidgetToLoad

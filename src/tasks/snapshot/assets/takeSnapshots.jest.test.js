@@ -9,6 +9,7 @@ const {
       configureImageSnapshotMatcher,
       puppeteerSettings,
       jestTimeout,
+      sleep,
       testSnapshots,
       waitForWidgetToLoad
     }
@@ -63,7 +64,7 @@ describe('snapshots', () => {
     page.on('console', (msg) => widgetConfig.snapshotTesting.consoleLogHandler(msg, testNameWithGroupName))
     await page.goto(`http://localhost:9000${testConfig.renderExampleUrl}`)
     await waitForWidgetToLoad({ page })
-    await page.waitFor(widgetConfig.snapshotTesting.snapshotDelay)
+    await sleep(widgetConfig.snapshotTesting.snapshotDelay)
     await testSnapshots({ page, testName: testNameWithoutGroupName, snapshotNames: testConfig.widgets.map(({ title }) => title) })
 
     if (widgetConfig.snapshotTesting.assertNoLogError) {

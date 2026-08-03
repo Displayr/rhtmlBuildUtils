@@ -69,7 +69,9 @@ module.exports = {
     // if true, assert that no errors occur; if false, does nothing
     assertNoLogError: true,
 
-    consoleLogHandler: (msg, testName) => console.log(msg._text)
+    // NB msg is a puppeteer ConsoleMessage. Read it via the public text() accessor: the private
+    // _text field this used to read does not exist in modern puppeteer and yields undefined.
+    consoleLogHandler: (msg, testName) => console.log(msg.text())
   },
 
   // these are defaults used when rendering widget in the internal web server only. They do not affect the widget when
