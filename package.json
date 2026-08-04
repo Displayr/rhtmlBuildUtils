@@ -9,7 +9,7 @@
   "main": "src/index.js",
   "scripts": {
     "prepush": "node ./bin/prepush",
-    "test": "mocha src/**/*.test.js"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -46,6 +46,7 @@
     "jest": "^29.7.0",
     "jest-image-snapshot": "^6.5.2",
     "jquery": "^3.6.0",
+    "js-yaml": "^3.15.0",
     "lodash": "^4.17.21",
     "mustache": "^2.3.2",
     "opn": "^5.5.0",
