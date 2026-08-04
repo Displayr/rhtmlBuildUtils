@@ -5,6 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
 const widgetConfig = require('../../../lib/widgetConfig')
+const getJestPath = require('../../../lib/getJestPath')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
 
@@ -47,21 +48,6 @@ module.exports = () => {
   }
 }
 
-// NB this alternation is done to support regular installs as well as "in dev" installs via npm link rhtmlBuildUtils
-// TODO this is shared in two places
-const getJestPath = ({ buildRoot, widgetConfig }) => {
-  const jestPathCandidates = [
-    path.join(widgetConfig.basePath, 'node_modules/.bin/jest'),
-    path.join(buildRoot, 'node_modules/.bin/jest')
-  ]
-
-  const jestPath = _.find(jestPathCandidates, fs.existsSync)
-  if (!jestPath) {
-    throw new Error(`Could not find jest at these locations: ${jestPathCandidates.join(',')}`)
-  }
-  return jestPath
-}
-
 const getTestRoots = ({ buildRoot, widgetConfig }) => {
   // NB takeSnapshots.jest.test.js is copied into <project_root>/.tmp (done by copySnapshotJestRunnerToProject task)
   const takeSnapshotForEachTestDefinition = path.join(widgetConfig.basePath, '.tmp')
@@ -76,10 +62,12 @@ const getCommandString = ({ testRoots, jestPath, args }) => {
   const roots = testRoots.map(root => `--roots="${root}"`).join(' ')
   const acceptNewSnapshots = (args.acceptNewSnapshots) ? `--ci=0` : ''
   const testNamePattern = (args.testNamePattern) ? `-t=${args.testNamePattern}` : ''
-  const testFilePattern = "--testMatch='**/*.jest.test.js'"
+  // NB double quotes, not single: cmd.exe does not strip single quotes, so jest would receive them
+  // as part of the pattern and match nothing. Double quotes work on both cmd.exe and posix shells.
+  const testFilePattern = '--testMatch="**/*.jest.test.js"'
   const updateSnapshots = (args.updateSnapshots) ? `-u` : ''
 
-  return `${jestPath} ${roots} ${testFilePattern} ${acceptNewSnapshots} ${updateSnapshots} ${testNamePattern}`
+  return `"${jestPath}" ${roots} ${testFilePattern} ${acceptNewSnapshots} ${updateSnapshots} ${testNamePattern}`
 }
 
 const writePassThroughConfigFile = ({ widgetConfig, args }) => {

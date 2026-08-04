@@ -1,9 +1,8 @@
-const _ = require('lodash')
-const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
 const yargs = require('yargs')
 const widgetConfig = require('../../lib/widgetConfig')
+const getJestPath = require('../../lib/getJestPath')
 const buildRoot = path.join(__dirname, '../../../')
 
 module.exports = () => {
@@ -25,21 +24,6 @@ module.exports = () => {
   }
 }
 
-// NB this alternation is done to support regular installs as well as "in dev" installs via npm link rhtmlBuildUtils
-// TODO this is shared in two places
-const getJestPath = ({ buildRoot, widgetConfig }) => {
-  const jestPathCandidates = [
-    path.join(widgetConfig.basePath, 'node_modules/.bin/jest'),
-    path.join(buildRoot, 'node_modules/.bin/jest')
-  ]
-
-  const jestPath = _.find(jestPathCandidates, fs.existsSync)
-  if (!jestPath) {
-    throw new Error(`Could not find jest at these locations: ${jestPathCandidates.join(',')}`)
-  }
-  return jestPath
-}
-
 const getTestRoots = ({ widgetConfig }) => {
   const specTestPath = path.join(widgetConfig.basePath, widgetConfig.specTestingDirectory)
   return [
@@ -50,9 +34,11 @@ const getTestRoots = ({ widgetConfig }) => {
 const getCommandString = ({ testRoots, jestPath, args }) => {
   const roots = testRoots.map(root => `--roots="${root}"`).join(' ')
   const testNamePattern = (args.testNamePattern) ? `-t=${args.testNamePattern}` : ''
-  const testFilePattern = "--testMatch='**/*.jest.test.js'"
+  // NB double quotes, not single: cmd.exe does not strip single quotes, so jest would receive them
+  // as part of the pattern and match nothing. Double quotes work on both cmd.exe and posix shells.
+  const testFilePattern = '--testMatch="**/*.jest.test.js"'
 
-  return `${jestPath} ${roots} ${testFilePattern} ${testNamePattern}`
+  return `"${jestPath}" ${roots} ${testFilePattern} ${testNamePattern}`
 }
 
 const parseCommandLineArguments = () => {

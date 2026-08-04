@@ -262,14 +262,12 @@ function _generateBrowserJsonFile (combinedTestPlan, testPlanDestinations, { fs 
 // '/foo/bar/anonymised_samples.yaml' => anonymised_samples
 // '/foo/bar/functional_tests/color_variations.yaml' => functional_tests
 function _extractGroupFromPath (baseDir, absolutePath) {
-  const relativePath = absolutePath.substring(baseDir.length + 1).replace('.yaml', '')
-  const relativePathParts = relativePath.split('/')
-  return relativePathParts[0]
+  const relativePathParts = path.relative(baseDir, absolutePath).split(path.sep)
+  return relativePathParts[0].replace(/\.yaml$/, '')
 }
 
 function _extractTestNameFromPath (testFilePath) {
-  const fileName = _.last(testFilePath.split('/'))
-  return fileName.replace(/.(yaml|json)/, '')
+  return path.basename(testFilePath).replace(/\.(yaml|json)$/, '')
 }
 
 const renderExampleBasePath = '/renderExample.html'
@@ -316,7 +314,7 @@ function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS
   if (_.has(testDefinition, 'data_directory')) {
     const directoryPath = path.join(widgetConfig.basePath, 'theSrc', 'internal_www', testDefinition.data_directory)
     const excludedFiles = (testDefinition.excluded_files || []).map(withoutJsonExtension => `${withoutJsonExtension}.json`)
-    const allSlashesRegExp = new RegExp('/', 'g')
+    const allSlashesRegExp = /[\\/]/g
     return fs.readdirSync(directoryPath)
       .filter(fileName => fileName.match(/.json$/))
       .filter(fileName => !excludedFiles.includes(fileName))
@@ -330,5 +328,7 @@ function _getDataStringsFromTestDefinition (testDefinition, { fs = promisifiedFS
 
 module.exports = {
   processTestPlans,
-  _extractGroupedTestCases // NB exported test only
+  _extractGroupedTestCases, // NB exported test only
+  _extractGroupFromPath, // NB exported test only
+  _extractTestNameFromPath // NB exported test only
 }

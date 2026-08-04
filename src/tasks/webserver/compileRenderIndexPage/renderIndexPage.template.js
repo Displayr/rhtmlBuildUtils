@@ -11,6 +11,7 @@ $(document).ready(function () {
         createUnorderedListIfNotExist(listName)
         _(contentLinks).each((contentLink) => {
           const listItem = $('<li>')
+          // NB contentLink is a URL, so '/' is always the separator
           const link = $('<a>')
             .attr('href', contentLink)
             .html(_.last(contentLink.split('/')))
