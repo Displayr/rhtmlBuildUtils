@@ -1,6 +1,4 @@
-const Vinyl = require('vinyl')
-const stream = require('stream')
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 
 const { basePath, experimentDirectory } = require('../../../lib/widgetConfig')
@@ -13,24 +11,13 @@ const getExperimentNames = function () {
     .sort()
 }
 
-function stringSrc (filename, string) {
-  const src = stream.Readable({ objectMode: true })
-  src._read = function () {
-    this.push(new Vinyl({
-      cwd: '',
-      path: filename,
-      contents: Buffer.from(string)
-    }))
-    this.push(null)
-  }
-  return src
-}
-
-module.exports = function (gulp) {
-  return function (done) {
+// NB same Vinyl-plus-stream-plus-gulp.dest plumbing as buildContentManifest used to have, for the same
+// job of writing a single json file.
+module.exports = () => {
+  return async function () {
     const experimentManifest = getExperimentNames()
-    return stringSrc('experimentManifest.json', JSON.stringify(experimentManifest, {}, 2))
-      .pipe(gulp.dest('browser/content'))
-      .on('finish', done)
+    const outputPath = path.join(basePath, 'browser', 'content', 'experimentManifest.json')
+    await fs.mkdirs(path.dirname(outputPath))
+    await fs.writeFile(outputPath, JSON.stringify(experimentManifest, {}, 2), 'utf8')
   }
 }

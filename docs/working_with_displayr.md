@@ -56,7 +56,7 @@ Displayr can be configured to use a dev R server. So to test a widget in Display
 
 Specific steps are listed below (assuming a widget called Displayr/rhtmlFoo and a working branch of JIRA-1234):
 
-* build the inst directory of the widget and commit and push your code (`gulp; git commit -m 'message'; git push origin head`)   
+* build the inst directory of the widget and commit and push your code (`rhtml; git commit -m 'message'; git push origin head`)   
 * login to the dev server (get server username and location from Displayr team)
 * Run `R_opencpu` and enter the following command sequence, then exit R_opencpu
 ```
@@ -79,7 +79,7 @@ On osx/unix/linux you can add this to your bash_profile (assuming you have your 
 
 Then the whole process becomes (assuming a widget called Displayr/rhtmlFoo and a working branch of JIRA-1234):
 
-    $ gulp #<-- build the widget
+    $ rhtml #<-- build the widget
     $ git commit -m 'message' && git push origin head <-- push code to git
     $ numpush "Displayr/rhtmlFoo@JIRA-1234" <-- push code to R Server
 

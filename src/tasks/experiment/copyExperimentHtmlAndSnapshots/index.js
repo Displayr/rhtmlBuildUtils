@@ -1,25 +1,33 @@
-const { experimentDirectory } = require('../../../lib/widgetConfig')
+const fs = require('fs-extra')
 const path = require('path')
+const fastGlob = require('fast-glob')
+const { basePath, experimentDirectory } = require('../../../lib/widgetConfig')
 
-module.exports = (gulp) => {
-  return function (done) {
-    let finishedCount = 0
-    const requiredCount = 2
-    const incrementFinishedCount = () => finishedCount++
+const uiAssetDirectory = path.join(__dirname, '../assets/ui')
 
-    gulp.src([`${experimentDirectory}/**/*`], {})
-      .pipe(gulp.dest('browser/experiments'))
-      .on('finish', incrementFinishedCount)
+// NB replaces two concurrent gulp.src pipelines whose completion was detected by a setInterval polling
+// a hand-maintained requiredCount of 2.
+module.exports = () => {
+  return async function () {
+    await copyTree({
+      cwd: basePath,
+      patterns: [path.posix.join(experimentDirectory.split(path.sep).join('/'), '**/*')],
+      destination: path.join(basePath, 'browser/experiments')
+    })
 
-    gulp.src([`${path.join(__dirname, '../assets/ui')}/**/*.html`, `${path.join(__dirname, '../assets/ui')}/**/*.css`], {})
-      .pipe(gulp.dest('browser/experiments/ui'))
-      .on('finish', incrementFinishedCount)
+    await copyTree({
+      cwd: uiAssetDirectory,
+      patterns: ['**/*.html', '**/*.css'],
+      destination: path.join(basePath, 'browser/experiments/ui')
+    })
+  }
+}
 
-    const intervalHandle = setInterval(() => {
-      if (finishedCount >= requiredCount) {
-        clearInterval(intervalHandle)
-        done()
-      }
-    }, 20)
+const copyTree = async ({ cwd, patterns, destination }) => {
+  const matches = await fastGlob(patterns, { cwd })
+  for (const relativeMatch of matches) {
+    const outputPath = path.join(destination, relativeMatch)
+    await fs.mkdirs(path.dirname(outputPath))
+    await fs.copy(path.join(cwd, relativeMatch), outputPath)
   }
 }

@@ -1,6 +1,6 @@
 const shell = require('shelljs')
 
-module.exports = function (gulp) {
+module.exports = () => {
   return function (done) {
     const commandString = 'r --no-save 2>/dev/null >/dev/null <<< "library(devtools); document()"'
     const exitCode = shell.exec(commandString).code

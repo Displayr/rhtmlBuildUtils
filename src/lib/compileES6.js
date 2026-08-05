@@ -8,7 +8,7 @@ const { esbuildOptions } = require('./widgetConfig')
 // array (target, inject, plugins) to replace ours outright, not merge element-wise.
 const replaceArrays = (objValue, srcValue) => (Array.isArray(srcValue) ? srcValue : undefined)
 
-module.exports = ({ gulp, entryPointFile, destinationDirectory, minify = false, callback } = {}) => {
+module.exports = ({ entryPointFile, destinationDirectory, minify = false, callback } = {}) => {
   // Required lazily, not at module top-level: src/index.js requires this file eagerly to expose
   // the public lib.compileES6 export, so a top-level require would load esbuild's native binary
   // any time a consumer merely imports the rhtmlBuildUtils package — including inside a jest

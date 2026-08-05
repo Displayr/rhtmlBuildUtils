@@ -11,7 +11,7 @@ const testPlanDestinations = [
   path.join(tmpDir, 'test_plan.json')
 ]
 
-function registerTaskWithGulp (gulp) {
+function processTestPlansTask () {
   return function (done) {
     return index(testPlansDir, testPlanDestinations)
       .catch(error => {
@@ -24,4 +24,4 @@ function registerTaskWithGulp (gulp) {
   }
 }
 
-module.exports = registerTaskWithGulp
+module.exports = processTestPlansTask

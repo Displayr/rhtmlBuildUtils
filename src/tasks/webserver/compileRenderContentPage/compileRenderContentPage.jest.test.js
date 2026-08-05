@@ -13,8 +13,7 @@ const createFileFromTemplate = require('../../../lib/createFileFromTemplate')
 const compileRenderContentPage = require('./index')
 
 const runTask = () => {
-  const gulp = {}
-  compileRenderContentPage(gulp)(() => {})
+  compileRenderContentPage()(() => {})
   return createFileFromTemplate.mock.calls[0][0].templateVariables
 }
 

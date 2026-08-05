@@ -6,6 +6,12 @@ module.exports = {
   // widgetName is the name of your widget. Typically match the repo name. This is used throughout the build process.
   widgetName: 'nameYourWidget!',
 
+  // Task names that this widget repo does not want to run. A disabled task logs "skipping '<name>'" and
+  // resolves, so a composite sequence that contains it (build, serve, testVisual, ...) still completes.
+  // This replaces the two mechanisms used under gulp: the `exclusions` argument to registerGulpTasks,
+  // and re-registering a task as a no-op that logged "skipping". e.g. disabledTasks: ['testSpecs']
+  disabledTasks: [],
+
   // widgetEntryPoint is used by the compileES6 to generate the JS for the inst/html directory.
   // The widgetEntryPoint must be a path to a JS file where the widget is registered with HTMLWidgets.
   // esbuild will follow all import statements from this file to create a single bundle of all your Javascript
