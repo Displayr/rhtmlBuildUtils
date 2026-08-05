@@ -49,11 +49,24 @@ const browserContextFiles = [
 // the test run for the same reason.
 const copiedTemplateTests = ['src/tasks/*/assets/*.jest.test.js']
 
-// The experiment UI is browser ES modules (`import _ from 'lodash'`), bundled by esbuild. It parsed
-// under the old .eslintrc only because eslint-config-standard set sourceType: 'module' for the whole
-// project, including the CommonJS majority. eslint-plugin-n's recommended-script config is correctly
-// CommonJS, so the genuinely-ESM files now say so for themselves.
-const browserEsmFiles = ['src/tasks/experiment/assets/ui/**/*.js']
+// Browser ES modules (`import _ from 'lodash'`), bundled by esbuild -- as opposed to the node CommonJS
+// that everything else here and in a widget repo is written in. These parsed under the old .eslintrc
+// only because eslint-config-standard set sourceType: 'module' for the WHOLE project, including the
+// CommonJS majority; eslint-plugin-n's recommended-script config is correctly CommonJS, so the
+// genuinely-ESM files have to say so for themselves.
+//
+// NB the widget entries matter as much as this package's own. `theSrc/scripts` is the standardised home
+// for a widget's source -- both widgetEntryPoint and widgetFactory point into it (see
+// src/config/default.widget.config.js) -- and it is ALL browser ESM. Without these globs a widget repo
+// adopting this config gets a parsing error on every one of its own source files. Globs that do not
+// apply in a given repo simply match nothing, so one list serves both.
+const browserEsmFiles = [
+  // this package's own experiment UI
+  'src/tasks/experiment/assets/ui/**/*.js',
+  // a widget repo's source, and any browser javascript it serves from the internal web server
+  'theSrc/scripts/**/*.js',
+  'theSrc/internal_www/js/**/*.js'
+]
 
 module.exports = [
   { ignores },
