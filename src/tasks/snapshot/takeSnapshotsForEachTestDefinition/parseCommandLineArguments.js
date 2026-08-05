@@ -5,22 +5,32 @@
 const yargs = require('yargs')
 
 module.exports = () => {
+  // NB defaults to FALSE so that a snapshot with no baseline FAILS instead of being written and
+  // passed. When true, this appends --ci=0 to the jest command, which makes jest compute
+  // updateSnapshot: 'new' (jest-config/build/normalize.js), so jest-image-snapshot writes the missing
+  // baseline and the test goes green. Combined with baselines only leaving CI on an explicit
+  // regeneration, a newly added test could look green forever while never being regression-tested at
+  // all. Pass --acceptNewSnapshots to opt back in when bootstrapping a new suite.
   yargs.option('acceptNewSnapshots', {
     alias: 'a',
-    describe: 'accept new snapshots',
+    describe: 'write and pass snapshots that have no baseline, instead of failing',
     boolean: true,
-    default: true
+    default: false
   })
   yargs.option('branch', {
     alias: 'b',
     string: true,
     describe: 'which branch are we testing (used to choose snapshot set)'
   })
+  // NB no `choices` whitelist. It previously allowed only 'local' and 'travis', so a CI environment
+  // could not be named after the system actually running it -- rhtmlCombinedScatter had to bypass the
+  // flag entirely by setting snapshotTesting.env in its own widget.config.js, which works only because
+  // options without defaults are absent from the parsed args. The value is just a directory name under
+  // snapshotDirectory, so any string is valid. Travis has not been in use for years.
   yargs.option('env', {
     alias: 'e',
     string: true,
-    describe: 'which env are we testing (used to choose snapshot set)',
-    choices: ['local', 'travis']
+    describe: 'which env are we testing, e.g. local or ci (chooses the snapshot set)'
   })
   yargs.option('headless', {
     alias: 'h',

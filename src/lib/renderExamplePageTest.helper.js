@@ -149,6 +149,18 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
     }
   }
 
+  // NB failures are COLLECTED here and rethrown once at the end, rather than swallowed or thrown
+  // immediately. Two separate reasons:
+  //
+  //  * Swallowing them (what this did before) meant a test whose images did not match reported PASS.
+  //    The job only went red via jest's aggregate snapshotState.unmatched count, so reading the
+  //    per-test list led straight to the wrong conclusion about what had actually failed.
+  //  * Throwing from inside the loop would abort it, so a multi-widget test would lose the diagnostic
+  //    new_snapshots image for every widget after the first failure.
+  //
+  // Collecting keeps the full set of diagnostics while still failing the test that failed.
+  const failures = []
+
   await asyncForEach(widgets, async (widget, index) => {
     // NB puppeteer now declares screenshot() as resolving a Uint8Array. It still hands back a
     // Buffer in practice, but jest-image-snapshot passes this straight to pngjs, which calls
@@ -159,6 +171,8 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
     try {
       expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
     } catch (e) {
+      failures.push({ snapshotName, error: e })
+
       // Can't find group name so just put all new snapshots in same folder
       const snapshotDirectory = path.join(
         widgetConfig.basePath,
@@ -167,12 +181,18 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
         widgetConfig.snapshotTesting.branch
       )
       const newSnapshotDir = path.join(snapshotDirectory, 'new_snapshots')
-      if (!fs.existsSync(newSnapshotDir)) fs.mkdirSync(newSnapshotDir)
-      fs.writeFile(path.join(newSnapshotDir, `${snapshotName}-snap.png`), image, 'binary', (err) => {
-        if (err) console.log('Error saving new image snapshot: ' + err)
-      })
+      // NB synchronous: the previous fs.writeFile callback form was fire-and-forget, so the process
+      // could exit before the diagnostic image reached disk.
+      fs.mkdirpSync(newSnapshotDir)
+      fs.writeFileSync(path.join(newSnapshotDir, `${snapshotName}-snap.png`), image, 'binary')
     }
   })
+
+  if (failures.length) {
+    const names = failures.map(({ snapshotName }) => snapshotName).join(', ')
+    const detail = failures.map(({ error }) => error.message).join('\n\n')
+    throw new Error(`${failures.length} snapshot(s) did not match: ${names}\n\n${detail}`)
+  }
 }
 
 module.exports = {

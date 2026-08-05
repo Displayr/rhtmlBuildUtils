@@ -109,12 +109,21 @@ module.exports = [
       'no-extend-native': 'error',
       'no-new-func': 'error',
 
-      // @stylistic's customize() defaults are close to standard but differ on these five. Set to
-      // standard's values so no existing file is reformatted.
+      // @stylistic's customize() defaults are close to standard but differ on these. Set to standard's
+      // values so no existing file is reformatted.
       '@stylistic/comma-dangle': ['error', 'never'],
       '@stylistic/space-before-function-paren': ['error', 'always'],
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       '@stylistic/quote-props': ['error', 'as-needed'],
+
+      // NB customize() defaults this to 'before', but eslint-config-standard used 'after' -- i.e. a
+      // wrapped expression keeps the operator at the END of the line. Nothing on master happened to
+      // wrap an operator, so the mismatch stayed invisible until a file written under the old config
+      // was added, which then reported 13 errors for style that was previously correct. Ternaries keep
+      // the operator at the start, which is standard's own exception.
+      '@stylistic/operator-linebreak': ['error', 'after', {
+        overrides: { '?': 'before', ':': 'before', '|>': 'before' }
+      }],
 
       // Not enabled by eslint-config-standard, and the tree mixes `x => ...` with `(x) => ...`.
       // Turning it on would be a reformat, so leave the existing mix alone.

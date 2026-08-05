@@ -54,7 +54,8 @@ automatically and are enumerated [below](#task-reference).
 
 ### Upgrading to 9.0.0 from 8.x
 
-Two breaking changes, both requiring a small edit in the widget repo.
+Two breaking changes requiring a small edit in the widget repo, plus three changes to what passes and
+fails that need no edit but do change results.
 
 **1. gulp is gone.** Delete your `gulpfile.js`, drop `gulp` from your devDependencies, and change every
 npm script from `gulp <task>` to `rhtml <task>`. Task names, sequences and command line flags are all
@@ -78,6 +79,29 @@ Build output is unchanged by the gulp removal: the generated `browser/`, `inst/`
 byte for byte identical to what the gulp pipeline produced, which is deliberate, because the compiled
 css feeds the pages the visual regression suite screenshots. `less` is pinned to 3.13.1 (the version
 `gulp-less@4` resolved) to keep it that way.
+
+#### Three changes to what passes and fails
+
+These need no edit in your repo, but they will change your results, so sequence a bump deliberately.
+
+**A mismatching snapshot now fails its own test.** Previously the comparison error was swallowed, so a
+test whose images did not match reported PASS and the job only went red via jest's aggregate count.
+Reading the per-test list therefore led straight to the wrong conclusion. Expect previously-green runs
+to surface real per-test failures.
+
+**A snapshot with no baseline now fails.** `acceptNewSnapshots` defaults to `false`. It used to default
+to `true`, which appended `--ci=0` to the jest command and made jest write the missing baseline and pass
+— so a newly added test could look green forever while never being regression-tested. Pass
+`--acceptNewSnapshots` to opt back in when bootstrapping a suite.
+
+**`clean` no longer deletes `man/`.** That directory holds tracked roxygen output which only `makeDocs`
+can regenerate, and `makeDocs` swallows its own failure so a missing R install is not fatal — so
+`rhtml build` used to silently delete tracked R documentation on every machine without R on PATH,
+including CI. `makeDocs` also now calls `Rscript` rather than `r`, which is what makes it capable of
+succeeding on Windows at all.
+
+The `--env` flag also no longer has a `local`/`travis` whitelist, so a CI environment can be named after
+the system running it instead of being set indirectly through `widget.config.js`.
 
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
 
@@ -150,6 +174,8 @@ The top level tasks are those you will likely run as part of the widget build pr
 * **--updateSnapshots**: accept all snapshots even if they have changed. Write the new snapshots into the snapshot directory
 
 `rhtml testVisual_s` : just run the visual regression suite (skip the other steps, `rhtml serve` must already be running).
+
+`rhtml reviewBaselines --from <ref> [--to <ref>]` : build a local side-by-side review page for image snapshot baselines, at `.tmp/reviewBaselines/index.html`. GitHub's diff renderer gives up on a few hundred binary files, which is exactly the size of a regenerated baseline set — and reviewing the images is the real gate when accepting new baselines, since a rendering regression accepted there is invisible afterwards. Omit `--to` to compare the working tree against `<ref>`. Baselines reported as *identical* are worth looking at first: one that did not regenerate usually means its test errored before reaching the snapshot.
 
 `rhtml lint` : this runs the eslint style checker on all the javascript files. Our settings are defined in [eslint.config.base.js](./eslint.config.base.js), which your widget repo's `eslint.config.js` re-exports. Which files are checked is decided by the `ignores` in that config rather than by this task, because eslint 10 has no `.eslintignore`. To run with auto fix run `rhtml lint --fix`. Note that this is also run as a git prepush hook so you will not be able to push code to git unless it passes the style checks. 
 

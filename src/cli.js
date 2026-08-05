@@ -1,24 +1,21 @@
 const colors = require('ansi-colors')
-const { runTasks, knownTaskNames } = require('./index')
+const { runTasks, knownTaskNames, widgetConfig } = require('./index')
 const { runTeardowns } = require('./lib/teardown')
+const parseTaskNames = require('./lib/parseTaskNames')
 
 // Entry point for the `rhtml` binary. Replaces `gulp <task> [<task>...] [--flags]` with
 // `rhtml <task> [<task>...] [--flags]`.
 //
-// NB task names are taken as the positional arguments and flags are left alone, because the tasks
-// parse their own flags out of process.argv via yargs (--fix, --env, --branch, --port, -t, -u, ...).
-// Deliberately not routed through a yargs command definition here: that would have to re-declare
-// every flag of every task, and the task-local declarations are what the docs describe.
-const parseTaskNames = (argv) => argv.filter(arg => !arg.startsWith('-'))
-
+// NB the flags themselves are deliberately NOT parsed here. Each task declares and reads its own flags
+// out of process.argv via yargs (--fix, --env, --branch, --port, --from, -t, -u, ...). Routing them
+// through a yargs command definition here would mean re-declaring every flag of every task, and the
+// task-local declarations are what the docs describe.
+//
+// Which arguments are task names is decided by src/lib/parseTaskNames.js.
 const main = async () => {
   const requested = parseTaskNames(process.argv.slice(2))
   const taskNames = requested.length ? requested : ['default']
 
-  // NB required lazily: widgetConfig reads <widget repo>/build/config/widget.config.js at require
-  // time and throws if it is absent, and we want that to surface as a clear error after argv parsing
-  // rather than as a stack trace before the CLI has done anything.
-  const { widgetConfig } = require('./index')
   const disabledTasks = widgetConfig.disabledTasks || []
 
   await runTasks({ taskNames, disabledTasks })
