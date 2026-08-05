@@ -31,7 +31,17 @@ module.exports = ({ entryPointFile, destinationDirectory, minify = false, callba
     format: 'iife',
     logLevel: 'silent', // we surface errors and warnings ourselves, below
     inject: [path.join(__dirname, 'esbuildPolyfillShim.js')],
-    alias: { crypto: 'crypto-browserify' }, // browserify shimmed node builtins implicitly
+    // browserify shimmed node builtins implicitly; esbuild does not, so the ones actually reached by
+    // widget dependency graphs are mapped here.
+    //
+    // NB `buffer` is not optional alongside `crypto`. crypto-browserify's own dependency tree
+    // (asn1.js, browserify-sign, browserify-rsa, safe-buffer, ...) requires 'buffer' in 19 places, so
+    // aliasing crypto without it fails the bundle outright with "Could not resolve buffer". Found while
+    // migrating rhtmlCombinedScatter, whose graph reaches crypto and which therefore could not build.
+    alias: {
+      crypto: 'crypto-browserify',
+      buffer: 'buffer'
+    },
     define: {
       'process.env.NODE_ENV': JSON.stringify(minify ? 'production' : 'development'),
       global: 'window'
