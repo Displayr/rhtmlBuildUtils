@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import $ from 'jquery'
 import jsyaml from 'js-yaml'
-/* global fetch */
 
 const getExperimentList = () => fetch('/content/experimentManifest.json')
   .then(response => response.text())

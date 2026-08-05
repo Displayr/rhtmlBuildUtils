@@ -38,7 +38,7 @@ const getExampleUrl = ({ configName, stateName, width = 1000, height = 1000, rer
       state: stateName
     }]
   }
-  const configString = new Buffer(JSON.stringify(config)).toString('base64') // eslint-disable-line node/no-deprecated-api
+  const configString = Buffer.from(JSON.stringify(config)).toString('base64')
   return `http://localhost:9000/renderExample.html?config=${configString}`
 }
 

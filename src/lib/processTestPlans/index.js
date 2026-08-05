@@ -272,7 +272,7 @@ function _extractTestNameFromPath (testFilePath) {
 
 const renderExampleBasePath = '/renderExample.html'
 function _generateRenderExampleUrl (renderExampleConfig) {
-  const configString = new Buffer(JSON.stringify(renderExampleConfig)).toString('base64') // eslint-disable-line node/no-deprecated-api
+  const configString = Buffer.from(JSON.stringify(renderExampleConfig)).toString('base64')
   return `${renderExampleBasePath}?config=${configString}`
 }
 

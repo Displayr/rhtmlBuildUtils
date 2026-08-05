@@ -79,7 +79,7 @@ describe('snapshots', () => {
       testConfig.assert_log.forEach(assertion => {
         let pass
         let assertionDescription = assertion['type'] + ' '
-        if (assertion.hasOwnProperty('exist')) {
+        if (Object.hasOwn(assertion, 'exist')) {
           if (assertion['exist']) {
             pass = _.some(logs, log => log.type === assertion['type'])
             assertionDescription += 'exist'
@@ -87,10 +87,10 @@ describe('snapshots', () => {
             pass = _.every(logs, log => log.type !== assertion['type'])
             assertionDescription += 'not exist'
           }
-        } else if (assertion.hasOwnProperty('match')) {
+        } else if (Object.hasOwn(assertion, 'match')) {
           pass = _.some(logs, log => log.type === assertion['type'] && log.text.match(assertion['match']))
           assertionDescription += 'match ' + assertion['match']
-        } else if (assertion.hasOwnProperty('notmatch')) {
+        } else if (Object.hasOwn(assertion, 'notmatch')) {
           pass = _.every(logs, log => log.type !== assertion['type'] || !log.text.match(assertion['notmatch']))
           assertionDescription += 'not match ' + assertion['notmatch']
         } else {

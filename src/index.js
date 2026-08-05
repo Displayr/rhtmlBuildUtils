@@ -6,7 +6,7 @@ const cliArgs = require('yargs').argv
 const DEBUG = 0
 
 const taskSequences = {
-  build: [ 'clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs'] ],
+  build: ['clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs']],
   compileExperiments: [
     'moveCrossExperimentSnapshotComparisonListToBrowser',
     'buildExperimentManifest',
@@ -21,12 +21,12 @@ const taskSequences = {
     'compileRenderIndexPage',
     'processTestPlans'
   ],
-  core: [ 'less', 'copy' ],
-  runExperiment: [ 'copyExperimentSnapshotJestRunnerToProject', 'takeExperimentSnapshots' ],
-  serve: [ ['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch' ],
+  core: ['less', 'copy'],
+  runExperiment: ['copyExperimentSnapshotJestRunnerToProject', 'takeExperimentSnapshots'],
+  serve: [['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch'],
   testSpecs: ['jestSpecTests'],
-  testVisual: [ 'core', 'compileInternal', 'connect', 'copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition' ],
-  testVisual_s: [ 'copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition' ]
+  testVisual: ['core', 'compileInternal', 'connect', 'copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition'],
+  testVisual_s: ['copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition']
 }
 
 function registerGulpTasks ({ gulp, exclusions = [] }) {
