@@ -35,10 +35,15 @@ const fakePage = (count) => ({
 })
 
 // Replaces the real jest-image-snapshot matcher so a comparison can be made to fail on demand without
-// any actual image diffing. testSnapshots calls expect(image).toMatchImageSnapshot({...}).
+// any actual image diffing, and so the identifier testSnapshots asks for can be asserted on.
+// testSnapshots calls expect(image).toMatchImageSnapshot({...}).
+let requestedIdentifiers = []
+
 const matcherFailingFor = (failingIdentifiers) => {
+  requestedIdentifiers = []
   expect.extend({
     toMatchImageSnapshot (received, { customSnapshotIdentifier }) {
+      requestedIdentifiers.push(customSnapshotIdentifier)
       const pass = !failingIdentifiers.includes(customSnapshotIdentifier)
       return { pass, message: () => `stub matcher: ${customSnapshotIdentifier} did not match` }
     }
@@ -58,14 +63,14 @@ test('resolves when every snapshot matches', async () => {
 // whose images did not match reported PASS -- the job only went red via jest's aggregate
 // snapshotState.unmatched count, and reading the per-test list led to the wrong conclusion.
 test('REJECTS when a snapshot does not match, rather than reporting pass', async () => {
-  matcherFailingFor(['a_mismatch'])
+  matcherFailingFor(['a_mismatch-snap'])
 
   await expect(testSnapshots({ page: fakePage(1), testName: 'a mismatch' }))
     .rejects.toThrow(/1 snapshot\(s\) did not match: a_mismatch/)
 })
 
 test('names every failure, not just the first', async () => {
-  matcherFailingFor(['multi-one', 'multi-three'])
+  matcherFailingFor(['multi-one-snap', 'multi-three-snap'])
 
   const promise = testSnapshots({
     page: fakePage(3),
@@ -79,7 +84,7 @@ test('names every failure, not just the first', async () => {
 // Throwing from inside the loop would abort it, losing the diagnostic image for every widget after the
 // first failure. Collecting and rethrowing at the end keeps the full set.
 test('writes a diagnostic png for every failure, including ones after the first', async () => {
-  matcherFailingFor(['multi-one', 'multi-three'])
+  matcherFailingFor(['multi-one-snap', 'multi-three-snap'])
 
   await expect(testSnapshots({
     page: fakePage(3),
@@ -93,7 +98,7 @@ test('writes a diagnostic png for every failure, including ones after the first'
 // The previous implementation used the fs.writeFile callback form and never awaited it, so the process
 // could exit before the diagnostic image reached disk.
 test('the diagnostic png is on disk by the time the rejection surfaces', async () => {
-  matcherFailingFor(['sync_check'])
+  matcherFailingFor(['sync_check-snap'])
 
   await expect(testSnapshots({ page: fakePage(1), testName: 'sync check' })).rejects.toThrow()
 
@@ -108,4 +113,27 @@ test('writes nothing to new_snapshots when everything matches', async () => {
   await testSnapshots({ page: fakePage(2), testName: 'clean run', snapshotNames: ['a', 'b'] })
 
   expect(fs.existsSync(newSnapshotsDir)).toBe(false)
+})
+
+// These two pin the baseline FILENAME, which is the contract with every committed baseline in every
+// widget repo: they are all <name>-snap.png. jest-image-snapshot v3 appended '-snap' to a custom
+// identifier; v6 appends it only when no custom identifier is given
+// (`customSnapshotIdentifier || `${defaultIdentifier}-snap``) and writes `${identifier}.png`. So under
+// v6 the suffix has to come from here. Getting this wrong is silent and expensive: nothing matches the
+// existing baselines, every test looks new, and a regeneration writes a parallel un-suffixed set while
+// orphaning the old one -- which is exactly what happened on the first rhtmlCombinedScatter run.
+test('asks for an identifier ending in -snap, so the baseline is <name>-snap.png', async () => {
+  matcherFailingFor([])
+
+  await testSnapshots({ page: fakePage(1), testName: 'grid' })
+
+  expect(requestedIdentifiers).toEqual(['grid-snap'])
+})
+
+test('suffixes every widget on a multi-widget page', async () => {
+  matcherFailingFor([])
+
+  await testSnapshots({ page: fakePage(3), testName: 'multi', snapshotNames: ['one', 'two', 'three'] })
+
+  expect(requestedIdentifiers).toEqual(['multi-one-snap', 'multi-two-snap', 'multi-three-snap'])
 })

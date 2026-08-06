@@ -169,7 +169,17 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
     let image = Buffer.isBuffer(rawImage) ? rawImage : Buffer.from(rawImage)
     const snapshotName = getSnapshotName(index)
     try {
-      expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
+      // NB the '-snap' suffix is applied HERE, and must be. jest-image-snapshot changed this between
+      // v3 and v6. Its createSnapshotIdentifier now reads:
+      //
+      //     let snapshotIdentifier = customSnapshotIdentifier || `${defaultIdentifier}-snap`
+      //
+      // so '-snap' is appended only when NO custom identifier is given -- and the baseline file is
+      // `${snapshotIdentifier}.png`. v3 appended it either way, which is why every committed baseline
+      // in every widget repo is named <name>-snap.png. Passing the bare name under v6 writes
+      // <name>.png instead: nothing matches the existing baselines, every test looks new, and a
+      // regeneration silently produces a parallel un-suffixed set while orphaning all the old ones.
+      expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: `${snapshotName}-snap` })
     } catch (e) {
       failures.push({ snapshotName, error: e })
 
