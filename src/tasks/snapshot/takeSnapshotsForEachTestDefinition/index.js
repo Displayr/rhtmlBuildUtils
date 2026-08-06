@@ -39,6 +39,7 @@ module.exports = () => {
     // connect now registers its server with src/lib/teardown.js, so the runner closes it and owns the
     // exit code, and this task is free to appear anywhere in a sequence.
     return shell.exec(command, { async: true }, (exitCode) => {
+      removePassThroughConfigFile({ widgetConfig })
       const error = (exitCode === 0) ? null : new Error(`${command} failed with code ${exitCode}`)
       done(error)
     })
@@ -67,6 +68,11 @@ const getCommandString = ({ testRoots, jestPath, args }) => {
   return `"${jestPath}" ${roots} ${testFilePattern} ${acceptNewSnapshots} ${updateSnapshots} ${testNamePattern}`
 }
 
+// The only reason this file exists is to carry command line values across a process boundary: this task
+// shells out to jest, and jest propagates no arguments to the workers that actually read widgetConfig.
+const passThroughConfigPath = ({ widgetConfig }) =>
+  path.join(widgetConfig.basePath, '.tmp', 'snapshot_dynamic_config.json')
+
 const writePassThroughConfigFile = ({ widgetConfig, args }) => {
   const dynamicSnapshotConfig = _.pick(args, ['branch', 'env', 'snapshotDirectory'])
 
@@ -79,6 +85,20 @@ const writePassThroughConfigFile = ({ widgetConfig, args }) => {
   }
 
   const configString = JSON.stringify(dynamicSnapshotConfig, {}, 2)
-  fs.writeFileSync(path.join(widgetConfig.basePath, '.tmp', 'snapshot_dynamic_config.json'), configString, 'utf8')
+  fs.writeFileSync(passThroughConfigPath({ widgetConfig }), configString, 'utf8')
   if (ECHO_PASSTHROUGH_CONFIG) { console.log(`snapshot dynamic config: ${configString}`) }
+}
+
+// NB removed as soon as the jest run finishes, because widgetConfig merges this file at HIGHER precedence
+// than the widget's own build/config/widget.config.js. Left behind, it silently reconfigures every LATER
+// task that reads widgetConfig -- so a filtered run like
+//
+//     rhtml testVisual --env=local --branch=probe --snapshotDirectory=.tmp/probe
+//
+// left `rhtml reviewBaselines` pointing at .tmp/probe rather than the real snapshot tree, which is exactly
+// when you need reviewBaselines to be right. It is a process-boundary hack, not ambient state, so it
+// should not outlive the process it was written for.
+const removePassThroughConfigFile = ({ widgetConfig }) => {
+  // force: true so a run that never got as far as writing the file does not fail on the way out.
+  fs.rmSync(passThroughConfigPath({ widgetConfig }), { force: true })
 }
