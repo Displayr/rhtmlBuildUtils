@@ -34,13 +34,19 @@ module.exports = ({ entryPointFile, destinationDirectory, minify = false, callba
     // browserify shimmed node builtins implicitly; esbuild does not, so the ones actually reached by
     // widget dependency graphs are mapped here.
     //
-    // NB `buffer` is not optional alongside `crypto`. crypto-browserify's own dependency tree
-    // (asn1.js, browserify-sign, browserify-rsa, safe-buffer, ...) requires 'buffer' in 19 places, so
-    // aliasing crypto without it fails the bundle outright with "Could not resolve buffer". Found while
-    // migrating rhtmlCombinedScatter, whose graph reaches crypto and which therefore could not build.
+    // NB these four go together. Aliasing `crypto` alone is not enough: crypto-browserify's own
+    // dependency tree (asn1.js, browserify-sign, browserify-rsa, safe-buffer, cipher-base, hash-base,
+    // readable-stream) requires buffer, stream and events, so a crypto-only alias fails the bundle
+    // outright with "Could not resolve buffer" / "Could not resolve stream".
+    //
+    // Found while migrating rhtmlCombinedScatter, which could not build at all against 9.0.0. Its chain
+    // is bignumber.js@2 -> crypto (used for BigNumber.random) -> the tree above. Any widget depending on
+    // bignumber.js v2 hits exactly this, so it belongs here rather than in one widget's esbuildOptions.
     alias: {
       crypto: 'crypto-browserify',
-      buffer: 'buffer'
+      buffer: 'buffer',
+      stream: 'stream-browserify',
+      events: 'events'
     },
     define: {
       'process.env.NODE_ENV': JSON.stringify(minify ? 'production' : 'development'),
