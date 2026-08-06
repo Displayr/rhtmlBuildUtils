@@ -103,6 +103,24 @@ succeeding on Windows at all.
 The `--env` flag also no longer has a `local`/`travis` whitelist, so a CI environment can be named after
 the system running it instead of being set indirectly through `widget.config.js`.
 
+#### `crypto` is stubbed in the bundle
+
+**If your widget calls anything on node's `crypto`, you must opt back in.** Add to
+`build/config/widget.config.js`:
+
+    esbuildOptions: { alias: { crypto: 'crypto-browserify' } }
+
+Without it the first call throws with a message pointing back here, rather than failing silently.
+**rhtmlPictographs is the known case** — `CacheService.js` and `SvgDefinitionManager.js` both use
+`crypto.createHash`.
+
+Why the default changed: `bignumber.js@2` (rhtmlCombinedScatter, rhtmlLabeledScatter) reaches for crypto
+via `require('cry' + 'pto')` inside a `try/catch`, an idiom specifically intended to stop bundlers
+resolving it — and browserify duly shipped none of it. esbuild constant-folds the concatenation, so it
+resolves, and mapping it to `crypto-browserify` dragged 616 KiB across 180 files (`elliptic`, four copies
+of `bn.js`, `asn1.js`, `diffie-hellman`) into rhtmlCombinedScatter's bundle for a code path
+(`BigNumber.random`) that nothing calls. See [src/lib/cryptoStub.js](./src/lib/cryptoStub.js).
+
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
 
 * [internal web server](./docs/internal_web_server.md)
