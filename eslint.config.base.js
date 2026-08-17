@@ -68,6 +68,14 @@ const browserEsmFiles = [
   'theSrc/internal_www/js/**/*.js'
 ]
 
+// A widget repo's test tree -- the widget-side counterpart of browserContextFiles above. These files
+// run in node, but the callbacks they hand to page.evaluate / waitForFunction are serialised into the
+// browser, so they reference `window` and `document` in code that never executes here. rhtmlDonut also
+// keeps an ES module helper under theSrc/test (utils/addTestFixturesToWindow.js), so this tree is
+// mixed: sourceType module covers that one without disturbing the CommonJS majority, whose `require`
+// and `module.exports` parse the same either way.
+const widgetTestFiles = ['theSrc/test/**/*.js']
+
 module.exports = [
   { ignores },
 
@@ -172,6 +180,26 @@ module.exports = [
       // comment to work around the missing browser globals; those are gone now that the globals are
       // declared here, since they would otherwise trip no-redeclare.
       'n/no-unsupported-features/node-builtins': 'off'
+    }
+  },
+
+  {
+    files: widgetTestFiles,
+    languageOptions: {
+      sourceType: 'module',
+      globals: { ...globals.browser }
+    },
+    rules: {
+      // NB puppeteer is deliberately NOT a dependency of a widget repo. It comes from here, because the
+      // browser version is what decides whether the widget's image baselines are valid, and declaring
+      // it in both places would let the two drift and silently invalidate every baseline. So it
+      // resolves at runtime while being absent from the widget's package.json -- exactly the shape
+      // these two rules report.
+      //
+      // n/no-missing-require is deliberately left ON: a require that resolves to nothing is still a
+      // defect here, and switching it off would turn the whole test tree into an unchecked directory.
+      'n/no-extraneous-require': 'off',
+      'n/no-extraneous-import': 'off'
     }
   }
 ]
