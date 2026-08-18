@@ -1,8 +1,8 @@
 const { createRunner } = require('./lib/taskRunner')
 
-// NB the nesting is meaningful and unchanged from the gulp era: a flat entry runs on its own, and a
-// NESTED ARRAY runs its members concurrently -- the equivalent of a gulp.parallel(...) inside a
-// gulp.series(...). See src/lib/taskRunner.js.
+// NB the nesting is unchanged from the gulp era but is NOT parallelism: gulp.series flattened these
+// arrays with arr-flatten before running them, so every step ran sequentially. It is kept for shape
+// only. See src/lib/taskRunner.js.
 //
 // NB `core` is series, not parallel, and must stay that way: `less` and `copy` both write into
 // inst/htmlwidgets/lib/style, so running them concurrently would race for any widget that ships both
