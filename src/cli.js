@@ -1,6 +1,7 @@
 const colors = require('ansi-colors')
 const { runTasks, knownTaskNames } = require('./index')
 const { runTeardowns } = require('./lib/teardown')
+const { formatTaskError } = require('./lib/formatError')
 
 // Entry point for the `rhtml` binary. Replaces `gulp <task> [<task>...] [--flags]` with
 // `rhtml <task> [<task>...] [--flags]`.
@@ -30,7 +31,11 @@ main()
     process.exit(0)
   })
   .catch(async (error) => {
-    console.error(colors.red(error.message))
+    const { summary, detail } = formatTaskError(error)
+    console.error(colors.red(summary))
+    // NB the stack is printed only for the error types that always mean a bug in a task. Errors this
+    // build raises deliberately already say everything they need to, and a stack under them is noise.
+    if (detail) { console.error(detail) }
     if (/^unknown task/.test(error.message)) {
       console.error(`\navailable tasks:\n  ${knownTaskNames().join('\n  ')}`)
     }
