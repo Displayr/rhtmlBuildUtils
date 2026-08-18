@@ -34,7 +34,7 @@ HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) base
  
 In your widget repo directory run : 
  
-    npm install -D "github:Displayr/rhtmlBuildUtils#8.0.0"
+    npm install -D "github:Displayr/rhtmlBuildUtils#9.0.0"
 
 then in your project gulpfile.js:
 
@@ -46,6 +46,18 @@ then in your project gulpfile.js:
       gulp: gulp, 
       exclusions: dontRegisterTheseTasks 
     })
+
+and an `eslint.config.js` in your widget repo root:
+
+    module.exports = require('rhtmlBuildUtils/eslint.config.base')
+
+### Upgrading to 9.0.0 from 8.x
+
+9.0.0 moves to eslint 10, which **removed `.eslintrc` support entirely**. A widget repo must therefore
+replace its `.eslintrc` (and `.eslintignore`, which flat config also drops) with the one line
+`eslint.config.js` shown above; without it `gulp lint` fails with "couldn't find an eslint
+configuration file". The shared config reproduces the previous `standard` style, so adopting it should
+not reformat any widget code. eslint 10 also requires node `^20.19.0 || ^22.13.0 || >=24`.
 
 By calling registerGulpTasks you will add all the tasks defined in [src/tasks](src/tasks) to your project. These tasks are enumerated [below](#gulp-task-reference).
 
@@ -121,7 +133,7 @@ The top level tasks are those you will likely run as part of the widget build pr
 
 `gulp testVisual_s` : just run the visual regression suite (skip the other steps, `gulp serve` must already be running).
 
-`gulp lint` : this runs the eslint style checker on all the javascript files. Our settings are defined in `.eslintrc`. To run with auto fix run `gulp lint --fix`. Note that this is also run as a git prepush hook so you will not be able to push code to git unless it passes the style checks. 
+`gulp lint` : this runs the eslint style checker on all the javascript files. Our settings are defined in [eslint.config.base.js](./eslint.config.base.js), which your widget repo's `eslint.config.js` re-exports. Which files are checked is decided by the `ignores` in that config rather than by this task, because eslint 10 has no `.eslintignore`. To run with auto fix run `gulp lint --fix`. Note that this is also run as a git prepush hook so you will not be able to push code to git unless it passes the style checks. 
 
 # Developing / Contributing
 

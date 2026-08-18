@@ -3,7 +3,6 @@ const fs = require('fs-extra')
 const deepDiff = require('deep-diff')
 const { mkdirp } = require('fs-extra')
 const path = require('path')
-const request = require('request-promise')
 const { configureToMatchImageSnapshot } = require('jest-image-snapshot')
 const widgetConfig = require('./widgetConfig')
 
@@ -38,7 +37,7 @@ const getExampleUrl = ({ configName, stateName, width = 1000, height = 1000, rer
       state: stateName
     }]
   }
-  const configString = new Buffer(JSON.stringify(config)).toString('base64') // eslint-disable-line node/no-deprecated-api
+  const configString = Buffer.from(JSON.stringify(config)).toString('base64')
   return `http://localhost:9000/renderExample.html?config=${configString}`
 }
 
@@ -55,12 +54,32 @@ const testState = async ({ page, stateName, tolerance }) => {
   expect(stateIsGood).toEqual(true)
 }
 
+// NB this replaced request-promise, which is deprecated along with the request package it extends.
+// The status check is deliberate: request-promise rejected on a non-2xx response, whereas fetch
+// resolves regardless and only reports the status on the response. Without it, a missing state file
+// would reach .json() as a 404 body and fail with a JSON parse error naming neither the url nor the
+// status.
+//
+// NB the disable below is about a stability LABEL, not availability. Global fetch has been present and
+// enabled by default since node 18; node only dropped the "experimental" tag in 21. engines.node
+// admits ^20.19.0 because that is eslint 10's floor, so eslint-plugin-n reports it. Narrowing engines
+// to >=22 purely to silence this would drop node 20 for every widget developer, which is a worse
+// trade than one scoped directive.
+const fetchJson = async (url) => {
+  // eslint-disable-next-line n/no-unsupported-features/node-builtins
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`GET ${url} failed with status ${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}
+
 const checkState = async ({ page, expectedStateFile, tolerance: toleranceString }) => {
   return new Promise((resolve, reject) => {
     const expectedStateUrl = `http://localhost:9000/${replaceDotsWithSlashes(expectedStateFile)}.json`
 
     const { statePreprocessor } = widgetConfig.internalWebSettings
-    const expectedStatePromise = request(expectedStateUrl).then(JSON.parse)
+    const expectedStatePromise = fetchJson(expectedStateUrl)
     const actualStatePromise = getRecentState(page)
 
     return Promise.all([actualStatePromise, expectedStatePromise]).then(([unprocessedActualState, expectedState]) => {
