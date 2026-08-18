@@ -1,4 +1,4 @@
-const { promisifyTask, discoverTaskModulePaths } = require('./taskRunner')
+const { createRunner, promisifyTask, discoverTaskModulePaths } = require('./taskRunner')
 
 describe('promisifyTask', () => {
   test('resolves when the task calls done with no error', async () => {
@@ -59,5 +59,75 @@ describe('discoverTaskModulePaths', () => {
 
   test('openBrowser is a real module, not registered inline as it was under gulp', () => {
     expect(typeof require(discovered.openBrowser)).toBe('function')
+  })
+})
+
+describe('createRunner', () => {
+  // Records start/end around a tick so that concurrent execution is distinguishable from sequential:
+  // run serially the marks pair up (a:start,a:end,b:start,b:end), run concurrently they interleave.
+  const recordingTasks = (order) => (taskName) => async () => {
+    order.push(`${taskName}:start`)
+    await new Promise(resolve => setImmediate(resolve))
+    order.push(`${taskName}:end`)
+  }
+
+  // NB nested arrays did NOT run concurrently under gulp. gulp.task(name, gulp.series(...sequence))
+  // reached undertaker's normalizeArgs, which flattens its arguments with arr-flatten before handing
+  // them to bach.series -- strictly sequential. The nesting in taskSequences was therefore decorative,
+  // and treating it as parallel would start openBrowser before connect had bound the port and let
+  // `less` and prepareInternalWwwCss race for browser/styles/index.css.
+  test('runs a nested array sequentially, as gulp.series did after arr-flatten', async () => {
+    const order = []
+    const runner = createRunner({
+      taskSequences: { it: [['a', 'b'], 'c'] },
+      loadTask: recordingTasks(order)
+    })
+
+    await runner.runNamed('it')
+
+    expect(order).toEqual(['a:start', 'a:end', 'b:start', 'b:end', 'c:start', 'c:end'])
+  })
+
+  test('flattens nesting at any depth', async () => {
+    const order = []
+    const runner = createRunner({
+      taskSequences: { it: [[['a', 'b']], 'c'] },
+      loadTask: recordingTasks(order)
+    })
+
+    await runner.runNamed('it')
+
+    expect(order).toEqual(['a:start', 'a:end', 'b:start', 'b:end', 'c:start', 'c:end'])
+  })
+
+  test('runs a referenced sequence in place, and sequentially', async () => {
+    const order = []
+    const runner = createRunner({
+      taskSequences: { outer: ['a', 'inner'], inner: ['b', 'c'] },
+      loadTask: recordingTasks(order)
+    })
+
+    await runner.runNamed('outer')
+
+    expect(order).toEqual(['a:start', 'a:end', 'b:start', 'b:end', 'c:start', 'c:end'])
+  })
+
+  test('skips a disabled task but still completes the sequence containing it', async () => {
+    const order = []
+    const runner = createRunner({
+      taskSequences: { it: ['a', 'b', 'c'] },
+      disabledTasks: ['b'],
+      loadTask: recordingTasks(order)
+    })
+
+    await runner.runNamed('it')
+
+    expect(order).toEqual(['a:start', 'a:end', 'c:start', 'c:end'])
+  })
+
+  test('names the task it cannot find', async () => {
+    const runner = createRunner({ taskSequences: {}, loadTask: () => undefined })
+
+    await expect(runner.runNamed('nope')).rejects.toThrow('unknown task \'nope\'')
   })
 })

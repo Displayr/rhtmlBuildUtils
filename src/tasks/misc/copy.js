@@ -1,6 +1,4 @@
-const fs = require('fs-extra')
-const path = require('path')
-const fastGlob = require('fast-glob')
+const copyJob = require('../../lib/copyJob')
 const { basePath, widgetName } = require('../../lib/widgetConfig')
 
 // NB PIXEL RELEVANT, in the sense that getting a destination wrong changes which css and which assets
@@ -21,8 +19,10 @@ const copyJobs = [
   { from: 'theSrc/images/**/*', base: 'theSrc/images', to: ['browser/images'] },
   { from: 'theSrc/styles/**/*.css', base: 'theSrc/styles', to: ['inst/htmlwidgets/lib/style', 'browser/style'] },
   { from: 'theSrc/internal_www/styles/**/*.css', base: 'theSrc/internal_www/styles', to: ['browser/style'] },
-  { from: 'theSrc/R/htmlwidget.yaml', base: 'theSrc/R', to: ['inst/htmlwidgets'], renameTo: `${widgetName}.yaml` },
-  { from: 'theSrc/R/htmlwidget.R', base: 'theSrc/R', to: ['R'], renameTo: `${widgetName}.R` },
+  // mustMatch: gulp.src threw on these two when absent, because they are non-magic single paths and
+  // allowEmpty defaults to false. Both are required for a working htmlwidget.
+  { from: 'theSrc/R/htmlwidget.yaml', base: 'theSrc/R', to: ['inst/htmlwidgets'], renameTo: `${widgetName}.yaml`, mustMatch: true },
+  { from: 'theSrc/R/htmlwidget.R', base: 'theSrc/R', to: ['R'], renameTo: `${widgetName}.R`, mustMatch: true },
   { from: ['theSrc/R/*.R', '!theSrc/R/htmlwidget.R'], base: 'theSrc/R', to: ['R'] },
   // only used directly in browser by renderExample.html
   {
@@ -32,31 +32,12 @@ const copyJobs = [
   }
 ]
 
-const copyJob = async ({ from, base, to, renameTo }) => {
-  const matches = await fastGlob(from, { cwd: basePath, dot: false })
-
-  for (const relativeMatch of matches) {
-    // A null base flattens into the destination, which is what gulp.src did for an explicit file list
-    // with no glob magic in its directory portion.
-    const relativeOutput = (base === null)
-      ? path.basename(relativeMatch)
-      : path.relative(base, relativeMatch)
-
-    for (const destination of to) {
-      const outputPath = path.join(basePath, destination, renameTo ? path.basename(relativeOutput) : relativeOutput)
-      const finalPath = renameTo ? path.join(path.dirname(outputPath), renameTo) : outputPath
-      await fs.mkdirs(path.dirname(finalPath))
-      await fs.copy(path.join(basePath, relativeMatch), finalPath)
-    }
-  }
-}
-
 module.exports = () => {
   return async function () {
     // Sequential rather than concurrent: two jobs share the inst/htmlwidgets/lib/style and
     // browser/style destinations, and the gulp version's ordering is what decided the winner.
     for (const job of copyJobs) {
-      await copyJob(job)
+      await copyJob({ basePath, ...job })
     }
   }
 }
