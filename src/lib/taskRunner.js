@@ -5,8 +5,15 @@ const colors = require('ansi-colors')
 // Replaces gulp's task registry and gulp.series/gulp.parallel.
 //
 // The sequence format is unchanged from the gulp era, so taskSequences in src/index.js reads exactly
-// as it did: a flat entry runs on its own, and a NESTED ARRAY runs its members concurrently. That
-// mirrors gulp.series([...]) with a gulp.parallel(...) inside it.
+// as it did -- and so does its BEHAVIOUR: every step runs sequentially, nesting included.
+//
+// NB the nesting looks like parallelism and is not. gulp.task(name, gulp.series(...taskSequences[name]))
+// reached undertaker's normalizeArgs, which flattens its arguments with arr-flatten before handing them
+// to bach.series, so a nested array was flattened into the surrounding series. Running them
+// concurrently instead would start openBrowser before connect had bound the port, and let less (in
+// core) race prepareInternalWwwCss (in compileInternal) for browser/styles/index.css -- which is pixel
+// relevant. Introducing parallelism is a deliberate change to make on its own, not a side effect of
+// dropping gulp.
 //
 // A task module is `() => function (done) { ... }`: the factory is called once, and the function it
 // returns takes a node style callback. That is the same contract the tasks had under gulp, minus the
@@ -53,8 +60,17 @@ const promisifyTask = (taskName, taskFunction) => new Promise((resolve, reject) 
   }
 })
 
-const createRunner = ({ taskSequences, disabledTasks = [] }) => {
+// Resolving a task name to its function is injectable so that runSequence can be tested without
+// executing real build tasks; nothing in production passes it.
+const createRunner = ({ taskSequences, disabledTasks = [], loadTask }) => {
   const taskModulePaths = discoverTaskModulePaths()
+
+  // Required lazily rather than up front so that a broken or irrelevant task module cannot stop an
+  // unrelated task from running, and so widgetConfig is only read by tasks that need it.
+  const loadTaskFunction = loadTask || (taskName => {
+    const modulePath = taskModulePaths[taskName]
+    return modulePath ? require(modulePath)() : undefined
+  })
 
   const runNamed = async (taskName) => {
     if (disabledTasks.includes(taskName)) {
@@ -66,8 +82,8 @@ const createRunner = ({ taskSequences, disabledTasks = [] }) => {
       return runSequence(taskSequences[taskName])
     }
 
-    const modulePath = taskModulePaths[taskName]
-    if (!modulePath) {
+    const taskFunction = loadTaskFunction(taskName)
+    if (!taskFunction) {
       // NB the list of valid names is printed by the CLI, not appended here, so that a programmatic
       // caller gets a one line message rather than all 34 task names.
       throw new Error(`unknown task '${taskName}'`)
@@ -75,20 +91,14 @@ const createRunner = ({ taskSequences, disabledTasks = [] }) => {
 
     const started = Date.now()
     console.log(`starting '${taskName}'`)
-    // Required here rather than up front so that a broken or irrelevant task module cannot stop an
-    // unrelated task from running, and so widgetConfig is only read by tasks that need it.
-    const taskFunction = require(modulePath)()
     await promisifyTask(taskName, taskFunction)
     console.log(`finished '${taskName}' after ${Date.now() - started} ms`)
   }
 
+  // flat() reproduces arr-flatten, which is what undertaker did to these same arrays.
   const runSequence = async (sequence) => {
-    for (const step of sequence) {
-      if (Array.isArray(step)) {
-        await Promise.all(step.map(runNamed))
-      } else {
-        await runNamed(step)
-      }
+    for (const step of sequence.flat(Infinity)) {
+      await runNamed(step)
     }
   }
 
