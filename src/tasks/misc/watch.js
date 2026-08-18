@@ -2,6 +2,7 @@ const path = require('path')
 const chokidar = require('chokidar')
 const livereload = require('livereload')
 const yargs = require('yargs')
+const createRebuildQueue = require('../../lib/rebuildQueue')
 const compileWatchRule = require('../../lib/watchRules')
 const { createRunner } = require('../../lib/taskRunner')
 const { registerTeardown } = require('../../lib/teardown')
@@ -27,6 +28,16 @@ module.exports = () => {
     const { runNamed } = createRunner({
       taskSequences: require('../../index').taskSequences,
       disabledTasks
+    })
+
+    // NB rebuilds go through a queue rather than straight to runNamed. gulp.watch coalesced a burst
+    // of events (glob-watcher defaults: delay 200, queue true) and never ran a rule twice at once;
+    // chokidar does not await an async listener, so a save-all or a branch checkout would otherwise
+    // launch one invocation per file and they would clobber each other's output. See rebuildQueue.js.
+    const rebuilds = createRebuildQueue({
+      run: runNamed,
+      // A failed rebuild must not kill the dev server, nor stop the rebuilds queued behind it.
+      onError: (taskName, error) => console.error(`${taskName} failed: ${error.message}`)
     })
 
     const liveReloadServer = livereload.createServer({ port: liveReloadPort })
@@ -56,15 +67,10 @@ module.exports = () => {
       const { directories, matches } = compileWatchRule({ basePath, patterns: watch })
 
       const watcher = chokidar.watch(directories, WATCH_OPTIONS)
-      watcher.on('all', async (event, changedPath) => {
+      watcher.on('all', (event, changedPath) => {
         if (!matches(changedPath)) { return }
         console.log(`${event} ${changedPath} -> ${run}`)
-        try {
-          await runNamed(run)
-        } catch (error) {
-          // A failed rebuild must not kill the dev server. Report it and keep watching.
-          console.error(`${run} failed: ${error.message}`)
-        }
+        rebuilds.schedule(run)
       })
       registerTeardown(`watcher for ${run}`, () => watcher.close())
     })
