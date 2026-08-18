@@ -40,7 +40,7 @@
 #### static snapshots
 
 * In the repo there are sets of widget configs and sets of test plans that define "render this config with this dimensions", or more complex "merge these two configs then render with these dimensions" <-- this has not changed
-* The 'jest' test driver loads each test in the test plan, then takes a named snapshot using the 'jest-image-snapshot' jest plugin. If a snapshot doesn't already exist for that name, then the plugin simply saves the image. If a snapshot does exist for that name, then the plugin uses 'pixelmatch' to compare the existing and new snapshot. If the two images are the same, the test passes. If they are different the test fails and a "diff" image is saved, which is a png showing the old, the new, and a diff.
+* The 'jest' test driver loads each test in the test plan, then takes a named snapshot using the 'jest-image-snapshot' jest plugin. If a snapshot does exist for that name, then the plugin uses 'pixelmatch' to compare the existing and new snapshot. If the two images are the same, the test passes. If they are different the test fails and a "diff" image is saved, which is a png showing the old, the new, and a diff. If a snapshot does NOT already exist for that name, the test FAILS -- otherwise a newly added test would write its own baseline, pass, and never actually be regression tested. The exception is a snapshot set that has never been baselined at all, which is seeded instead; see below.
 
 #### Interactions Tests + Snapshots
 
@@ -57,6 +57,17 @@ Why we need different snapshot sets for different environments
 Why we need different snapshot sets for different branches
 
 During work on VIS-513 I probably went through 10 rounds of changes where I said : ok I need to see what effect this specific change will have. Having different snapshot sets for master and for VIS-513 allows me to preserve what master looks like while I rebaseline the VIS-513 set on each iteration. When I am finally satisfied, then I rebaseline master, and discard the VIS-513 snapshots.
+
+A branch that has never been baselined has no snapshot set, and nothing copies one from master. The
+first `rhtml testVisual --branch=<new branch>` therefore SEEDS the set: every image is written,
+nothing is compared, and the run says so:
+
+    no baselines under theSrc/test/snapshots/local/VIS-513
+    seeding this snapshot set: every image will be WRITTEN and nothing compared
+
+Once the set exists, a snapshot with no baseline fails, so a test added later cannot quietly
+baseline itself. `--acceptNewSnapshots` forces seeding for a set that already exists, and `-u`
+rebaselines everything regardless.
 
 ## AWS dependencies
 

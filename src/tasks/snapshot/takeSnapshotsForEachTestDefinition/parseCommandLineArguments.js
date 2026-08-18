@@ -6,13 +6,18 @@ const yargs = require('yargs')
 
 module.exports = () => {
   // NB defaults to FALSE so that a snapshot with no baseline FAILS instead of being written and
-  // passed. The flag is emitted BOTH ways (--ci=0 when accepting, --ci when not) rather than only
-  // when accepting, because jest's ci option defaults to ci-info's isCI: omitting it would mean
-  // "whatever this machine is", which on a developer machine is false, giving updateSnapshot:
-  // 'new' and letting jest-image-snapshot write the missing baseline and pass -- on exactly the
-  // machine where a new test gets added. Combined with baselines only leaving CI on an explicit
-  // regeneration, such a test could look green forever while never being regression-tested at all.
-  // Pass --acceptNewSnapshots to opt back in when bootstrapping a new suite.
+  // passed -- otherwise a newly added test writes its own baseline and goes green forever, never
+  // actually being regression tested.
+  //
+  // NB the default is not applied blindly: a snapshot set that has never been baselined is SEEDED
+  // instead, because sets are keyed on <snapshotDirectory>/<env>/<branch> and nothing seeds a new
+  // branch from master, so being strict there would fail every test on the first run of every
+  // feature branch. src/lib/resolveAcceptNewSnapshots.js decides. Passing this flag forces seeding
+  // even for a set that already exists.
+  //
+  // The flag is emitted BOTH ways (--ci=0 when accepting, --ci when not) rather than only when
+  // accepting, because jest's ci option defaults to ci-info's isCI: omitting it would leave the
+  // behaviour to whatever machine happens to be running. -u still overrides both.
   yargs.option('acceptNewSnapshots', {
     alias: 'a',
     describe: 'write and pass snapshots that have no baseline, instead of failing',

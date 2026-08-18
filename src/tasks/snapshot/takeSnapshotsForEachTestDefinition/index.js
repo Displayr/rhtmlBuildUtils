@@ -1,5 +1,6 @@
 // TODO address duplication between takeExperimentSnapshots/index.js and takeSnapshotsForEachTestDefinition/index.js
 
+const colors = require('ansi-colors')
 const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
@@ -8,6 +9,7 @@ const widgetConfig = require('../../../lib/widgetConfig')
 const getJestPath = require('../../../lib/getJestPath')
 const { registerTeardown } = require('../../../lib/teardown')
 const buildSnapshotJestCommand = require('../../../lib/snapshotJestCommand')
+const resolveAcceptNewSnapshots = require('../../../lib/resolveAcceptNewSnapshots')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
 
@@ -36,7 +38,17 @@ module.exports = () => {
     // behind -- and it is merged at HIGHER precedence than the widget config, so it would silently
     // reconfigure every later invocation. Removal is idempotent (force: true), so doing both is safe.
     registerTeardown('snapshot pass-through config', () => removePassThroughConfigFile({ widgetConfig }))
-    const command = buildSnapshotJestCommand({ testRoots, jestPath, args })
+    // NB whether a missing baseline fails is decided here, not by the flag alone. A branch that has
+    // never been baselined has no baselines by design -- sets are per branch and nothing seeds them
+    // from master -- so being strict there would fail the whole suite on the first run of every
+    // feature branch. See src/lib/resolveAcceptNewSnapshots.js.
+    const { acceptNewSnapshots, seeding, setRoot } = resolveAcceptNewSnapshots({ widgetConfig, args })
+    if (seeding) {
+      console.log(`no baselines under ${setRoot}`)
+      console.log(colors.yellow('seeding this snapshot set: every image will be WRITTEN and nothing compared'))
+    }
+
+    const command = buildSnapshotJestCommand({ testRoots, jestPath, args: { ...args, acceptNewSnapshots } })
 
     console.log(`running ${command}`)
 
