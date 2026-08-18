@@ -62,6 +62,8 @@ There are lots of files. This is what they do:
 * **theSrc/R/htmlwidget.yaml** - this is copied to inst/htmlwidget/WIDGETNAME.yaml and contains a manifest the htmlwidget framework uses. See [http://www.htmlwidgets.orghttp://www.htmlwidgets.org/develop_intro.html](http://www.htmlwidgets.org/develop_intro.html) for details. _**You do not need to rename this file.**_.
 * **theSrc/styles/main.less** - this is your CSS in a less file. It is used to generate `inst/htmlwidgets/lib/style/main.css`
 
+Both `theSrc/R/htmlwidget.R` and `theSrc/R/htmlwidget.yaml` are required: `rhtml build` fails with `no file matched ...` if either is absent, rather than producing an R package that is missing its widget definition and only fails later, at load time in R.
+
 **Spec Test Files**
 * **theSrc/scripts/*.spec.js** - These are karma test files. See [https://karma-runner.github.io/](https://karma-runner.github.io/) for docs on how to write tests using Karma. The last few widgets developed have relied 100% on visual snapshot testing, and did not use spec testing.
 
