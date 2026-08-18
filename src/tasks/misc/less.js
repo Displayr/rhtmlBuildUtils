@@ -2,6 +2,7 @@ const fs = require('fs-extra')
 const path = require('path')
 const less = require('less')
 const fastGlob = require('fast-glob')
+const { formatLessError } = require('../../lib/formatError')
 const { basePath } = require('../../lib/widgetConfig')
 
 // NB PIXEL RELEVANT. The compiled css is loaded by the page the visual regression suite screenshots,
@@ -26,7 +27,15 @@ module.exports = () => {
 
       // NB `filename` is what lets @import resolve relative to the file being compiled, which is how
       // gulp-less behaved. Without it any widget using @import would fail to find its partials.
-      const { css } = await less.render(source, { filename: sourceFile })
+      // NB the error is reformatted rather than propagated as is. less attaches filename, line and a
+      // source extract, all of which gulp-less used to surface and all of which are lost if only
+      // .message reaches the cli -- a broken stylesheet would report just "Unrecognised input".
+      let css
+      try {
+        ({ css } = await less.render(source, { filename: sourceFile }))
+      } catch (error) {
+        throw new Error(formatLessError(error, { basePath }), { cause: error })
+      }
 
       // gulp.dest preserved the path relative to the glob base (theSrc/styles), so a nested
       // theSrc/styles/a/b.less landed at browser/styles/a/b.css. Preserved here.
