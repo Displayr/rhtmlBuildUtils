@@ -70,8 +70,29 @@ Excluding a task no longer means passing `exclusions` or re-registering it as a 
 
 **2. eslint 10 removed `.eslintrc` support entirely.** Replace your `.eslintrc` (and `.eslintignore`,
 which flat config also drops) with the one line `eslint.config.js` above; without it `rhtml lint` fails
-with "couldn't find an eslint configuration file". The shared config reproduces the previous `standard`
-style, so adopting it should not reformat any widget code.
+with "couldn't find an eslint configuration file". The shared config reproduces the previous
+`standard` style, so it will not reformat code that relied on standard's defaults -- but see the
+next paragraph if your `.eslintrc` set rules of its own.
+
+Carry your own `rules` block across. The one line config replaces the config FORMAT, not your
+repo's rule choices: the shared config reproduces `standard`'s defaults and nothing else, so any rule
+your `.eslintrc` set is silently dropped. Re-apply them after the spread:
+
+    const base = require('rhtmlBuildUtils/eslint.config.base')
+
+    module.exports = [
+      ...base,
+      { rules: { /* whatever your .eslintrc set */ } }
+    ]
+
+Two traps when transcribing them. eslint 10 moved the formatting rules into `@stylistic`, so `indent`,
+`comma-dangle`, `no-multi-spaces` and friends need the prefix now -- switching off the unprefixed name
+silently does nothing. And `@stylistic` split the continuation indent of a wrapped binary expression
+out of `indent` into `indent-binary-ops`, so a repo that turned `indent` off wants that off too.
+
+This is not a formality. rhtmlDonut sets `comma-dangle: ["error", "always-multiline"]`, the opposite
+of the shared `never`: following the step above literally gives it **331 errors**, 301 of them from
+that one rule, and carrying its three rules across drops it to 33.
 
 Delete any `/* global X */` comments that name a standard BROWSER global. The shared config declares
 `globals.browser` for `theSrc/scripts/**`, `theSrc/internal_www/js/**` and `theSrc/test/**`, so those
