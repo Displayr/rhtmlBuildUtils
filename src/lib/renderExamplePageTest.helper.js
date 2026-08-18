@@ -131,6 +131,16 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
   let widgets = await page.$$(widgetConfig.internalWebSettings.singleWidgetSnapshotSelector)
   console.log(`taking ${widgets.length} snapshot(s) for ${testName}`)
 
+  // NB an empty match is a FAILURE, not a no-op. Without this the loop body never runs, failures
+  // stays empty and the test reports green having compared nothing -- the same class of defect as a
+  // swallowed matcher throw, and likelier in practice, since a selector change, a render error or a
+  // page exception all produce zero matches rather than a mismatched image. reviewBaselines already
+  // carries a read-side workaround for this ("identical - not regenerated usually means its test
+  // errored before reaching the snapshot"); this closes it on the write side.
+  if (!widgets.length) {
+    throw new Error(`${testName}: no widgets matched ${widgetConfig.internalWebSettings.singleWidgetSnapshotSelector} -- the page rendered nothing to snapshot`)
+  }
+
   const filesystemSafe = input => input
     .replace(/ /g, '_')
     .replace(/\./g, '_')
@@ -149,6 +159,18 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
     }
   }
 
+  // NB failures are COLLECTED here and rethrown once at the end, rather than swallowed or thrown
+  // immediately. Two separate reasons:
+  //
+  //  * Swallowing them (what this did before) meant a test whose images did not match reported PASS.
+  //    The job only went red via jest's aggregate snapshotState.unmatched count, so reading the
+  //    per-test list led straight to the wrong conclusion about what had actually failed.
+  //  * Throwing from inside the loop would abort it, so a multi-widget test would lose the diagnostic
+  //    new_snapshots image for every widget after the first failure.
+  //
+  // Collecting keeps the full set of diagnostics while still failing the test that failed.
+  const failures = []
+
   await asyncForEach(widgets, async (widget, index) => {
     // NB puppeteer now declares screenshot() as resolving a Uint8Array. It still hands back a
     // Buffer in practice, but jest-image-snapshot passes this straight to pngjs, which calls
@@ -157,8 +179,20 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
     let image = Buffer.isBuffer(rawImage) ? rawImage : Buffer.from(rawImage)
     const snapshotName = getSnapshotName(index)
     try {
-      expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: snapshotName })
+      // NB the '-snap' suffix is applied HERE, and must be. jest-image-snapshot changed this between
+      // v3 and v6. Its createSnapshotIdentifier now reads:
+      //
+      //     let snapshotIdentifier = customSnapshotIdentifier || `${defaultIdentifier}-snap`
+      //
+      // so '-snap' is appended only when NO custom identifier is given -- and the baseline file is
+      // `${snapshotIdentifier}.png`. v3 appended it either way, which is why every committed baseline
+      // in every widget repo is named <name>-snap.png. Passing the bare name under v6 writes
+      // <name>.png instead: nothing matches the existing baselines, every test looks new, and a
+      // regeneration silently produces a parallel un-suffixed set while orphaning all the old ones.
+      expect(image).toMatchImageSnapshot({ customSnapshotIdentifier: `${snapshotName}-snap` })
     } catch (e) {
+      failures.push({ snapshotName, error: e })
+
       // Can't find group name so just put all new snapshots in same folder
       const snapshotDirectory = path.join(
         widgetConfig.basePath,
@@ -167,12 +201,18 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
         widgetConfig.snapshotTesting.branch
       )
       const newSnapshotDir = path.join(snapshotDirectory, 'new_snapshots')
-      if (!fs.existsSync(newSnapshotDir)) fs.mkdirSync(newSnapshotDir)
-      fs.writeFile(path.join(newSnapshotDir, `${snapshotName}-snap.png`), image, 'binary', (err) => {
-        if (err) console.log('Error saving new image snapshot: ' + err)
-      })
+      // NB synchronous: the previous fs.writeFile callback form was fire-and-forget, so the process
+      // could exit before the diagnostic image reached disk.
+      fs.mkdirpSync(newSnapshotDir)
+      fs.writeFileSync(path.join(newSnapshotDir, `${snapshotName}-snap.png`), image, 'binary')
     }
   })
+
+  if (failures.length) {
+    const names = failures.map(({ snapshotName }) => snapshotName).join(', ')
+    const detail = failures.map(({ error }) => error.message).join('\n\n')
+    throw new Error(`${failures.length} snapshot(s) did not match: ${names}\n\n${detail}`)
+  }
 }
 
 module.exports = {

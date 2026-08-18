@@ -31,7 +31,26 @@ module.exports = ({ entryPointFile, destinationDirectory, minify = false, callba
     format: 'iife',
     logLevel: 'silent', // we surface errors and warnings ourselves, below
     inject: [path.join(__dirname, 'esbuildPolyfillShim.js')],
-    alias: { crypto: 'crypto-browserify' }, // browserify shimmed node builtins implicitly
+    // browserify shimmed node builtins implicitly; esbuild does not, so the ones actually reached by
+    // widget dependency graphs are mapped here.
+    //
+    // NB `crypto` is stubbed, NOT mapped to crypto-browserify. See src/lib/cryptoStub.js for the full
+    // reasoning: browserify shipped no crypto at all for these widgets, and resolving it costs 616 KiB
+    // for a code path nothing calls. A widget that genuinely needs it opts back in via
+    // esbuildOptions: { alias: { crypto: 'crypto-browserify' } }.
+    //
+    // NB buffer/stream/events stay mapped even though the default crypto stub no longer needs them.
+    // They are what makes the crypto-browserify opt-in above actually resolve -- its tree (asn1.js,
+    // browserify-sign, safe-buffer, cipher-base, hash-base, readable-stream) requires all three, and
+    // without them the bundle fails with "Could not resolve buffer" / "Could not resolve stream". They
+    // are also the right answer for any widget code that requires them directly, and cost nothing when
+    // nothing does.
+    alias: {
+      crypto: path.join(__dirname, 'cryptoStub.js'),
+      buffer: 'buffer',
+      stream: 'stream-browserify',
+      events: 'events'
+    },
     define: {
       'process.env.NODE_ENV': JSON.stringify(minify ? 'production' : 'development'),
       global: 'window'

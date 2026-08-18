@@ -49,11 +49,32 @@ const browserContextFiles = [
 // the test run for the same reason.
 const copiedTemplateTests = ['src/tasks/*/assets/*.jest.test.js']
 
-// The experiment UI is browser ES modules (`import _ from 'lodash'`), bundled by esbuild. It parsed
-// under the old .eslintrc only because eslint-config-standard set sourceType: 'module' for the whole
-// project, including the CommonJS majority. eslint-plugin-n's recommended-script config is correctly
-// CommonJS, so the genuinely-ESM files now say so for themselves.
-const browserEsmFiles = ['src/tasks/experiment/assets/ui/**/*.js']
+// Browser ES modules (`import _ from 'lodash'`), bundled by esbuild -- as opposed to the node CommonJS
+// that everything else here and in a widget repo is written in. These parsed under the old .eslintrc
+// only because eslint-config-standard set sourceType: 'module' for the WHOLE project, including the
+// CommonJS majority; eslint-plugin-n's recommended-script config is correctly CommonJS, so the
+// genuinely-ESM files have to say so for themselves.
+//
+// NB the widget entries matter as much as this package's own. `theSrc/scripts` is the standardised home
+// for a widget's source -- both widgetEntryPoint and widgetFactory point into it (see
+// src/config/default.widget.config.js) -- and it is ALL browser ESM. Without these globs a widget repo
+// adopting this config gets a parsing error on every one of its own source files. Globs that do not
+// apply in a given repo simply match nothing, so one list serves both.
+const browserEsmFiles = [
+  // this package's own experiment UI
+  'src/tasks/experiment/assets/ui/**/*.js',
+  // a widget repo's source, and any browser javascript it serves from the internal web server
+  'theSrc/scripts/**/*.js',
+  'theSrc/internal_www/js/**/*.js'
+]
+
+// A widget repo's test tree -- the widget-side counterpart of browserContextFiles above. These files
+// run in node, but the callbacks they hand to page.evaluate / waitForFunction are serialised into the
+// browser, so they reference `window` and `document` in code that never executes here. rhtmlDonut also
+// keeps an ES module helper under theSrc/test (utils/addTestFixturesToWindow.js), so this tree is
+// mixed: sourceType module covers that one without disturbing the CommonJS majority, whose `require`
+// and `module.exports` parse the same either way.
+const widgetTestFiles = ['theSrc/test/**/*.js']
 
 module.exports = [
   { ignores },
@@ -109,12 +130,21 @@ module.exports = [
       'no-extend-native': 'error',
       'no-new-func': 'error',
 
-      // @stylistic's customize() defaults are close to standard but differ on these five. Set to
-      // standard's values so no existing file is reformatted.
+      // @stylistic's customize() defaults are close to standard but differ on these. Set to standard's
+      // values so no existing file is reformatted.
       '@stylistic/comma-dangle': ['error', 'never'],
       '@stylistic/space-before-function-paren': ['error', 'always'],
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       '@stylistic/quote-props': ['error', 'as-needed'],
+
+      // NB customize() defaults this to 'before', but eslint-config-standard used 'after' -- i.e. a
+      // wrapped expression keeps the operator at the END of the line. Nothing on master happened to
+      // wrap an operator, so the mismatch stayed invisible until a file written under the old config
+      // was added, which then reported 13 errors for style that was previously correct. Ternaries keep
+      // the operator at the start, which is standard's own exception.
+      '@stylistic/operator-linebreak': ['error', 'after', {
+        overrides: { '?': 'before', ':': 'before', '|>': 'before' }
+      }],
 
       // Not enabled by eslint-config-standard, and the tree mixes `x => ...` with `(x) => ...`.
       // Turning it on would be a reformat, so leave the existing mix alone.
@@ -151,5 +181,43 @@ module.exports = [
       // declared here, since they would otherwise trip no-redeclare.
       'n/no-unsupported-features/node-builtins': 'off'
     }
+  },
+
+  {
+    files: widgetTestFiles,
+    languageOptions: {
+      sourceType: 'module',
+      globals: { ...globals.browser }
+    },
+    rules: {
+      // NB puppeteer is deliberately NOT a dependency of a widget repo. It comes from here, because the
+      // browser version is what decides whether the widget's image baselines are valid, and declaring
+      // it in both places would let the two drift and silently invalidate every baseline. So it
+      // resolves at runtime while being absent from the widget's package.json -- exactly the shape
+      // these two rules report.
+      //
+      // n/no-missing-require is deliberately left ON: a require that resolves to nothing is still a
+      // defect here, and switching it off would turn the whole test tree into an unchecked directory.
+      'n/no-extraneous-require': 'off',
+      'n/no-extraneous-import': 'off',
+
+      // NB a DIFFERENT rule to the two above, and worth spelling out because the distinction is what
+      // made this one hide: puppeteer is absent from the widget's package.json altogether, which is
+      // what no-extraneous-require reports. rhtmlBuildUtils IS declared -- as a devDependency, exactly
+      // as the README instructs -- and these files are ones npm would publish, because a widget repo
+      // sets neither `files` nor `.npmignore`. That combination is no-unpublished-require, and the two
+      // requires sit on adjacent lines in the same helper. The test tree is no more published than
+      // puppeteer is a dependency.
+      'n/no-unpublished-require': 'off',
+      'n/no-unpublished-import': 'off'
+    }
+  },
+
+  {
+    // The widget's own eslint.config.js is the one line `require('rhtmlBuildUtils/eslint.config.base')`
+    // the README prescribes, so it names this package by the same devDependency and trips the same
+    // rule. It is configuration, not shipped code.
+    files: ['eslint.config.js'],
+    rules: { 'n/no-unpublished-require': 'off' }
   }
 ]

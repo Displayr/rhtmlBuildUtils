@@ -54,7 +54,8 @@ automatically and are enumerated [below](#task-reference).
 
 ### Upgrading to 9.0.0 from 8.x
 
-Two breaking changes, both requiring a small edit in the widget repo.
+Three breaking changes requiring a small edit in the widget repo, plus three changes to what passes
+and fails that need no edit but do change results.
 
 **1. gulp is gone.** Delete your `gulpfile.js`, drop `gulp` from your devDependencies, and change every
 npm script from `gulp <task>` to `rhtml <task>`. Task names, sequences and command line flags are all
@@ -69,15 +70,99 @@ Excluding a task no longer means passing `exclusions` or re-registering it as a 
 
 **2. eslint 10 removed `.eslintrc` support entirely.** Replace your `.eslintrc` (and `.eslintignore`,
 which flat config also drops) with the one line `eslint.config.js` above; without it `rhtml lint` fails
-with "couldn't find an eslint configuration file". The shared config reproduces the previous `standard`
-style, so adopting it should not reformat any widget code.
+with "couldn't find an eslint configuration file". The shared config reproduces the previous
+`standard` style, so it will not reformat code that relied on standard's defaults -- but see the
+next paragraph if your `.eslintrc` set rules of its own.
+
+Carry your own `rules` block across. The one line config replaces the config FORMAT, not your
+repo's rule choices: the shared config reproduces `standard`'s defaults and nothing else, so any rule
+your `.eslintrc` set is silently dropped. Re-apply them after the spread:
+
+    const base = require('rhtmlBuildUtils/eslint.config.base')
+
+    module.exports = [
+      ...base,
+      { rules: { /* whatever your .eslintrc set */ } }
+    ]
+
+Two traps when transcribing them. eslint 10 moved the formatting rules into `@stylistic`, so `indent`,
+`comma-dangle`, `no-multi-spaces` and friends need the prefix now -- switching off the unprefixed name
+silently does nothing. And `@stylistic` split the continuation indent of a wrapped binary expression
+out of `indent` into `indent-binary-ops`, so a repo that turned `indent` off wants that off too.
+
+This is not a formality. rhtmlDonut sets `comma-dangle: ["error", "always-multiline"]`, the opposite
+of the shared `never`: following the step above literally gives it **331 errors**, 301 of them from
+that one rule, and carrying its three rules across drops it to 33.
+
+Delete any `/* global X */` comments that name a standard BROWSER global. The shared config declares
+`globals.browser` for `theSrc/scripts/**`, `theSrc/internal_www/js/**` and `theSrc/test/**`, so those
+comments now trip `no-redeclare` -- rhtmlBuildUtils removed its own `/* global fetch */` for the same
+reason. Keep the ones naming globals that are NOT browser built-ins: `/* global HTMLWidgets */` must
+stay, since HTMLWidgets comes from the htmlwidgets framework rather than the browser.
 
 eslint 10 also requires node `^20.19.0 || ^22.13.0 || >=24`.
+
+**3. Update `.Rbuildignore`.** It almost certainly lists `.eslintrc`, `.eslintignore` and
+`gulpfile.js` -- all of which you have just deleted -- and nothing in it will match the new
+`eslint.config.js`: `babel.config.js` is a literal, and `build` does not match a file at the repo
+root. Without an entry the flat config ships inside the R package. Add:
+
+    eslint.config.js
+
+This applies to every widget repo: rhtmlDonut, rhtmlHeatmap, rhtmlPictographs, rhtmlPalmTrees and
+rhtmlMetro all list the old three today.
 
 Build output is unchanged by the gulp removal: the generated `browser/`, `inst/` and `R/` trees are
 byte for byte identical to what the gulp pipeline produced, which is deliberate, because the compiled
 css feeds the pages the visual regression suite screenshots. `less` is pinned to 3.13.1 (the version
 `gulp-less@4` resolved) to keep it that way.
+
+#### Three changes to what passes and fails
+
+These need no edit in your repo, but they will change your results, so sequence a bump deliberately.
+
+**A mismatching snapshot now fails its own test.** Previously the comparison error was swallowed, so a
+test whose images did not match reported PASS and the job only went red via jest's aggregate count.
+Reading the per-test list therefore led straight to the wrong conclusion. Expect previously-green runs
+to surface real per-test failures.
+
+**A snapshot with no baseline now fails, unless the whole set is new.** `acceptNewSnapshots` defaults
+to `false`. It used to default to `true`, which appended `--ci=0` to the jest command and made jest
+write the missing baseline and pass -- so a newly added test could look green forever while never
+being regression-tested.
+
+The default is not applied blindly. Snapshot sets are keyed on `<snapshotDirectory>/<env>/<branch>`
+and nothing seeds a new branch from master, so a set that holds NO baselines is seeded instead: every
+image is written, nothing is compared, and the run says so. Once the set exists, a snapshot with no
+baseline fails, so a test added later cannot quietly baseline itself. `--acceptNewSnapshots` forces
+seeding for a set that already exists, and `-u` rebaselines everything.
+
+**`clean` no longer deletes `man/`.** That directory holds tracked roxygen output which only `makeDocs`
+can regenerate, and `makeDocs` swallows its own failure so a missing R install is not fatal — so
+`rhtml build` used to silently delete tracked R documentation on every machine without R on PATH,
+including CI. `makeDocs` also now calls `Rscript` rather than `r`, which is what makes it capable of
+succeeding on Windows at all.
+
+The `--env` flag also no longer has a `local`/`travis` whitelist, so a CI environment can be named after
+the system running it instead of being set indirectly through `widget.config.js`.
+
+#### `crypto` is stubbed in the bundle
+
+**If your widget calls anything on node's `crypto`, you must opt back in.** Add to
+`build/config/widget.config.js`:
+
+    esbuildOptions: { alias: { crypto: 'crypto-browserify' } }
+
+Without it the first call throws with a message pointing back here, rather than failing silently.
+**rhtmlPictographs is the known case** — `CacheService.js` and `SvgDefinitionManager.js` both use
+`crypto.createHash`.
+
+Why the default changed: `bignumber.js@2` (rhtmlCombinedScatter, rhtmlLabeledScatter) reaches for crypto
+via `require('cry' + 'pto')` inside a `try/catch`, an idiom specifically intended to stop bundlers
+resolving it — and browserify duly shipped none of it. esbuild constant-folds the concatenation, so it
+resolves, and mapping it to `crypto-browserify` dragged 616 KiB across 180 files (`elliptic`, four copies
+of `bn.js`, `asn1.js`, `diffie-hellman`) into rhtmlCombinedScatter's bundle for a code path
+(`BigNumber.random`) that nothing calls. See [src/lib/cryptoStub.js](./src/lib/cryptoStub.js).
 
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
 
@@ -150,6 +235,8 @@ The top level tasks are those you will likely run as part of the widget build pr
 * **--updateSnapshots**: accept all snapshots even if they have changed. Write the new snapshots into the snapshot directory
 
 `rhtml testVisual_s` : just run the visual regression suite (skip the other steps, `rhtml serve` must already be running).
+
+`rhtml reviewBaselines --from <ref> [--to <ref>]` : build a local side-by-side review page for image snapshot baselines, at `.tmp/reviewBaselines/index.html`. GitHub's diff renderer gives up on a few hundred binary files, which is exactly the size of a regenerated baseline set — and reviewing the images is the real gate when accepting new baselines, since a rendering regression accepted there is invisible afterwards. Omit `--to` to compare the working tree against `<ref>`. Baselines reported as *identical* are worth looking at first: one that did not regenerate usually means its test errored before reaching the snapshot.
 
 `rhtml lint` : this runs the eslint style checker on all the javascript files. Our settings are defined in [eslint.config.base.js](./eslint.config.base.js), which your widget repo's `eslint.config.js` re-exports. Which files are checked is decided by the `ignores` in that config rather than by this task, because eslint 10 has no `.eslintignore`. To run with auto fix run `rhtml lint --fix`. Note that this is also run as a git prepush hook so you will not be able to push code to git unless it passes the style checks. 
 

@@ -1,29 +1,39 @@
 const colors = require('ansi-colors')
-const { runTasks, knownTaskNames } = require('./index')
+const { runTasks, knownTaskNames, widgetConfig } = require('./index')
 const { runTeardowns } = require('./lib/teardown')
+const resolveTaskNames = require('./lib/resolveTaskNames')
 const { formatTaskError } = require('./lib/formatError')
 
 // Entry point for the `rhtml` binary. Replaces `gulp <task> [<task>...] [--flags]` with
 // `rhtml <task> [<task>...] [--flags]`.
 //
-// NB task names are taken as the positional arguments and flags are left alone, because the tasks
-// parse their own flags out of process.argv via yargs (--fix, --env, --branch, --port, -t, -u, ...).
-// Deliberately not routed through a yargs command definition here: that would have to re-declare
-// every flag of every task, and the task-local declarations are what the docs describe.
-const parseTaskNames = (argv) => argv.filter(arg => !arg.startsWith('-'))
-
+// NB the flags themselves are deliberately NOT parsed here. Each task declares and reads its own flags
+// out of process.argv via yargs (--fix, --env, --branch, --port, --from, -t, -u, ...). Routing them
+// through a yargs command definition here would mean re-declaring every flag of every task, and the
+// task-local declarations are what the docs describe.
+//
+// Which arguments are task names is decided by src/lib/parseTaskNames.js, and the fallback to
+// `default` by src/lib/resolveTaskNames.js.
 const main = async () => {
-  const requested = parseTaskNames(process.argv.slice(2))
-  const taskNames = requested.length ? requested : ['default']
+  const taskNames = resolveTaskNames(process.argv.slice(2))
 
-  // NB required lazily: widgetConfig reads <widget repo>/build/config/widget.config.js at require
-  // time and throws if it is absent, and we want that to surface as a clear error after argv parsing
-  // rather than as a stack trace before the CLI has done anything.
-  const { widgetConfig } = require('./index')
   const disabledTasks = widgetConfig.disabledTasks || []
 
   await runTasks({ taskNames, disabledTasks })
 }
+
+// NB an interrupted run still has to release what it registered. The visual suite writes a
+// pass-through config file that widgetConfig merges ABOVE the widget's own config, so a Ctrl-C
+// during a long snapshot run would otherwise leave every later task reconfigured. Teardowns are
+// idempotent, so running them here and in the normal path is safe.
+const interrupted = async (signal) => {
+  console.error(`\nreceived ${signal}, cleaning up`)
+  await runTeardowns()
+  process.exit(130)
+}
+
+process.on('SIGINT', () => interrupted('SIGINT'))
+process.on('SIGTERM', () => interrupted('SIGTERM'))
 
 main()
   .then(async () => {

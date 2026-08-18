@@ -1,0 +1,15 @@
+# Normalise every text file to LF, in the repository AND in the working tree.
+#
+# NB the working tree half is the part that matters. Git already stores LF, but on Windows
+# core.autocrlf rewrites files to CRLF on checkout, and eslint-plugin-n's `n/hashbang` rule requires
+# LF for any file carrying a shebang. So bin/rhtml.js -- untouched, correct in the repository -- fails
+# `rhtml lint` on a Windows checkout, which since 9.0.0 also fails bin/prepush and blocks the push.
+# `eol=lf` overrides autocrlf for this repo, so what a developer lints is what CI lints.
+#
+# NB `text=auto` still lets git detect binary content, so the png and jpg baselines below are belt and
+# braces rather than a correction -- they are declared explicitly because silently line-ending-mangled
+# images are expensive to notice.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
