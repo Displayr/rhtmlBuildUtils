@@ -6,6 +6,7 @@ const path = require('path')
 const shell = require('shelljs')
 const widgetConfig = require('../../../lib/widgetConfig')
 const getJestPath = require('../../../lib/getJestPath')
+const { registerTeardown } = require('../../../lib/teardown')
 const buildSnapshotJestCommand = require('../../../lib/snapshotJestCommand')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
@@ -30,6 +31,11 @@ module.exports = () => {
     const jestPath = getJestPath({ buildRoot, widgetConfig })
 
     writePassThroughConfigFile({ widgetConfig, args })
+    // NB also registered as a teardown, not only removed in the completion callback below. A Ctrl-C
+    // during a long visual run, or a throw before the child spawns, would otherwise leave the file
+    // behind -- and it is merged at HIGHER precedence than the widget config, so it would silently
+    // reconfigure every later invocation. Removal is idempotent (force: true), so doing both is safe.
+    registerTeardown('snapshot pass-through config', () => removePassThroughConfigFile({ widgetConfig }))
     const command = buildSnapshotJestCommand({ testRoots, jestPath, args })
 
     console.log(`running ${command}`)

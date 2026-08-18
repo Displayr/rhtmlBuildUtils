@@ -62,6 +62,24 @@ test('resolves when every snapshot matches', async () => {
 // This is the regression the whole fix is for. The catch used to swallow the matcher's throw, so a test
 // whose images did not match reported PASS -- the job only went red via jest's aggregate
 // snapshotState.unmatched count, and reading the per-test list led to the wrong conclusion.
+// The same class of defect as the one below, and likelier in practice: a selector change, a render
+// error, or a JS exception on the page all produce zero matches rather than a mismatched image. With
+// no widgets the loop body never ran, failures stayed empty, and jest reported a test that had
+// compared nothing as green.
+test('REJECTS when the page rendered no widgets, rather than passing having compared nothing', async () => {
+  matcherFailingFor([])
+
+  await expect(testSnapshots({ page: fakePage(0), testName: 'nothing rendered' }))
+    .rejects.toThrow(/no widgets matched/)
+})
+
+test('names the test and the selector when nothing rendered', async () => {
+  matcherFailingFor([])
+
+  await expect(testSnapshots({ page: fakePage(0), testName: 'nothing rendered' }))
+    .rejects.toThrow(/nothing rendered/)
+})
+
 test('REJECTS when a snapshot does not match, rather than reporting pass', async () => {
   matcherFailingFor(['a_mismatch-snap'])
 

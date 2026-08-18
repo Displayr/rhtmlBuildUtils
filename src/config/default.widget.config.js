@@ -28,12 +28,15 @@ module.exports = {
   // that implements 'renderValue' and 'resize' calls. The widgetFactory file is imported by the renderContentPage.js file
   widgetFactory: 'theSrc/scripts/rhtmlYourWidget.factory.js',
 
-  // the values for branch, env, snapshotDirectory, puppeteer.headless, and puppeteer.slowMo can be overriden on command line whan calling gulp testVisual
+  // the values for branch, env, snapshotDirectory, puppeteer.headless, and puppeteer.slowMo can be overriden on command line when calling rhtml testVisual
   // see docs for details TODO link to docs
   snapshotTesting: {
     branch: 'master', // used to determine which snapshots are used.
 
-    env: 'local', // used to determine which snapshots are used. Valid options are 'local' or 'travis'
+    // NB any string is valid: it is just a directory name under snapshotDirectory. The old
+    // whitelist allowed only 'local' and 'travis', which is why rhtmlCombinedScatter sets env here
+    // rather than passing --env=ci. Travis has not been in use for years.
+    env: 'local', // used to determine which snapshots are used.
 
     // the directory that contains the yaml test plans files.
     // these files define the static snapshots to take during snapshot testing, and also populate the index page of the internal server

@@ -110,7 +110,23 @@ const materialise = ({ ref, snapshotPath, outputDirectory, basePath, name }) => 
     { cwd: basePath, silent: true }
   )
   if (archive.code !== 0) {
-    throw new Error(`Could not read ${snapshotPath} at "${ref}": ${archive.stderr.trim()}`)
+    // NB "did not match any files" is NOT a failure here. git archive treats a pathspec matching
+    // nothing at the ref as fatal, but the subtree legitimately does not exist at the `from` ref when
+    // reviewing the first baseline set for a branch, or a newly introduced --env or --branch -- which
+    // is precisely when this tool is most useful. Everything downstream already handles an empty side:
+    // findBaselinePngs returns [] for a missing root, collectPairs marks every file `added` with a
+    // null fromSrc, and the renderer has an "added" pane for it. Aborting here was the only thing
+    // stopping that from working. It also made the friendlier "check --env and --branch" message
+    // unreachable for a typo, since this fired first and surfaced raw git output.
+    if (!/did not match any files/.test(archive.stderr)) {
+      throw new Error(`Could not read ${snapshotPath} at "${ref}": ${archive.stderr.trim()}`)
+    }
+    // destination is already mkdirp-ed and empty, so the caller sees a tree with no baselines.
+    return {
+      root: path.join(destination, ...snapshotPath.split('/')),
+      label: ref,
+      relativeToOutput: `${name}/${snapshotPath}`
+    }
   }
 
   // Extract with cwd set to the destination and a RELATIVE path to the archive.

@@ -131,6 +131,16 @@ const testSnapshots = async ({ page, testName, snapshotNames = null }) => {
   let widgets = await page.$$(widgetConfig.internalWebSettings.singleWidgetSnapshotSelector)
   console.log(`taking ${widgets.length} snapshot(s) for ${testName}`)
 
+  // NB an empty match is a FAILURE, not a no-op. Without this the loop body never runs, failures
+  // stays empty and the test reports green having compared nothing -- the same class of defect as a
+  // swallowed matcher throw, and likelier in practice, since a selector change, a render error or a
+  // page exception all produce zero matches rather than a mismatched image. reviewBaselines already
+  // carries a read-side workaround for this ("identical - not regenerated usually means its test
+  // errored before reaching the snapshot"); this closes it on the write side.
+  if (!widgets.length) {
+    throw new Error(`${testName}: no widgets matched ${widgetConfig.internalWebSettings.singleWidgetSnapshotSelector} -- the page rendered nothing to snapshot`)
+  }
+
   const filesystemSafe = input => input
     .replace(/ /g, '_')
     .replace(/\./g, '_')
