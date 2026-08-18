@@ -2,7 +2,7 @@ const path = require('path')
 const createFileFromTemplate = require('../../../lib/createFileFromTemplate')
 const { basePath, internalWebSettings } = require('../../../lib/widgetConfig')
 
-module.exports = function (gulp) {
+module.exports = () => {
   return function (done) {
     createFileFromTemplate({
       templateFile: path.join(__dirname, './renderExample.template.html'),

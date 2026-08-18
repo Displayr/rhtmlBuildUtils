@@ -2,10 +2,10 @@
 
 ## Quick Reference: how to use and extend it
 
-* to run the visual regression suite : `gulp testVisual`
-* to run the visual regression suite if `gulp serve` is already running: `gulp testVisual_s`
-* to run the visual regression suite on a subset of the tests : `gulp testVisual_s -t=FILTER`. Only tests whose name matches FILTER will be run
-* to accept the current snapshots and override the existing snapshots (aka what I have is the new baseline): `gulp testVisual_s -u`
+* to run the visual regression suite : `rhtml testVisual`
+* to run the visual regression suite if `rhtml serve` is already running: `rhtml testVisual_s`
+* to run the visual regression suite on a subset of the tests : `rhtml testVisual_s -t=FILTER`. Only tests whose name matches FILTER will be run
+* to accept the current snapshots and override the existing snapshots (aka what I have is the new baseline): `rhtml testVisual_s -u`
 * to view the visual regression results: look at the collection of snapshots in the `<projectRoot>/theSrc/test/snapshots` directory for the current env and git branch. For example if you are doing local development on a branch called VIS-778 then look in the `<projectRoot>/theSrc/test/snapshots/local/VIS-778` directory  
 * to see all the diffs for the failed snapshots:
     * these diffs will be stored in `__diff_output__` directories in the `<projectRoot>/theSrc/test/snapshots/local/BRANCH` directory.
@@ -26,7 +26,7 @@
     * follow the steps above to retrieve snapshots from travis-ci
     * copy those snapshots into the `<projectRoot>/theSrc/test/snapshots/travis/master` directory
 
-**Note:** that in some repos we define npm commands in the `package.json` file that "wrap" the gulp commands. So for example in the `rhtmlTemplate` and `rhtmlLabeledScatter` repos we can run the snapshot suite by running `npm run localTest`.
+**Note:** that in some repos we define npm commands in the `package.json` file that "wrap" the `rhtml` commands. So for example in the `rhtmlTemplate` and `rhtmlLabeledScatter` repos we can run the snapshot suite by running `npm run localTest`.
 
 ## Technology Breakdown
 
@@ -164,4 +164,4 @@ The current process to update travis snapshots is pretty laborious:
     * add to git and commit
     * get green build
     
-Proposal is to put something in the commit message that will cause the build to add the -u flag to the `gulp testVisual command`
+Proposal is to put something in the commit message that will cause the build to add the -u flag to the `rhtml testVisual` command

@@ -6,9 +6,9 @@ TODO Examples of the framework
 
 # Quick Refererence
 
-* run an experiment: `gulp runExperiment --name EXPERIMENT_NAME`
-* skip the baseline: `gulp runExperiment --no-baseline --name EXPERIMENT_NAME` 
-* run only a specific iteration of an experiment: `gulp runExperiment --iteration ITERATION_NAME --no-baseline --name EXPERIMENT_NAME`
+* run an experiment: `rhtml runExperiment --name EXPERIMENT_NAME`
+* skip the baseline: `rhtml runExperiment --no-baseline --name EXPERIMENT_NAME` 
+* run only a specific iteration of an experiment: `rhtml runExperiment --iteration ITERATION_NAME --no-baseline --name EXPERIMENT_NAME`
 
 # Required Files and Config
 

@@ -1,69 +1,43 @@
-const rename = require('gulp-rename')
-const widgetConfig = require('../../lib/widgetConfig')
+const copyJob = require('../../lib/copyJob')
+const { basePath, widgetName } = require('../../lib/widgetConfig')
 
-// TODO the method for knowing when we are done is crude and
-// relies on author to keep requiredCount and all calls to incrementFinishCount up to date
+// NB PIXEL RELEVANT, in the sense that getting a destination wrong changes which css and which assets
+// the screenshotted page loads. The source -> destination map below is a faithful transcription of the
+// gulp.src/gulp.dest pipelines this replaced; the ORDER and the DESTINATIONS are the contract, not the
+// implementation. Two traps worth naming:
+//
+//   * browser/style is SINGULAR here and holds hand-written css, while less.js writes COMPILED css to
+//     browser/styles (PLURAL). renderExample.html loads the plural one. They are not the same
+//     directory and must not be merged.
+//   * The last entry reads from the WIDGET's node_modules, not this package's. That is why it resolves
+//     against basePath.
+//
+// This also replaces a `setInterval` polling loop that counted stream 'finish' events against a
+// hard-coded requiredCount of 8, with its own TODO admitting the count had to be kept in sync by hand.
+const copyJobs = [
+  { from: 'theSrc/internal_www/**/*', base: 'theSrc/internal_www', to: ['browser'] },
+  { from: 'theSrc/images/**/*', base: 'theSrc/images', to: ['browser/images'] },
+  { from: 'theSrc/styles/**/*.css', base: 'theSrc/styles', to: ['inst/htmlwidgets/lib/style', 'browser/style'] },
+  { from: 'theSrc/internal_www/styles/**/*.css', base: 'theSrc/internal_www/styles', to: ['browser/style'] },
+  // mustMatch: gulp.src threw on these two when absent, because they are non-magic single paths and
+  // allowEmpty defaults to false. Both are required for a working htmlwidget.
+  { from: 'theSrc/R/htmlwidget.yaml', base: 'theSrc/R', to: ['inst/htmlwidgets'], renameTo: `${widgetName}.yaml`, mustMatch: true },
+  { from: 'theSrc/R/htmlwidget.R', base: 'theSrc/R', to: ['R'], renameTo: `${widgetName}.R`, mustMatch: true },
+  { from: ['theSrc/R/*.R', '!theSrc/R/htmlwidget.R'], base: 'theSrc/R', to: ['R'] },
+  // only used directly in browser by renderExample.html
+  {
+    from: ['node_modules/lodash/lodash.min.js', 'node_modules/jquery/dist/jquery.min.js'],
+    base: null,
+    to: ['browser/internal_www/external']
+  }
+]
 
-module.exports = function (gulp) {
-  return function (done) {
-    let finishedCount = 0
-    const requiredCount = 8
-    const incrementFinishedCount = () => finishedCount++
-
-    gulp.src([
-      'theSrc/internal_www/**/*'
-    ], {})
-      .pipe(gulp.dest('browser'))
-      .on('finish', incrementFinishedCount)
-
-    gulp.src([
-      'theSrc/images/**/*'
-    ], {})
-      .pipe(gulp.dest('browser/images'))
-      .on('finish', incrementFinishedCount)
-
-    gulp.src([
-      'theSrc/styles/**/*.css'
-    ], {})
-      .pipe(gulp.dest('inst/htmlwidgets/lib/style'))
-      .pipe(gulp.dest('browser/style'))
-      .on('finish', incrementFinishedCount)
-
-    gulp.src([
-      'theSrc/internal_www/styles/**/*.css'
-    ], {})
-      .pipe(gulp.dest('browser/style'))
-      .on('finish', incrementFinishedCount)
-
-    gulp.src('theSrc/R/htmlwidget.yaml')
-      .pipe(rename(`${widgetConfig.widgetName}.yaml`))
-      .pipe(gulp.dest('inst/htmlwidgets/'))
-      .on('finish', incrementFinishedCount)
-
-    gulp.src('theSrc/R/htmlwidget.R')
-      .pipe(rename(`${widgetConfig.widgetName}.R`))
-      .pipe(gulp.dest('R/'))
-      .on('finish', incrementFinishedCount)
-
-    gulp.src(['theSrc/R/*.R', '!theSrc/R/htmlwidget.R'])
-      .pipe(gulp.dest('R/'))
-      .on('finish', incrementFinishedCount)
-
-    // only used directly in browser by renderExample.html
-    const internalWebServerDependencies = [
-      'node_modules/lodash/lodash.min.js',
-      'node_modules/jquery/dist/jquery.min.js'
-    ]
-
-    gulp.src(internalWebServerDependencies)
-      .pipe(gulp.dest('browser/internal_www/external/'))
-      .on('finish', incrementFinishedCount)
-
-    const intervalHandle = setInterval(() => {
-      if (finishedCount >= requiredCount) {
-        clearInterval(intervalHandle)
-        done()
-      }
-    }, 20)
+module.exports = () => {
+  return async function () {
+    // Sequential rather than concurrent: two jobs share the inst/htmlwidgets/lib/style and
+    // browser/style destinations, and the gulp version's ordering is what decided the winner.
+    for (const job of copyJobs) {
+      await copyJob({ basePath, ...job })
+    }
   }
 }

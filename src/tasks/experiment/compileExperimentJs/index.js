@@ -13,7 +13,7 @@ const getJsFilesToCompileList = () => {
     .then(filePaths => filePaths.filter(fileName => fileName.endsWith('.js')))
 }
 
-module.exports = function (gulp) {
+module.exports = () => {
   return function (done) {
     getJsFilesToCompileList()
       .then(jsFilePaths => {
@@ -22,7 +22,6 @@ module.exports = function (gulp) {
             const destinationDirectory = determineDestinationDirectory({ jsFilePath })
 
             compileES6({
-              gulp,
               entryPointFile: jsFilePath,
               destinationDirectory,
               callback: resolve

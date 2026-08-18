@@ -4,7 +4,7 @@ const compileES6 = require('../../../lib/compileES6')
 const createFileFromTemplate = require('../../../lib/createFileFromTemplate')
 const { basePath, internalWebSettings } = require('../../../lib/widgetConfig')
 
-module.exports = function (gulp) {
+module.exports = () => {
   return function (callback) {
     const entryPointFile = path.join(basePath, '.tmp/renderIndexPage.js')
 
@@ -18,6 +18,6 @@ module.exports = function (gulp) {
     // step 2: esbuild, which bundles all the code into single file for browser testing
     const destinationDirectory = path.join(basePath, 'browser/js/')
     fs.mkdirsSync(destinationDirectory)
-    return compileES6({ gulp, entryPointFile, destinationDirectory, minify: false, callback })
+    return compileES6({ entryPointFile, destinationDirectory, minify: false, callback })
   }
 }

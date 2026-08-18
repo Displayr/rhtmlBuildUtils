@@ -16,7 +16,7 @@ Example widgets that use this framework:
  * **[rhtmlMoonPlot](https://github.com/Displayr/rhtmlMoonPlot)**: a widget for displaying a moon plot to visualise results of correspondance analysis
  * **[rhtmlSankeyTree](https://github.com/Displayr/rhtmlSankeyTree)**: a widget for displaying sankey diagrams
  
-HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) based nodejs projects that use gulp as a task manager. The twofold purpose(s) of these nodejs projects is to produce R HTMLWidget package for cunsumption in R, and provide a development framework including a visual regression suite to make development easier.
+HTML Widgets that use the `rhtmlBuildUtils` package are ES2015 (or greater) based nodejs projects whose build tasks are run by the `rhtml` binary this package installs. The twofold purpose(s) of these nodejs projects is to produce R HTMLWidget package for cunsumption in R, and provide a development framework including a visual regression suite to make development easier.
  
 ## Documentation 
  
@@ -36,30 +36,48 @@ In your widget repo directory run :
  
     npm install -D "github:Displayr/rhtmlBuildUtils#9.0.0"
 
-then in your project gulpfile.js:
-
-    const gulp = require('gulp')
-    const rhtmlBuildUtils = require('rhtmlBuildUtils')
-    
-    const dontRegisterTheseTasks = []
-    rhtmlBuildUtils.registerGulpTasks({ 
-      gulp: gulp, 
-      exclusions: dontRegisterTheseTasks 
-    })
-
-and an `eslint.config.js` in your widget repo root:
+then add an `eslint.config.js` in your widget repo root:
 
     module.exports = require('rhtmlBuildUtils/eslint.config.base')
 
+and invoke the tasks through the `rhtml` binary from your npm scripts:
+
+    "scripts": {
+      "build": "rhtml build",
+      "lint": "rhtml lint",
+      "start": "rhtml serve",
+      "localTest": "rhtml testSpecs && rhtml testVisual --env=local"
+    }
+
+There is no gulpfile.js and no registration step: the tasks in [src/tasks](src/tasks) are discovered
+automatically and are enumerated [below](#task-reference).
+
 ### Upgrading to 9.0.0 from 8.x
 
-9.0.0 moves to eslint 10, which **removed `.eslintrc` support entirely**. A widget repo must therefore
-replace its `.eslintrc` (and `.eslintignore`, which flat config also drops) with the one line
-`eslint.config.js` shown above; without it `gulp lint` fails with "couldn't find an eslint
-configuration file". The shared config reproduces the previous `standard` style, so adopting it should
-not reformat any widget code. eslint 10 also requires node `^20.19.0 || ^22.13.0 || >=24`.
+Two breaking changes, both requiring a small edit in the widget repo.
 
-By calling registerGulpTasks you will add all the tasks defined in [src/tasks](src/tasks) to your project. These tasks are enumerated [below](#gulp-task-reference).
+**1. gulp is gone.** Delete your `gulpfile.js`, drop `gulp` from your devDependencies, and change every
+npm script from `gulp <task>` to `rhtml <task>`. Task names, sequences and command line flags are all
+unchanged, so `gulp testVisual --env=local --branch=x` becomes `rhtml testVisual --env=local
+--branch=x`. If your repo defines its OWN gulp tasks (rhtmlDonut does), keep gulp as a dependency of
+your repo for those and use `rhtml` for the shared ones.
+
+Excluding a task no longer means passing `exclusions` or re-registering it as a no-op. Set
+`disabledTasks` in `build/config/widget.config.js` instead:
+
+    disabledTasks: ['testSpecs']
+
+**2. eslint 10 removed `.eslintrc` support entirely.** Replace your `.eslintrc` (and `.eslintignore`,
+which flat config also drops) with the one line `eslint.config.js` above; without it `rhtml lint` fails
+with "couldn't find an eslint configuration file". The shared config reproduces the previous `standard`
+style, so adopting it should not reformat any widget code.
+
+eslint 10 also requires node `^20.19.0 || ^22.13.0 || >=24`.
+
+Build output is unchanged by the gulp removal: the generated `browser/`, `inst/` and `R/` trees are
+byte for byte identical to what the gulp pipeline produced, which is deliberate, because the compiled
+css feeds the pages the visual regression suite screenshots. `less` is pinned to 3.13.1 (the version
+`gulp-less@4` resolved) to keep it that way.
 
 Two of the main features provided by rhtmlBuildUtils are to start the internal web server and to run the visual regression tests. These topics are covered in these subdocs:
 
@@ -70,11 +88,11 @@ The `rhtmlBuildUtils` makes many assumptions about the directory structure and n
 
 ## Customisation
 
-When using the `rhtmlBuildUtils` package in a widget repo, there are two ways to change the behaviour of the gulp tasks: to exclude a task then define it yourself in the repo, or to modify a local widget.config.js file.
+When using the `rhtmlBuildUtils` package in a widget repo, there are two ways to change the behaviour of the tasks: disable a task, or modify a local widget.config.js file.
 
-### Override a task in a repo
+### Disable a task in a repo
 
-When calling rhtmlBuildUtils.registerGulpTasks, pass an exclusions array with a list of tasks that you do not want rhtmlBuildUtils to define. Then add them to your gulp config following standard gulp techniques; see [http://gulpjs.com/](http://gulpjs.com/).
+List the task names in `disabledTasks` in `build/config/widget.config.js`. A disabled task logs `skipping '<name>'` and resolves, so any composite sequence that contains it still completes. This replaces both the `exclusions` argument to the old registerGulpTasks and the idiom of re-registering a task as a no-op.
 
 ### Modifying widget.config.js
 
@@ -93,15 +111,15 @@ Example:
       loader: { '.js': 'jsx' }
     }
 
-# gulp task reference
+# task reference
 
 ## Top Level Tasks
 
 The top level tasks are those you will likely run as part of the widget build process: 
 
-`gulp` : this will run the default task: `gulp build`
+`rhtml` : this will run the default task: `rhtml build`
 
-`gulp build` : the following tasks are performed :
+`rhtml build` : the following tasks are performed :
  
 * delete the directories that contain auto generated code
 * run the JS style checker (eslint) and fail the build if the code does not match style
@@ -110,17 +128,17 @@ The top level tasks are those you will likely run as part of the widget build pr
 * copy all images and other resources into the dist directories
 * write R docs
 
-`gulp serve` : the following tasks are performed :
+`rhtml serve` : the following tasks are performed :
  
 * all of the build tasks above (except test and lint)
 * produce a different transpiled version of the code that will load in a local browser
 * in addition to the HTML Widget libraries, the local browser session will include a list of examples. This allows the developer to view the effect of their changes
 * if this repo contains any experiments, the experiment results will be browsable in the local browser
-* gulp serve also starts a `watch` process. Every save to the local file system will rebuild the project and then send a signal to the browser to reload the active page, so that the changes just made to the project are immediately visible.
+* `rhtml serve` also starts a `watch` process. Every save to the local file system will rebuild the project and then send a signal to the browser to reload the active page, so that the changes just made to the project are immediately visible.
 
-`gulp testSpecs` : just run the spec tests
+`rhtml testSpecs` : just run the spec tests
 
-`gulp testVisual` : start server (`i.e., gulp serve`), take snapshots for each test definition. This command takes several parameters
+`rhtml testVisual` : start server (i.e. `rhtml serve`), take snapshots for each test definition. This command takes several parameters
 
 * **--acceptNewSnapshots**: accept new snapshots. Defaults to true
 * **--branch**: which branch. This determines where to save updated snapshots, and which snapshot set to use for a baseline
@@ -131,9 +149,9 @@ The top level tasks are those you will likely run as part of the widget build pr
 * **--testNamePattern**: run subset of tests using this string to filter snapshots. Can be file name or test name
 * **--updateSnapshots**: accept all snapshots even if they have changed. Write the new snapshots into the snapshot directory
 
-`gulp testVisual_s` : just run the visual regression suite (skip the other steps, `gulp serve` must already be running).
+`rhtml testVisual_s` : just run the visual regression suite (skip the other steps, `rhtml serve` must already be running).
 
-`gulp lint` : this runs the eslint style checker on all the javascript files. Our settings are defined in [eslint.config.base.js](./eslint.config.base.js), which your widget repo's `eslint.config.js` re-exports. Which files are checked is decided by the `ignores` in that config rather than by this task, because eslint 10 has no `.eslintignore`. To run with auto fix run `gulp lint --fix`. Note that this is also run as a git prepush hook so you will not be able to push code to git unless it passes the style checks. 
+`rhtml lint` : this runs the eslint style checker on all the javascript files. Our settings are defined in [eslint.config.base.js](./eslint.config.base.js), which your widget repo's `eslint.config.js` re-exports. Which files are checked is decided by the `ignores` in that config rather than by this task, because eslint 10 has no `.eslintignore`. To run with auto fix run `rhtml lint --fix`. Note that this is also run as a git prepush hook so you will not be able to push code to git unless it passes the style checks. 
 
 # Developing / Contributing
 

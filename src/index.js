@@ -1,10 +1,12 @@
-const fs = require('fs-extra')
-const path = require('path')
-const opn = require('opn')
-const cliArgs = require('yargs').argv
+const { createRunner } = require('./lib/taskRunner')
 
-const DEBUG = 0
-
+// NB the nesting is unchanged from the gulp era but is NOT parallelism: gulp.series flattened these
+// arrays with arr-flatten before running them, so every step ran sequentially. It is kept for shape
+// only. See src/lib/taskRunner.js.
+//
+// NB `core` is series, not parallel, and must stay that way: `less` and `copy` both write into
+// inst/htmlwidgets/lib/style, so running them concurrently would race for any widget that ships both
+// a .less and a .css with the same basename.
 const taskSequences = {
   build: ['clean', ['compileWidgetEntryPoint', 'core', 'lint'], ['makeDocs']],
   compileExperiments: [
@@ -26,82 +28,34 @@ const taskSequences = {
   serve: [['core', 'compileInternal', 'compileExperiments', 'connect', 'openBrowser'], 'watch'],
   testSpecs: ['jestSpecTests'],
   testVisual: ['core', 'compileInternal', 'connect', 'copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition'],
-  testVisual_s: ['copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition']
+  testVisual_s: ['copySnapshotJestRunnerToProject', 'takeSnapshotsForEachTestDefinition'],
+  default: ['build']
 }
 
-function registerGulpTasks ({ gulp, exclusions = [] }) {
-  const shouldRegister = function (taskName) {
-    return !exclusions.includes(taskName)
-  }
-
-  const taskDirectories = [
-    path.join(__dirname, 'tasks/misc'),
-    path.join(__dirname, 'tasks/webserver'),
-    path.join(__dirname, 'tasks/snapshot'),
-    path.join(__dirname, 'tasks/experiment')
-  ]
-  taskDirectories.forEach(taskDirectory => conditionallyLoadTasksInDirectory({ gulp, taskDirectory, shouldRegister }))
-
-  // move to task directory
-  if (shouldRegister('openBrowser')) {
-    const port = cliArgs.port || 9000
-    const openBrowser = function (done) {
-      opn(`http://localhost:${port}`)
-      done()
-    }
-    gulp.task('openBrowser', gulp.series(openBrowser))
-  }
-
-  // NB order matters: a task cannot reference an undefined task
-  const conditionallyRegisterTheseTasks = [
-    'core',
-    'build',
-    'compileExperiments',
-    'compileInternal',
-    'serve',
-    'runExperiment',
-    'testVisual',
-    'testVisual_s',
-    'testSpecs'
-  ]
-  conditionallyRegisterTheseTasks.forEach(taskName => {
-    if (shouldRegister(taskName)) {
-      gulp.task(taskName, gulp.series(...taskSequences[taskName]))
-    }
-  })
-
-  if (shouldRegister('default')) {
-    gulp.task('default', gulp.series('build'))
-  }
-
-  return gulp
+// Runs one or more of the tasks or sequences above. This is what the `rhtml` CLI (bin/rhtml.js) calls,
+// and the CLI is what widget repos invoke from their npm scripts in place of `gulp <task>`.
+//
+// `disabledTasks` replaces both mechanisms widget repos used under gulp: the `exclusions` argument to
+// registerGulpTasks, and re-registering a task as a no-op that logs "skipping". A disabled task logs
+// and resolves, so a composite sequence containing it still completes.
+const runTasks = async ({ taskNames, disabledTasks = [] }) => {
+  const runner = createRunner({ taskSequences, disabledTasks })
+  await runner.runSequence(taskNames)
 }
 
-function conditionallyLoadTasksInDirectory ({ gulp, taskDirectory, shouldRegister }) {
-  const excludedFilesAndDirectories = ['assets']
-  fs.readdirSync(taskDirectory)
-    .map(stripJsSuffix)
-    .filter(fileName => !excludedFilesAndDirectories.includes(fileName))
-    .map(function (taskName) {
-      if (DEBUG) { console.log(`dir: ${taskDirectory} task: ${taskName}`) }
-      if (shouldRegister(taskName)) {
-        const modulePath = path.join(taskDirectory, taskName)
-        gulp.task(taskName, require(modulePath)(gulp))
-      }
-    })
-}
-
-function stripJsSuffix (file) {
-  return file.replace(/\.js$/, '')
-}
+const knownTaskNames = () => createRunner({ taskSequences }).knownTaskNames()
 
 module.exports = {
   widgetConfig: require('./lib/widgetConfig'),
-  registerGulpTasks,
+  runTasks,
+  knownTaskNames,
   taskSequences,
   lib: {
     compileES6: require('./lib/compileES6')
   },
+  // NB consumed by the jest runners copied into widget repos (src/tasks/*/assets/*.jest.test.js).
+  // Their require('rhtmlBuildUtils') destructures exactly these names, so this shape is load bearing
+  // and must not be renamed without updating those templates.
   snapshotTesting: {
     puppeteer: require('puppeteer'),
     renderExamplePageTestHelper: require('./lib/renderExamplePageTest.helper'),

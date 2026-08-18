@@ -33,17 +33,14 @@ module.exports = () => {
 
     console.log(`running ${command}`)
 
+    // NB this used to be followed by `setTimeout(() => process.exit(exitCode), 200)`, because the
+    // connect task left a listening server behind and gulp would therefore never exit. That hack forced
+    // this to be the LAST task in any sequence and put the process exit code in the hands of a task.
+    // connect now registers its server with src/lib/teardown.js, so the runner closes it and owns the
+    // exit code, and this task is free to appear anywhere in a sequence.
     return shell.exec(command, { async: true }, (exitCode) => {
       const error = (exitCode === 0) ? null : new Error(`${command} failed with code ${exitCode}`)
       done(error)
-
-      /* connect is leaving the server running, so gulp will not exit. This is a hacky way of getting gulp to exit and maintaining the test exit code
-       * Main issue I can see with this approach is that now jestSnapshotTests MUST be the last task to run
-       * Note that runProtractor.js handled this by properly using gulp streams and then piping to gulpExit
-       */
-      setTimeout(() => {
-        process.exit(exitCode)
-      }, 200)
     })
   }
 }
