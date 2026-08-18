@@ -54,8 +54,8 @@ automatically and are enumerated [below](#task-reference).
 
 ### Upgrading to 9.0.0 from 8.x
 
-Two breaking changes requiring a small edit in the widget repo, plus three changes to what passes and
-fails that need no edit but do change results.
+Three breaking changes requiring a small edit in the widget repo, plus three changes to what passes
+and fails that need no edit but do change results.
 
 **1. gulp is gone.** Delete your `gulpfile.js`, drop `gulp` from your devDependencies, and change every
 npm script from `gulp <task>` to `rhtml <task>`. Task names, sequences and command line flags are all
@@ -73,7 +73,23 @@ which flat config also drops) with the one line `eslint.config.js` above; withou
 with "couldn't find an eslint configuration file". The shared config reproduces the previous `standard`
 style, so adopting it should not reformat any widget code.
 
+Delete any `/* global X */` comments that name a standard BROWSER global. The shared config declares
+`globals.browser` for `theSrc/scripts/**`, `theSrc/internal_www/js/**` and `theSrc/test/**`, so those
+comments now trip `no-redeclare` -- rhtmlBuildUtils removed its own `/* global fetch */` for the same
+reason. Keep the ones naming globals that are NOT browser built-ins: `/* global HTMLWidgets */` must
+stay, since HTMLWidgets comes from the htmlwidgets framework rather than the browser.
+
 eslint 10 also requires node `^20.19.0 || ^22.13.0 || >=24`.
+
+**3. Update `.Rbuildignore`.** It almost certainly lists `.eslintrc`, `.eslintignore` and
+`gulpfile.js` -- all of which you have just deleted -- and nothing in it will match the new
+`eslint.config.js`: `babel.config.js` is a literal, and `build` does not match a file at the repo
+root. Without an entry the flat config ships inside the R package. Add:
+
+    eslint.config.js
+
+This applies to every widget repo: rhtmlDonut, rhtmlHeatmap, rhtmlPictographs, rhtmlPalmTrees and
+rhtmlMetro all list the old three today.
 
 Build output is unchanged by the gulp removal: the generated `browser/`, `inst/` and `R/` trees are
 byte for byte identical to what the gulp pipeline produced, which is deliberate, because the compiled
@@ -89,10 +105,16 @@ test whose images did not match reported PASS and the job only went red via jest
 Reading the per-test list therefore led straight to the wrong conclusion. Expect previously-green runs
 to surface real per-test failures.
 
-**A snapshot with no baseline now fails.** `acceptNewSnapshots` defaults to `false`. It used to default
-to `true`, which appended `--ci=0` to the jest command and made jest write the missing baseline and pass
-— so a newly added test could look green forever while never being regression-tested. Pass
-`--acceptNewSnapshots` to opt back in when bootstrapping a suite.
+**A snapshot with no baseline now fails, unless the whole set is new.** `acceptNewSnapshots` defaults
+to `false`. It used to default to `true`, which appended `--ci=0` to the jest command and made jest
+write the missing baseline and pass -- so a newly added test could look green forever while never
+being regression-tested.
+
+The default is not applied blindly. Snapshot sets are keyed on `<snapshotDirectory>/<env>/<branch>`
+and nothing seeds a new branch from master, so a set that holds NO baselines is seeded instead: every
+image is written, nothing is compared, and the run says so. Once the set exists, a snapshot with no
+baseline fails, so a test added later cannot quietly baseline itself. `--acceptNewSnapshots` forces
+seeding for a set that already exists, and `-u` rebaselines everything.
 
 **`clean` no longer deletes `man/`.** That directory holds tracked roxygen output which only `makeDocs`
 can regenerate, and `makeDocs` swallows its own failure so a missing R install is not fatal — so
