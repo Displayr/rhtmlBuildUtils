@@ -27,19 +27,30 @@ const widgetFixture = (files) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'rhtml-eslint-'))
   createdRoots.push(root)
 
-  // Verbatim the one line eslint.config.js the README tells a widget repo to add, except that it names
-  // the config by absolute path rather than by package. It has to be a real file at the fixture root:
-  // flat config resolves `files` globs against the directory holding the config that is in effect, so
-  // passing --config would anchor the widget globs at THIS repo and match nothing -- which is the very
-  // failure mode being guarded against, arriving through the test harness instead of the config.
-  writeFile(root, 'eslint.config.js', `module.exports = require(${JSON.stringify(configPath)})\n`)
+  // rhtmlBuildUtils is stubbed into the fixture's node_modules and declared as a devDependency so the
+  // config can be required BY PACKAGE NAME -- verbatim the one line the README tells a widget repo to
+  // add. An absolute path require would also work, but a path require is not a dependency reference,
+  // so n/no-unpublished-require would have nothing to check, and the fixture would not resemble a real
+  // widget repo's dependency graph -- which is how that rule went unnoticed the first time.
+  //
+  // NB the config has to be a real file at the fixture root: flat config resolves `files` globs against
+  // the directory holding the config that is in effect, so passing --config would anchor the widget
+  // globs at THIS repo and match nothing -- the very failure mode being guarded against, arriving
+  // through the test harness instead of the config.
+  stubPackage(root, 'rhtmlBuildUtils', {
+    'eslint.config.base.js': `module.exports = require(${JSON.stringify(configPath)})\n`
+  })
+  writeFile(root, 'eslint.config.js', 'module.exports = require(\'rhtmlBuildUtils/eslint.config.base\')\n')
 
   writeFile(root, 'package.json', JSON.stringify({
     name: 'fixture-widget',
     version: '1.0.0',
     // eslint-plugin-n judges API availability against this, so the fixture declares the same floor the
     // real widget repos do -- otherwise the n/* results here would not match theirs.
-    engines: { node: '^20.19.0 || ^22.13.0 || >=24' }
+    engines: { node: '^20.19.0 || ^22.13.0 || >=24' },
+    // NB a devDependency, which is how the README says to install it, and what makes
+    // n/no-unpublished-require reachable: the package IS declared, just not as a runtime dependency.
+    devDependencies: { rhtmlBuildUtils: 'github:Displayr/rhtmlBuildUtils#9.0.0' }
   }))
 
   Object.entries(files).forEach(([relativePath, contents]) => writeFile(root, relativePath, contents))
@@ -52,22 +63,26 @@ const widgetFixture = (files) => {
 // declared is therefore the real situation, and it is what makes n/no-extraneous-require fire rather
 // than n/no-missing-require. Stubbing it reproduces that, instead of the different -- and misleading
 // -- result an uninstalled package would give.
-const installUndeclared = (root, name) => {
+const stubPackage = (root, name, extraFiles = {}) => {
   writeFile(root, path.join('node_modules', name, 'package.json'), JSON.stringify({
     name,
     version: '1.0.0',
     main: 'index.js'
   }))
   writeFile(root, path.join('node_modules', name, 'index.js'), 'module.exports = {}\n')
+  Object.entries(extraFiles).forEach(([relativePath, contents]) =>
+    writeFile(root, path.join('node_modules', name, relativePath), contents))
 }
+
+const installUndeclared = (root, name) => stubPackage(root, name)
 
 // Shells out rather than using the ESLint class, for two reasons: it is the same path `rhtml lint`
 // takes (src/tasks/misc/lint.js also spawns the cli), and eslint 10's programmatic lintFiles reaches
 // for a dynamic import that jest's CommonJS vm refuses without --experimental-vm-modules.
-const lintWidget = (root) => {
+const lintWidget = (root, targets = ['theSrc']) => {
   let stdout
   try {
-    stdout = execFileSync(process.execPath, [eslintBin, '--format', 'json', 'theSrc'], {
+    stdout = execFileSync(process.execPath, [eslintBin, '--format', 'json', ...targets], {
       cwd: root,
       encoding: 'utf8'
     })
@@ -171,4 +186,27 @@ test('uses the helper', () => expect(helper).toBeDefined())
   expect(lintWidget(root)).toEqual([
     expect.stringContaining('n/no-missing-require')
   ])
+})
+
+// NB rhtmlBuildUtils trips a DIFFERENT rule than puppeteer, which is why the override above did not
+// cover it. puppeteer is absent from a widget's package.json entirely, which is n/no-extraneous-require.
+// rhtmlBuildUtils IS declared -- as a devDependency, exactly as the README instructs -- and the files
+// requiring it are ones npm would publish, since a widget repo sets neither `files` nor `.npmignore`.
+// That is n/no-unpublished-require, and the two requires sit on adjacent lines in the same files.
+test('accepts the shared config required by name from a widget eslint.config.js', () => {
+  const root = widgetFixture({})
+
+  expect(lintWidget(root, ['eslint.config.js'])).toEqual([])
+})
+
+test('accepts rhtmlBuildUtils required by name from the test tree', () => {
+  const root = widgetFixture({
+    'theSrc/test/lib/loadWidget.helper.js': `
+const { lib } = require('rhtmlBuildUtils')
+
+module.exports = () => lib
+`.trimStart()
+  })
+
+  expect(lintWidget(root)).toEqual([])
 })

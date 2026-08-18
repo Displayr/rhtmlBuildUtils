@@ -6,11 +6,13 @@ const yargs = require('yargs')
 
 module.exports = () => {
   // NB defaults to FALSE so that a snapshot with no baseline FAILS instead of being written and
-  // passed. When true, this appends --ci=0 to the jest command, which makes jest compute
-  // updateSnapshot: 'new' (jest-config/build/normalize.js), so jest-image-snapshot writes the missing
-  // baseline and the test goes green. Combined with baselines only leaving CI on an explicit
-  // regeneration, a newly added test could look green forever while never being regression-tested at
-  // all. Pass --acceptNewSnapshots to opt back in when bootstrapping a new suite.
+  // passed. The flag is emitted BOTH ways (--ci=0 when accepting, --ci when not) rather than only
+  // when accepting, because jest's ci option defaults to ci-info's isCI: omitting it would mean
+  // "whatever this machine is", which on a developer machine is false, giving updateSnapshot:
+  // 'new' and letting jest-image-snapshot write the missing baseline and pass -- on exactly the
+  // machine where a new test gets added. Combined with baselines only leaving CI on an explicit
+  // regeneration, such a test could look green forever while never being regression-tested at all.
+  // Pass --acceptNewSnapshots to opt back in when bootstrapping a new suite.
   yargs.option('acceptNewSnapshots', {
     alias: 'a',
     describe: 'write and pass snapshots that have no baseline, instead of failing',

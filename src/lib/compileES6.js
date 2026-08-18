@@ -34,9 +34,6 @@ module.exports = ({ entryPointFile, destinationDirectory, minify = false, callba
     // browserify shimmed node builtins implicitly; esbuild does not, so the ones actually reached by
     // widget dependency graphs are mapped here.
     //
-    // browserify shimmed node builtins implicitly; esbuild does not, so the ones widget dependency
-    // graphs actually reach are mapped here.
-    //
     // NB `crypto` is stubbed, NOT mapped to crypto-browserify. See src/lib/cryptoStub.js for the full
     // reasoning: browserify shipped no crypto at all for these widgets, and resolving it costs 616 KiB
     // for a code path nothing calls. A widget that genuinely needs it opts back in via

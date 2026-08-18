@@ -6,6 +6,7 @@ const path = require('path')
 const shell = require('shelljs')
 const widgetConfig = require('../../../lib/widgetConfig')
 const getJestPath = require('../../../lib/getJestPath')
+const buildSnapshotJestCommand = require('../../../lib/snapshotJestCommand')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 const buildRoot = path.join(__dirname, '../../../../')
 
@@ -29,7 +30,7 @@ module.exports = () => {
     const jestPath = getJestPath({ buildRoot, widgetConfig })
 
     writePassThroughConfigFile({ widgetConfig, args })
-    const command = getCommandString({ testRoots, jestPath, args })
+    const command = buildSnapshotJestCommand({ testRoots, jestPath, args })
 
     console.log(`running ${command}`)
 
@@ -54,18 +55,6 @@ const getTestRoots = ({ buildRoot, widgetConfig }) => {
     takeSnapshotForEachTestDefinition,
     interactionTestPath
   ]
-}
-
-const getCommandString = ({ testRoots, jestPath, args }) => {
-  const roots = testRoots.map(root => `--roots="${root}"`).join(' ')
-  const acceptNewSnapshots = (args.acceptNewSnapshots) ? `--ci=0` : ''
-  const testNamePattern = (args.testNamePattern) ? `-t=${args.testNamePattern}` : ''
-  // NB double quotes, not single: cmd.exe does not strip single quotes, so jest would receive them
-  // as part of the pattern and match nothing. Double quotes work on both cmd.exe and posix shells.
-  const testFilePattern = '--testMatch="**/*.jest.test.js"'
-  const updateSnapshots = (args.updateSnapshots) ? `-u` : ''
-
-  return `"${jestPath}" ${roots} ${testFilePattern} ${acceptNewSnapshots} ${updateSnapshots} ${testNamePattern}`
 }
 
 // The only reason this file exists is to carry command line values across a process boundary: this task

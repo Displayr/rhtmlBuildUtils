@@ -17,6 +17,7 @@ const fs = require('fs-extra')
 const path = require('path')
 const shell = require('shelljs')
 const widgetConfig = require('../../../lib/widgetConfig')
+const findBaselinePngs = require('../../../lib/findBaselinePngs')
 const getCommandLineArgs = require('./parseCommandLineArguments')
 
 const WORKING_TREE = '(working tree)'
@@ -132,18 +133,8 @@ const materialise = ({ ref, snapshotPath, outputDirectory, basePath, name }) => 
   }
 }
 
-const findPngs = (root) => {
-  if (!fs.existsSync(root)) { return [] }
-  const walk = (directory) => _.flatMap(fs.readdirSync(directory, { withFileTypes: true }), (entry) => {
-    const full = path.join(directory, entry.name)
-    if (entry.isDirectory()) { return walk(full) }
-    return entry.name.endsWith('.png') ? [path.relative(root, full).split(path.sep).join('/')] : []
-  })
-  return walk(root)
-}
-
 const collectPairs = ({ from, to }) => {
-  const relativePaths = _.union(findPngs(from.root), findPngs(to.root)).sort()
+  const relativePaths = _.union(findBaselinePngs(from.root), findBaselinePngs(to.root)).sort()
 
   return relativePaths.map((relativePath) => {
     const fromFile = path.join(from.root, ...relativePath.split('/'))

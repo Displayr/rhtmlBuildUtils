@@ -199,7 +199,25 @@ module.exports = [
       // n/no-missing-require is deliberately left ON: a require that resolves to nothing is still a
       // defect here, and switching it off would turn the whole test tree into an unchecked directory.
       'n/no-extraneous-require': 'off',
-      'n/no-extraneous-import': 'off'
+      'n/no-extraneous-import': 'off',
+
+      // NB a DIFFERENT rule to the two above, and worth spelling out because the distinction is what
+      // made this one hide: puppeteer is absent from the widget's package.json altogether, which is
+      // what no-extraneous-require reports. rhtmlBuildUtils IS declared -- as a devDependency, exactly
+      // as the README instructs -- and these files are ones npm would publish, because a widget repo
+      // sets neither `files` nor `.npmignore`. That combination is no-unpublished-require, and the two
+      // requires sit on adjacent lines in the same helper. The test tree is no more published than
+      // puppeteer is a dependency.
+      'n/no-unpublished-require': 'off',
+      'n/no-unpublished-import': 'off'
     }
+  },
+
+  {
+    // The widget's own eslint.config.js is the one line `require('rhtmlBuildUtils/eslint.config.base')`
+    // the README prescribes, so it names this package by the same devDependency and trips the same
+    // rule. It is configuration, not shipped code.
+    files: ['eslint.config.js'],
+    rules: { 'n/no-unpublished-require': 'off' }
   }
 ]
